@@ -40,11 +40,11 @@ def encrypt_password(password, salt):
 
 def user_register(mail, user_id, password):
     if(check_empty(mail)):
-        return (2, 'Mail address cannot be empty.')
+        return (2, _('Mail address cannot be empty.'))
     if(check_empty(user_id)):
-        return (3, 'User ID cannot be empty.')
+        return (3, _('User ID cannot be empty.'))
     if(check_empty(password)):
-        return (4, 'Password cannot be empty.')
+        return (4, _('Password cannot be empty.'))
 
     try:
         if(User.select().where(User.mail == mail)):
@@ -75,7 +75,9 @@ def user_register(mail, user_id, password):
 
 
 def user_login(login_name, password):
+    query = None
     user = None
+    salt = None
 
     try:
         query = User.select().where(User.user_id == login_name)
@@ -88,5 +90,13 @@ def user_login(login_name, password):
         return (2, _('No such user.'))
     user = query.get()
 
-#    try:
-#        query = Salt.select().where(
+    try:
+        salt = user.salt[0].salt
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+    encrypted_pw = encrypt_password(password, salt)
+    if(encrypted_pw != user.password):
+        return (3, _('Wrong password.'))
+
+    return (0, _('Login successfully.'))
