@@ -121,7 +121,7 @@ class AtFromSubpost(BaseModel):
 
 
 class Image(BaseModel):
-    sha256 = FixedCharField(max_length=64, primary_key=True)
+    sha256 = FixedCharField(max_length=64, primary_key=True, index=True)
     uploader = ForeignKeyField(User, related_name='images', index=True)
 
 
