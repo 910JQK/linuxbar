@@ -27,7 +27,7 @@ class User(BaseModel):
 
 class Salt(BaseModel):
     user = ForeignKeyField(User,
-                          related_name='salt', primary_key=True, index=True)
+                           related_name='salt', primary_key=True, index=True)
     salt = FixedCharField(max_length=8)
 
 
@@ -127,5 +127,7 @@ tables = [Config, User, Salt, SiteAdmin, Board, Ban, BoardAdmin, Topic, Post,
 
 if __name__ == '__main__':
     db.connect()
+    print('Creating tables ...')
     db.create_tables(tables)
+    print('Tables have been created.')
     db.close()
