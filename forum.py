@@ -307,7 +307,7 @@ def board_update(original_short_name, short_name, name, desc, announce):
 #   Tip: author -> uid
 #   Tip: Don't forget to save the date.
 #   Tip: Don't forget to update last_post_date of its topic.
-#   Tip: Don't forget to fill fields reply{0,1,2} abd reply{0,1,2}_author
+#   Tip: Don't forget to fill fields reply{0,1,2} and reply{0,1,2}_author
 #          to emit replies.
 #   Tip: Don't extract At from the content, which is not the responsibility of
 #          this function.
