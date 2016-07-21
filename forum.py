@@ -221,4 +221,17 @@ def board_remove(short_name):
         return (1, db_err_msg(err))
 
 
-#def board_update(short_name
+def board_update(original_short_name, short_name, name, desc, announce):
+    try:
+        query = Board.select().where(Board.short_name == original_short_name)
+        if(not query):
+            return (2, _('No such board'))
+        board = query.get()
+        board.short_name = short_name
+        board.name = name
+        board.description = desc
+        board.announcement = announce
+        board.save()
+        return (0, _('Info of board named %s updated successfully.' % name))
+    except Exception as err:
+        return(1, db_err_msg(err))
