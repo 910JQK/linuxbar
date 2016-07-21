@@ -178,7 +178,7 @@ def board_list():
     list = []
     for board in query:
         list.append({
-            'bid': board.id
+            'bid': board.id,
             'short_name': board.short_name,
             'name': board.name,
             'desc': board.description,
@@ -217,3 +217,6 @@ def board_remove(short_name):
         return (0, _('Board named %s removed successfully.' % board.name))
     except Exception as err:
         return (1, db_err_msg(err))
+
+
+#def board_update(short_name
