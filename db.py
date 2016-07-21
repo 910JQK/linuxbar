@@ -43,12 +43,18 @@ class Board(BaseModel):
 
 
 class Ban(BaseModel):
-    user = ForeignKeyField(User,
-                           related_name='banned', primary_key=True, index=True)
-    operator = ForeignKeyField(User, related_name='banning')
-    # NULL = globally banned
-    board = ForeignKeyField(Board, related_name='banning', null=True)
-    date = DateTimeField()
+    user = ForeignKeyField(User, related_name='banned', unique=True, index=True)
+    operator = ForeignKeyField(User, related_name='banning', index=True)
+    board = ForeignKeyField(Board, related_name='banning', index=True)
+    date = DateTimeField(index=True)
+    expire_date = DateTimeField()
+
+
+class BanGlobal(BaseModel):
+    user = ForeignKeyField(User, related_name='banned_global', unique=True,
+                           index=True)
+    operator = ForeignKeyField(User, related_name='banning_global', index=True)
+    date = DateTimeField(index=True)
     expire_date = DateTimeField()
 
 
