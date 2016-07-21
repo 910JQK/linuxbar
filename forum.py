@@ -196,6 +196,8 @@ def board_add(short_name, name, desc, announce):
         if(Board.select().where(Board.short_name == short_name)):
             return (4, _('Board with ID (short name) %s already exists.'
                          % short_name))
+        if(Board.select().where(Board.name == name)):
+            return (5, _('Board named %s already exists.' % name))
         Board.create(
             short_name = short_name,
             name = name,
