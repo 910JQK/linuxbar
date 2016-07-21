@@ -139,40 +139,35 @@ def site_admin_list():
 def site_admin_add(uid):
     try:
         query = User.select().where(User.id == uid)
-    except Exception as err:
-        return (1, db_err_msg(err))
-    if(not query):
-        return (2, _('No such user.'))
-    user = query.get()
-    if(user.site_managing):
-        return (3, _('User %s is already a site administrator.' % user.name))
-    try:
+
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
+        if(user.site_managing):
+            return (3, _('User %s is already a site administrator.' % user.name))
+
         admin = SiteAdmin.create(user=user)
+        return (0, _('New site administrator %s added successfully.' % user.name))
     except Exception as err:
         return (1, db_err_msg(err))
-    return (0, _('New site administrator %s added successfully.' % user.name))
 
 
 def site_admin_remove(uid):
     try:
         query = User.select().where(User.id == uid)
-    except Exception as err:
-        return (1, db_err_msg(err))
-    if(not query):
-        return (2, _('No such user'))
-    user = query.get()
-    try:
+        if(not query):
+            return (2, _('No such user'))
+        user = query.get()
+
         query = SiteAdmin.select().where(SiteAdmin.user == user)
-    except Exception as err:
-        return (1, db_err_msg(err))
-    if(not query):
-        return (3, _('No such site administrator'))
-    admin = query.get()
-    try:
+        if(not query):
+            return (3, _('No such site administrator'))
+        admin = query.get()
+
         admin.delete_instance()
+        return (0, _('Site administrator %s removed successfully.' % user.name))
     except Exception as err:
         return (1, db_err_msg(err))
-    return (0, _('Site administrator %s removed successfully.' % user.name))
 
 
 def board_list():
@@ -183,9 +178,42 @@ def board_list():
     list = []
     for board in query:
         list.append({
-            'id': board.id,
+            'bid': board.id
+            'short_name': board.short_name,
             'name': board.name,
             'desc': board.description,
             'announce': board.announcement
         })
     return (0, OK_MSG, {'list': list, 'count': len(list)})
+
+
+def board_add(short_name, name, desc, announce):
+    if(check_empty(short_name)):
+        return (2, _('Board ID (short name) cannot be empty'))
+    if(check_empty(name)):
+        return (3, _('Board name cannot be empty'))
+    try:
+        if(Board.select().where(Board.short_name == short_name)):
+            return (4, _('Board with ID (short name) %s already exists.'
+                         % short_name))
+        Board.create(
+            short_name = short_name,
+            name = name,
+            description = desc,
+            announcement = announce
+        )
+        return (0, _('Board named %s created successfully.' % name))
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def board_remove(short_name):
+    try:
+        query = Board.select().where(Board.short_name == short_name)
+        if(not query):
+            return (2, _('No such board'))
+        board = query.get()
+        board.delete_instance()
+        return (0, _('Board named %s removed successfully.' % board.name))
+    except Exception as err:
+        return (1, db_err_msg(err))
