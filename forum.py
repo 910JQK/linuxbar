@@ -40,28 +40,30 @@ def encrypt_password(password, salt):
 
 def user_register(mail, user_id, password):
     if(check_empty(mail)):
-        return (2, 'Mail address cannot be empty')
+        return (2, 'Mail address cannot be empty.')
     if(check_empty(user_id)):
-        return (3, 'User ID cannot be empty')
+        return (3, 'User ID cannot be empty.')
+    if(check_empty(password)):
+        return (4, 'Password cannot be empty.')
 
     try:
         if(User.select().where(User.mail == mail)):
-            return (4, _('Mail address already in use.'))
+            return (5, _('Mail address already in use.'))
         if(User.select().where(User.user_id == user_id)):
-            return (5, _('User ID already in use.'))
+            return (6, _('User ID already in use.'))
     except Exception as err:
         return (1, db_err_msg(err))
 
     salt = gen_salt()
-    encrypted_pw = encrypt_password(password)
+    encrypted_pw = encrypt_password(password, salt)
 
-    user_rec = User(
+    user_rec = User.create(
         mail = mail,
         user_id = user_id,
         password = encrypted_pw,
         reg_date = now()
     )
-    salt_rec = Salt(user=user_rec, salt=salt)
+    salt_rec = Salt.create(user=user_rec, salt=salt)
 
     try:
         user_rec.save()
@@ -73,11 +75,18 @@ def user_register(mail, user_id, password):
 
 
 def user_login(login_name, password):
-    pass
-    #user = None
-    #try:
-    #    query = User.select().where(User.user_id == login_name)
-    #    if(!query):
-    #        query = User.select().where(User.mail == login_name)
-    #except Exception as err:
-    #    return (1, db_err_msg(err))
+    user = None
+
+    try:
+        query = User.select().where(User.user_id == login_name)
+        if(not query):
+            query = User.select().where(User.mail == login_name)
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+    if(not query):
+        return (2, _('No such user.'))
+    user = query.get()
+
+#    try:
+#        query = Salt.select().where(
