@@ -11,6 +11,9 @@ def _(string):
     return string  # reserved for l10n
 
 
+OK_MSG = _('Data retrieved successfully.')
+
+
 def db_err_msg(err):
     return _('Database Error: %s' % str(err))
 
@@ -57,28 +60,21 @@ def user_register(mail, name, password):
     salt = gen_salt()
     encrypted_pw = encrypt_password(password, salt)
 
-    user_rec = User.create(
-        mail = mail,
-        name = name,
-        password = encrypted_pw,
-        reg_date = now()
-    )
-    salt_rec = Salt.create(user=user_rec, salt=salt)
-
     try:
-        user_rec.save()
-        salt_rec.save()
+        user_rec = User.create(
+            mail = mail,
+            name = name,
+            password = encrypted_pw,
+            reg_date = now()
+        )
+        salt_rec = Salt.create(user=user_rec, salt=salt)
     except Exception as err:
         return (1, db_err_msg(err))
-    
+
     return (0, _('User %s registered successfully.' % name))
 
 
 def user_login(login_name, password):
-    query = None
-    user = None
-    salt = None
-
     try:
         query = User.select().where(User.name == login_name)
         if(not query):
@@ -103,6 +99,77 @@ def user_login(login_name, password):
     return (0, _('Login successfully.'), data)
 
 
+def user_get_uid(name):
+    try:
+        query = User.select().where(User.name == name)
+    except Exception as err:
+        return (1, db_err_msg(err))
+    if(not query):
+        return (2, _('No such user.'))
+    user = query.get()
+    return (0, OK_MSG, {'uid': user.id})
+
+
+def site_admin_check(uid):
+    try:
+        query = User.select().where(User.id == uid)
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
+        admin = user.site_managing
+    except Exception as err:
+        return (1, db_err_msg(err))
+    if(admin):
+        return (0, OK_MSG, {'site_admin': True})
+    else:
+        return (0, OK_MSG, {'site_admin': False})
+
+
 def site_admin_list():
-    pass
-    #query = SiteAdmin.select()
+    try:
+        query = SiteAdmin.select()
+    except Exception as err:
+        return (1, db_err_msg(err))
+    list = []
+    for admin in query:
+        list.append(admin.user.id)
+    return (0, OK_MSG, {'list': list})
+
+
+def site_admin_add(uid):
+    try:
+        query = User.select().where(User.id == uid)
+    except Exception as err:
+        return (1, db_err_msg(err))
+    if(not query):
+        return (2, _('No such user.'))
+    user = query.get()
+    if(user.site_managing):
+        return (3, _('User %s is already a site administrator.' % user.name))
+    try:
+        admin = SiteAdmin.create(user=user)
+    except Exception as err:
+        return (1, db_err_msg(err))
+    return (0, _('New site administrator %s added successfully.' % user.name))
+
+
+def site_admin_remove(uid):
+    try:
+        query = User.select().where(User.id == uid)
+    except Exception as err:
+        return (1, db_err_msg(err))
+    if(not query):
+        return (2, _('No such user'))
+    user = query.get()
+    try:
+        query = SiteAdmin.select().where(SiteAdmin.user == user)
+    except Exception as err:
+        return (1, db_err_msg(err))
+    if(not query):
+        return (3, _('No such site administrator'))
+    admin = query.get()
+    try:
+        admin.delete_instance()
+    except Exception as err:
+        return (1, db_err_msg(err))
+    return (0, _('Site administrator %s removed successfully.' % user.name))
