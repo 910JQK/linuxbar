@@ -37,7 +37,7 @@ class SiteAdmin(BaseModel):
 
 class Board(BaseModel):
     id = CharField(max_length=32, primary_key=True)
-    name = CharField(max_length=64)
+    name = CharField(max_length=64, unique=True)
     description = CharField(255)
     announcement = TextField()
 
