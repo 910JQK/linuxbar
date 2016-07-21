@@ -210,6 +210,7 @@ def board_add(short_name, name, desc, announce):
 
 
 def board_remove(short_name):
+    # regard short name as ID for convenience
     try:
         query = Board.select().where(Board.short_name == short_name)
         if(not query):
@@ -222,6 +223,7 @@ def board_remove(short_name):
 
 
 def board_update(original_short_name, short_name, name, desc, announce):
+    # regard short name as ID for convenience
     try:
         query = Board.select().where(Board.short_name == original_short_name)
         if(not query):
@@ -235,3 +237,113 @@ def board_update(original_short_name, short_name, name, desc, announce):
         return (0, _('Info of board named %s updated successfully.' % name))
     except Exception as err:
         return(1, db_err_msg(err))
+
+
+# Not Implemented Functions
+
+
+# Local and Global Ban
+#
+# def ban_check_global(uid)
+# def ban_check(uid, board)
+# def ban_list_global()
+# def ban_list(board)
+# def ban_global(uid, expire_time, operator)
+#   Tip: if expire_time > original_expire_time, update;
+#        if expire_time < original_expire_time, do nothing
+#          and return a feedback.
+#   Tip: operator is also uid, not user name.
+# def ban(uid, board, expire_time, operator)
+#   Tip: The same as above.
+# def ban_remove_global(uid)
+# def ban_remove(uid, board)
+
+
+# Board Administrators Management
+#
+# def board_admin_check(uid, board)
+#   Tip: return the level: 1 = assistant, 2 = moderator
+# def board_admin_list(board)
+# def board_admin_add(uid, board)
+# def board_admin_remove(uid, board)
+
+
+# Topic
+#
+# def topic_add(board, title, author, post_body)
+#   Tip: board -> short_name, author -> uid
+#   Tip: Don't forget to save the date.
+#   Tip: Don't forget to update last_post_date, which intends for sorting.
+# def topic_remove(tid, operator)
+#   Tip: Just set deleted = True, not removing the record.
+#   Tip: Don't forget to save the operator and the date.
+#   Tip: Checking permission of user is unnecessary.
+#        (That isn't the responsibility of this function)
+# def topic_list(board, page, count_per_page)
+#   Tip: Return both topics and count for paging.
+
+
+# Post
+#
+# def post_add(tid, author, content)
+#   Tip: author -> uid
+#   Tip: Don't forget to save the date.
+#   Tip: Don't forget to update last_post_date of its topic.
+#   Tip: Don't forget to set field topic_author to emit a reply.
+#   Tip: Don't extract At from the content, which is not the responsibility of
+#          this function.
+# def post_edit(pid, new_content)
+#   Tip: Don't forget to save the edit date.
+# def post_remove(pid, operator)
+#   Tip: The same as topic_remove()
+#   Tip: Reject the requests of removing top posts (a.k.a floor #1).
+# def post_list(tid, page, count_per_page)
+#   Tip: Return both posts and count for paging.
+
+
+# Subpost (a.k.a Post in Post)
+#
+# def subpost_add(pid, author, content)
+#   Tip: author -> uid
+#   Tip: Don't forget to save the date.
+#   Tip: Don't forget to update last_post_date of its topic.
+#   Tip: Don't forget to fill fields reply{0,1,2} abd reply{0,1,2}_author
+#          to emit replies.
+#   Tip: Don't extract At from the content, which is not the responsibility of
+#          this function.
+# def subpost_edit(sid, new_content)
+#   Tip: Don't forget to save the edit date.
+# def subpost_remove(sid, operator)
+#   Tip: The same as topic_remove()
+# def subpost_list(pid, page, count_per_page)
+#   Tip: Return both subposts and count for paging.
+
+
+# Reply
+#
+# def reply_get(uid, page, count_per_page)
+#   Tip: Get replies that user with uid "uid" received.
+#   Tip: Take a union set (query) of records from the two sources.
+#   Tip: Return both posts and count for paging.
+
+
+# At
+# def at_from_post_add(pid, caller, callee)
+# Tip: caller, callee -> uid
+# def at_from_subpost_add(sid, caller, callee)
+# Tip: The same as above.
+# def at_get(uid, page, count_per_page)
+#   Tip: Get At that user with uid "uid" received.
+#   Tip: Take a union set (query) of records from the two sources.
+#   Tip: Return both posts and count for paging.
+
+
+# Image
+#
+# def image_add(sha256, uid)
+#   Tip: This function is only for importing the record {sha256, uid} into the
+#          database. Uploading is the responsibility of the higher layer.
+# def image_remove(sha256)
+#   Tip: Only for database record. (as above)
+# def image_list(uid, page, images_per_page)
+#   Tip: Return both images and count for paging.
