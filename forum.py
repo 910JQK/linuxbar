@@ -133,7 +133,7 @@ def site_admin_list():
     list = []
     for admin in query:
         list.append(admin.user.id)
-    return (0, OK_MSG, {'list': list})
+    return (0, OK_MSG, {'list': list, 'count': len(list)})
 
 
 def site_admin_add(uid):
@@ -173,3 +173,19 @@ def site_admin_remove(uid):
     except Exception as err:
         return (1, db_err_msg(err))
     return (0, _('Site administrator %s removed successfully.' % user.name))
+
+
+def board_list():
+    try:
+        query = Board.select()
+    except Exception as err:
+        return (1, db_err_msg(err))
+    list = []
+    for board in query:
+        list.append({
+            'id': board.id,
+            'name': board.name,
+            'desc': board.description,
+            'announce': board.announcement
+        })
+    return (0, OK_MSG, {'list': list, 'count': len(list)})
