@@ -112,14 +112,12 @@ class AtFromPost(BaseModel):
     post = ForeignKeyField(Post, related_name='At')
     caller = ForeignKeyField(User, related_name='at_from_post_sent')
     callee = ForeignKeyField(User, related_name='at_from_post_received')
-    date = DateTimeField(index=True)
 
 
 class AtFromSubpost(BaseModel):
     subpost = ForeignKeyField(Subpost, related_name='At')
     caller = ForeignKeyField(User, related_name='at_from_subpost_sent')
     callee = ForeignKeyField(User, related_name='at_from_subpost_received')
-    date = DateTimeField(index=True)
 
 
 class Image(BaseModel):
