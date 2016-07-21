@@ -38,10 +38,10 @@ def encrypt_password(password, salt):
     return sha256(salt[0:4] + sha256(password) + salt[4:8])
 
 
-def user_register(mail, user_id, password):
+def user_register(mail, name, password):
     if(check_empty(mail)):
         return (2, _('Mail address cannot be empty.'))
-    if(check_empty(user_id)):
+    if(check_empty(name)):
         return (3, _('User ID cannot be empty.'))
     if(check_empty(password)):
         return (4, _('Password cannot be empty.'))
@@ -49,7 +49,7 @@ def user_register(mail, user_id, password):
     try:
         if(User.select().where(User.mail == mail)):
             return (5, _('Mail address already in use.'))
-        if(User.select().where(User.user_id == user_id)):
+        if(User.select().where(User.name == name)):
             return (6, _('User ID already in use.'))
     except Exception as err:
         return (1, db_err_msg(err))
@@ -59,7 +59,7 @@ def user_register(mail, user_id, password):
 
     user_rec = User.create(
         mail = mail,
-        user_id = user_id,
+        name = name,
         password = encrypted_pw,
         reg_date = now()
     )
@@ -71,7 +71,7 @@ def user_register(mail, user_id, password):
     except Exception as err:
         return (1, db_err_msg(err))
     
-    return (0, _('User %s registered successfully.' % user_id))
+    return (0, _('User %s registered successfully.' % name))
 
 
 def user_login(login_name, password):
@@ -80,7 +80,7 @@ def user_login(login_name, password):
     salt = None
 
     try:
-        query = User.select().where(User.user_id == login_name)
+        query = User.select().where(User.name == login_name)
         if(not query):
             query = User.select().where(User.mail == login_name)
     except Exception as err:
@@ -99,4 +99,10 @@ def user_login(login_name, password):
     if(encrypted_pw != user.password):
         return (3, _('Wrong password.'))
 
-    return (0, _('Login successfully.'))
+    data = {'uid': user.id, 'name': user.name, 'mail': user.mail}
+    return (0, _('Login successfully.'), data)
+
+
+def site_admin_list():
+    pass
+    #query = SiteAdmin.select()

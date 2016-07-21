@@ -20,7 +20,7 @@ class Config(BaseModel):
 
 class User(BaseModel):
     mail = CharField(max_length=64, unique=True, index=True)
-    user_id = CharField(max_length=32, unique=True, index=True)
+    name = CharField(max_length=32, unique=True, index=True)
     password = FixedCharField(max_length=64) # sha256 with salt
     reg_date = DateTimeField()
 
