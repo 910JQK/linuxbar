@@ -275,7 +275,7 @@ def ban_info_global(uid):
             return (2, _('No such user.'))
         user = query.get()
         ban = user.banned_global()
-        if(not ban or date >= ban.expire_date):
+        if(not ban or now() >= ban.expire_date):
             return (3, _('User %s is not being banned' % user.name))
         else:
             operator = ban.operator
@@ -325,6 +325,7 @@ def ban_list_global(page, count_per_page):
 
 
 def ban_global(uid, expire_time, operator):
+    # "operator" is UID of the operator, which must be valid.
     date = now()
     try:
         query = User.select().where(User.id == uid)
@@ -333,7 +334,9 @@ def ban_global(uid, expire_time, operator):
         user = query.get()
         ban = user.banned_global
         if(ban):
-            if(expire_date > ban.expire_date):
+            if(expire_date-date > ban.expire_date-ban.date):
+                ban.date = date
+                ban.operator_id = operator
                 ban.expire_date = expire_date
                 ban.save()
                 return (0, _('Ban on user %s entered into force.' % user.name))
@@ -355,6 +358,22 @@ def ban_global(uid, expire_time, operator):
                 expire_date = expire_date
             )
             return (0, _('Ban on user %s entered into force.' % user.name))
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def ban_remove_global(uid):
+    try:
+        query = User.select().where(User.id == uid)
+        if(not query):
+            return (1, _('No such user.'))
+        user = query.get()
+        ban = user.banned_global
+        if(not ban or now() >= ban.expire):
+            return (2, _('User %s is not being banned.' % user.name))
+        else:
+            ban.delete_instance()
+            return (0, _('Ban on user %s cancelled successfully.' % user.name))
     except Exception as err:
         return (1, db_err_msg(err))
 
