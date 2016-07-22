@@ -405,7 +405,8 @@ def ban_add(uid, days, operator, board=''):
                 ban.operator_id = operator
                 ban.expire_date = expire_date
                 ban.save()
-                return (0, _('Ban on user %s entered into force.' % user.name))
+                return (0, _('Ban on user %s entered into force.'
+                             % user_rec.name))
             else:
                 return (4, _('Ban with same or longer term already exists.'), {
                     'operator': {
@@ -435,7 +436,7 @@ def ban_add(uid, days, operator, board=''):
                     date = date,
                     expire_date = expire_date
                 )
-            return (0, _('Ban on user %s entered into force.' % user.name))
+            return (0, _('Ban on user %s entered into force.' % user_rec.name))
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -466,7 +467,8 @@ def ban_remove(uid, board=''):
                              % (user_rec.name, board)) )
         else:
             bans[0].delete_instance()
-            return (0, _('Ban on user %s cancelled successfully.' % user.name))
+            return (0, _('Ban on user %s cancelled successfully.'
+                         % user_rec.name))
     except Exception as err:
         return (1, db_err_msg(err))
 
