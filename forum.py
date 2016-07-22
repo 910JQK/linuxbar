@@ -278,17 +278,16 @@ def ban_global_info(uid):
         if(not ban or now() >= ban[0].expire_date):
             return (3, _('User %s is not being banned' % user.name))
         else:
-            operator = ban.operator
             return (0, OK_MSG, {
                 'operator': {
-                    'uid': operator.id,
-                    'name': operator.name,
-                    'mail': operator.mail
+                    'uid': ban[0].operator.id,
+                    'name': ban[0].operator.name,
+                    'mail': ban[0].operator.mail
                 },
-                'date': ban.date.timestamp(),
-                'expire_date': ban.expire_date.timestamp(),
+                'date': ban[0].date.timestamp(),
+                'expire_date': ban[0].expire_date.timestamp(),
                 'days': round(
-                    (ban.expire_date - ban.date).total_seconds() / 86400
+                    (ban[0].expire_date - ban.date).total_seconds() / 86400
                 )
             })
     except Exception as err:
@@ -383,7 +382,7 @@ def ban_global_remove(uid):
         if(not ban or now() >= ban[0].expire_date):
             return (2, _('User %s is not being banned.' % user.name))
         else:
-            ban.delete_instance()
+            ban[0].delete_instance()
             return (0, _('Ban on user %s cancelled successfully.' % user.name))
     except Exception as err:
         return (1, db_err_msg(err))
