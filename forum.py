@@ -182,7 +182,7 @@ def admin_add(uid, board='', level=1):
                 return (4, _('User %s is already a site administrator.'
                              % user_rec.name))
             else:
-                SiteAdmin.create(user=user)
+                SiteAdmin.create(user=user_rec)
                 return (0, _('New site administrator %s added successfully.'
                              % user_rec.name))
         else:
@@ -224,7 +224,7 @@ def admin_remove(uid, board=''):
             else:
                 admin[0].delete_instance()
                 return (0, _('Site administrator %s removed successfully.'
-                             % user.name))
+                             % user_rec.name))
         else:
             query = Board.select().where(Board.short_name == board)
             if(not query):
