@@ -275,19 +275,20 @@ def ban_global_info(uid):
             return (2, _('No such user.'))
         user = query.get()
         ban = user.banned_global
-        if(not ban or now() >= ban[0].expire_date):
+        if(not bans or now() >= ban[0].expire_date):
             return (3, _('User %s is not being banned' % user.name))
         else:
+            ban = bans[0]
             return (0, OK_MSG, {
                 'operator': {
-                    'uid': ban[0].operator.id,
-                    'name': ban[0].operator.name,
-                    'mail': ban[0].operator.mail
+                    'uid': ban.operator.id,
+                    'name': ban.operator.name,
+                    'mail': ban.operator.mail
                 },
-                'date': ban[0].date.timestamp(),
-                'expire_date': ban[0].expire_date.timestamp(),
+                'date': ban.date.timestamp(),
+                'expire_date': ban.expire_date.timestamp(),
                 'days': round(
-                    (ban[0].expire_date - ban.date).total_seconds() / 86400
+                    (ban.expire_date - ban.date).total_seconds() / 86400
                 )
             })
     except Exception as err:
@@ -339,8 +340,9 @@ def ban_global_add(uid, days, operator):
         if(not query):
             return (2, _('No such user.'))
         user = query.get()
-        ban = user.banned_global
-        if(ban):
+        bans = user.banned_global
+        if(bans):
+            ban = bans[0]
             if(delta > ban.expire_date-ban.date):
                 ban.date = date
                 ban.operator_id = operator
@@ -378,11 +380,11 @@ def ban_global_remove(uid):
         if(not query):
             return (1, _('No such user.'))
         user = query.get()
-        ban = user.banned_global
-        if(not ban or now() >= ban[0].expire_date):
+        bans = user.banned_global
+        if(not bans or now() >= bans[0].expire_date):
             return (2, _('User %s is not being banned.' % user.name))
         else:
-            ban[0].delete_instance()
+            bans[0].delete_instance()
             return (0, _('Ban on user %s cancelled successfully.' % user.name))
     except Exception as err:
         return (1, db_err_msg(err))
