@@ -274,7 +274,7 @@ def ban_global_info(uid):
         if(not query):
             return (2, _('No such user.'))
         user = query.get()
-        ban = user.banned_global()
+        ban = user.banned_global
         if(not ban or now() >= ban.expire_date):
             return (3, _('User %s is not being banned' % user.name))
         else:
@@ -285,8 +285,11 @@ def ban_global_info(uid):
                     'name': operator.name,
                     'mail': operator.mail
                 },
-                'date': ban.date,
-                'expire_date': ban.expire_date
+                'date': ban.date.timestamp(),
+                'expire_date': ban.expire_date.timestamp(),
+                'days': round(
+                    (ban.expire_date - ban.date).total_seconds() / 86400
+                )
             })
     except Exception as err:
         return (1, db_err_msg(err))
@@ -318,15 +321,20 @@ def ban_global_list(page, count_per_page):
                 'name': ban.operator.name,
                 'mail': ban.operator.mail
             },
-            'date': ban.date,
-            'expire_date': ban.expire_date
+            'date': ban.date.timestamp(),
+            'expire_date': ban.expire_date.timestamp(),
+            'days': round(
+                (ban.expire_date - ban.date).total_seconds() / 86400
+            )
         })
     return (0, {'list': list, 'count': len(list)})
 
 
-def ban_global_add(uid, expire_time, operator):
+def ban_global_add(uid, days, operator):
     # "operator" is UID of the operator, which must be valid.
     date = now()
+    delta = datetime.timedelta(days=days)
+    expire_date = date + delta
     try:
         query = User.select().where(User.id == uid)
         if(not query):
@@ -334,7 +342,7 @@ def ban_global_add(uid, expire_time, operator):
         user = query.get()
         ban = user.banned_global
         if(ban):
-            if(expire_date-date > ban.expire_date-ban.date):
+            if(delta > ban.expire_date-ban.date):
                 ban.date = date
                 ban.operator_id = operator
                 ban.expire_date = expire_date
@@ -347,8 +355,11 @@ def ban_global_add(uid, expire_time, operator):
                         'name': ban.operator.name,
                         'mail': ban.operator.mail
                     },
-                    'date': ban.date,
-                    'expire_date': ban.expire_date
+                    'date': ban.date.timestamp(),
+                    'expire_date': ban.expire_date.timestamp(),
+                    'days': round(
+                        (ban.expire_date - ban.date).total_seconds() / 86400
+                    )
                 })
         else:
             BanGlobal.create(
@@ -383,20 +394,20 @@ def ban_global_remove(uid):
 
 # Local and Global Ban
 #
-# def ban_check_global(uid)
+# def ban_global_check(uid)
 # def ban_check(uid, board)
-# def ban_info_global(uid)
+# def ban_global_info(uid)
 # def ban_info(uid, board)
-# def ban_list_global(page, count_per_page)
+# def ban_global_list(page, count_per_page)
 # def ban_list(board, page, count_per_page)
-# def ban_global(uid, expire_time, operator)
+# def ban_global_add(uid, days, operator)
 #   Tip: if expire_time > original_expire_time, update;
 #        if expire_time < original_expire_time, do nothing
 #          and return a feedback.
 #   Tip: operator is also uid, not user name.
-# def ban(uid, board, expire_time, operator)
+# def ban_add(uid, board, days, operator)
 #   Tip: The same as above.
-# def ban_remove_global(uid)
+# def ban_global_remove(uid)
 # def ban_remove(uid, board)
 
 
