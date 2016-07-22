@@ -192,9 +192,9 @@ def admin_add(uid, board='', level=1):
             board_rec = query.get()
             board_admin = BoardAdmin.select().where(
                 BoardAdmin.user == user_rec
-                and BoardAdmin.board == board_rec)
+                and BoardAdmin.board == board_rec
             )
-            if(board_admin)
+            if(board_admin):
                 return (4, _(
                     'User %s is already a level-%d administrator of board %s.'
                     % (user_rec.name, board_admin.level, board)) )
