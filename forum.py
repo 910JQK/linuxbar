@@ -121,62 +121,125 @@ def user_get_name(uid):
     return (0, OK_MSG, {'name': user.name})
 
 
-def site_admin_check(uid):
+def admin_check(uid, board=''):
     try:
         query = User.select().where(User.id == uid)
         if(not query):
             return (2, _('No such user.'))
-        user = query.get()
-        admin = user.site_managing
+        user_rec = query.get()
+        admin = None
+        if(not board):
+            admin = user_rec.site_managing
+        else:
+            query = Board.select().where(Board.short_name == board)
+            if(not query):
+                return (3, _('No such board.'))
+            admin = BoardAdmin.select().where(
+                BoardAdmin.user == user_rec
+                and BoardAdmin.board == board_rec
+            )
     except Exception as err:
         return (1, db_err_msg(err))
     if(admin):
-        return (0, OK_MSG, {'site_admin': True})
+        if(not board):
+            return (0, OK_MSG, {'admin': True})
+        else:
+            return (0, OK_MSG, {'admin': True, 'level': admin[0].level})
     else:
-        return (0, OK_MSG, {'site_admin': False})
+        return (0, OK_MSG, {'admin': False})
 
 
-def site_admin_list():
+def admin_list(board=''):
     try:
-        query = SiteAdmin.select()
+        query = None
+        if(not board):
+            query = SiteAdmin.select()
+        else:
+            query = Board.select().where(Board.short_name == board)
+            if(not query):
+                return (2, _('No such board.'))
+            board_rec = query.get()
+            query = BoardAdmin.select().where(BoardAdmin.board == board_rec)
     except Exception as err:
         return (1, db_err_msg(err))
     list = []
     for admin in query:
-        list.append(admin.user.id)
+        if(not board):
+            list.append(admin.user.id)
+        else:
+            list.append({'uid': admin.user.id, 'level': admin.level})
     return (0, OK_MSG, {'list': list, 'count': len(list)})
 
 
-def site_admin_add(uid):
+def admin_add(uid, board='', level=1):
     try:
         query = User.select().where(User.id == uid)
-
         if(not query):
             return (2, _('No such user.'))
-        user = query.get()
-        if(user.site_managing):
-            return (3, _('User %s is already a site administrator.' % user.name))
-
-        admin = SiteAdmin.create(user=user)
-        return (0, _('New site administrator %s added successfully.' % user.name))
+        user_rec = query.get()
+        if(not board):
+            if(user_rec.site_managing):
+                return (4, _('User %s is already a site administrator.'
+                             % user_rec.name))
+            else:
+                SiteAdmin.create(user=user)
+                return (0, _('New site administrator %s added successfully.'
+                             % user_rec.name))
+        else:
+            query = Board.select().where(Board.short_name == board)
+            if(not query):
+                return (3, _('No such board.'))
+            board_rec = query.get()
+            board_admin = BoardAdmin.select().where(
+                BoardAdmin.user == user_rec
+                and BoardAdmin.board == board_rec)
+            )
+            if(board_admin)
+                return (4, _(
+                    'User %s is already a level-%d administrator of board %s.'
+                    % (user_rec.name, board_admin.level, board)) )
+            else:
+                BoardAdmin.create(
+                    user = user_rec,
+                    board = board_rec,
+                    level = level
+                )
+                return (0, _(
+                    'New level-%d board administrator %s added successfully.'
+                    % (level, user_rec.name)) )
     except Exception as err:
         return (1, db_err_msg(err))
 
 
-def site_admin_remove(uid):
+def admin_remove(uid, board=''):
     try:
         query = User.select().where(User.id == uid)
         if(not query):
             return (2, _('No such user.'))
-        user = query.get()
-
-        query = SiteAdmin.select().where(SiteAdmin.user == user)
-        if(not query):
-            return (3, _('No such site administrator.'))
-        admin = query.get()
-
-        admin.delete_instance()
-        return (0, _('Site administrator %s removed successfully.' % user.name))
+        user_rec = query.get()
+        if(not board):
+            admin = user_rec.site_managing
+            if(not admin):
+                return (4, _('No such site administrator.'))
+            else:
+                admin[0].delete_instance()
+                return (0, _('Site administrator %s removed successfully.'
+                             % user.name))
+        else:
+            query = Board.select().where(Board.short_name == board)
+            if(not query):
+                return (3, _('No such board.'))
+            board_rec = query.get()
+            admin = BoardAdmin.select().where(
+                BoardAdmin.user == user_rec
+                and BoardAdmin.board == board_rec
+            )
+            if(not admin):
+                return (4, _('No such administrator of board %s.' % board))
+            else:
+                admin[0].delete_instance()
+                return (0, _('Administrator %s of board %s removed successfully.'
+                             % (user_rec.name, board)) )
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -304,7 +367,7 @@ def ban_info(uid, board=''):
                 return (4, _('User %s is not being banned globally.'
                              % user_rec.name))
             else:
-                return (4, _('User %s is not being banned in board %s.'
+                return (4, _('User %s is not being banned on board %s.'
                              % (user_rec.name, board)) )
         else:
             ban = bans[0]
@@ -387,6 +450,7 @@ def ban_add(uid, days, operator, board=''):
         if(not query):
             return (2, _('No such user.'))
         user_rec = query.get()
+        bans = None
         if(not board):
             bans = user_rec.banned_global
         else:
@@ -447,6 +511,7 @@ def ban_remove(uid, board=''):
         if(not query):
             return (1, _('No such user.'))
         user_rec = query.get()
+        bans = None
         if(not board):
             bans = user_rec.banned_global
         else:
@@ -463,7 +528,7 @@ def ban_remove(uid, board=''):
                 return (3, _('User %s is not being banned globally.'
                              % user_rec.name))
             else:
-                return (3, _('User %s is not being banned in board %s.'
+                return (3, _('User %s is not being banned on board %s.'
                              % (user_rec.name, board)) )
         else:
             bans[0].delete_instance()
@@ -479,7 +544,7 @@ def ban_remove(uid, board=''):
 # Board Administrators Management
 #
 # def board_admin_check(uid, board)
-#   Tip: return the level: 1 = assistant, 2 = moderator
+#   Tip: return the level: 1 = assistant, 0 = moderator
 # def board_admin_list(board)
 # def board_admin_add(uid, board)
 # def board_admin_remove(uid, board)
