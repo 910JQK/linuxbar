@@ -380,7 +380,7 @@ def ban_global_remove(uid):
             return (1, _('No such user.'))
         user = query.get()
         ban = user.banned_global
-        if(not ban or now() >= ban.expire):
+        if(not ban or now() >= ban.expire_date):
             return (2, _('User %s is not being banned.' % user.name))
         else:
             ban.delete_instance()
