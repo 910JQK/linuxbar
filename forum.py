@@ -274,8 +274,8 @@ def ban_global_info(uid):
         if(not query):
             return (2, _('No such user.'))
         user = query.get()
-        ban = user.banned_global
-        if(not bans or now() >= ban[0].expire_date):
+        bans = user.banned_global
+        if(not bans or now() >= bans[0].expire_date):
             return (3, _('User %s is not being banned' % user.name))
         else:
             ban = bans[0]
