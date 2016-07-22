@@ -250,33 +250,62 @@ def board_update(original_short_name, short_name, name, desc, announce):
         return(1, db_err_msg(err))
 
 
-def ban_global_check(uid):
+def ban_check(uid, board=''):
     try:
         query = User.select().where(User.id == uid)
         if(not query):
             return (2, _('No such user.'))
-        user = query.get()
-        banned = user.banned_global
+        user_rec = query.get()
+
+        bans = None
+        if(not board):
+            bans = user_rec.banned_global
+        else:
+            query = Board.select().where(Board.short_name == board)
+            if(not query):
+                return (3, _('No such board.'))
+            board_rec = query.get()
+            bans = Ban.select().where(
+                Ban.user == user_rec
+                and Ban.board == board_rec
+            )
     except Exception as err:
         return (1, db_err_msg(err))
-    if(banned and now() < banned[0].expire_date):
+    if(bans and now() < bans[0].expire_date):
         return (0, OK_MSG, {
             'banned': True,
-            'expire_date': banned[0].expire_date
+            'expire_date': bans[0].expire_date
         })
     else:
         return (0, OK_MSG, {'banned': False})
 
 
-def ban_global_info(uid):
+def ban_info(uid, board=''):
     try:
         query = User.select().where(User.id == uid)
         if(not query):
             return (2, _('No such user.'))
-        user = query.get()
-        bans = user.banned_global
+        user_rec = query.get()
+
+        bans = None
+        if(not board):
+            bans = user_rec.banned_global
+        else:
+            query = Board.select().where(Board.short_name == board)
+            if(not query):
+                return (3, _('No such board.'))
+            board_rec = query.get()
+            bans = Ban.select().where(
+                Ban.user == user_rec
+                and Ban.board == board_rec
+            )
         if(not bans or now() >= bans[0].expire_date):
-            return (3, _('User %s is not being banned' % user.name))
+            if(not board):
+                return (4, _('User %s is not being banned globally.'
+                             % user_rec.name))
+            else:
+                return (4, _('User %s is not being banned in board %s.'
+                             % (user_rec.name, board)) )
         else:
             ban = bans[0]
             return (0, OK_MSG, {
@@ -295,21 +324,39 @@ def ban_global_info(uid):
         return (1, db_err_msg(err))
 
 
-def ban_global_list(page, count_per_page):
+def ban_list(page, count_per_page, board=''):
     date = now()
     try:
-        query = (
-            BanGlobal
-            .select(BanGlobal, User)
-            .join(User)
-            .where(date < BanGlobal.expire_date)
-            .order_by(BanGlobal.date.desc())
-            .paginate(page, count_per_page)
-        )
+        bans = None
+        if(not board):
+            bans = (
+                BanGlobal
+                .select(BanGlobal, User)
+                .join(User)
+                .where(date < BanGlobal.expire_date)
+                .order_by(BanGlobal.date.desc())
+                .paginate(page, count_per_page)
+            )
+        else:
+            query = Board.select().where(Board.short_name == board)
+            if(not query):
+                return (2, _('No such board.'))
+            board_rec = query.get()
+            bans = (
+                Ban
+                .select(Ban, User)
+                .join(User)
+                .where(
+                    Ban.board == board_rec
+                    and date < Ban.expire_date
+                )
+                .order_by(Ban.date.desc())
+                .paginate(page, count_per_page)
+            )
     except Exception as err:
         return (1, db_err_msg(err))
     list = []
-    for ban in query:
+    for ban in bans:
         list.append({
             'user': {
                 'uid': ban.user.id,
@@ -330,7 +377,7 @@ def ban_global_list(page, count_per_page):
     return (0, OK_MSG, {'list': list, 'count': len(list)})
 
 
-def ban_global_add(uid, days, operator):
+def ban_add(uid, days, operator, board=''):
     # "operator" is UID of the operator, which must be valid.
     date = now()
     delta = datetime.timedelta(days=days)
@@ -339,8 +386,18 @@ def ban_global_add(uid, days, operator):
         query = User.select().where(User.id == uid)
         if(not query):
             return (2, _('No such user.'))
-        user = query.get()
-        bans = user.banned_global
+        user_rec = query.get()
+        if(not board):
+            bans = user_rec.banned_global
+        else:
+            query = Board.select().where(Board.short_name == board)
+            if(not query):
+                return (3, _('No such board.'))
+            board_rec = query.get()
+            bans = Ban.select().where(
+                Ban.user == user_rec
+                and Ban.board == board_rec
+            )
         if(bans):
             ban = bans[0]
             if(delta > ban.expire_date-ban.date):
@@ -350,7 +407,7 @@ def ban_global_add(uid, days, operator):
                 ban.save()
                 return (0, _('Ban on user %s entered into force.' % user.name))
             else:
-                return (3, _('Ban with same or longer term already exists.'), {
+                return (4, _('Ban with same or longer term already exists.'), {
                     'operator': {
                         'uid': ban.operator.id,
                         'name': ban.operator.name,
@@ -363,26 +420,50 @@ def ban_global_add(uid, days, operator):
                     )
                 })
         else:
-            BanGlobal.create(
-                user = user,
-                operator_id = operator,
-                date = date,
-                expire_date = expire_date
-            )
+            if(not board):
+                BanGlobal.create(
+                    user = user_rec,
+                    operator_id = operator,
+                    date = date,
+                    expire_date = expire_date
+                )
+            else:
+                Ban.create(
+                    user = user_rec,
+                    operator_id = operator,
+                    board = board_rec,
+                    date = date,
+                    expire_date = expire_date
+                )
             return (0, _('Ban on user %s entered into force.' % user.name))
     except Exception as err:
         return (1, db_err_msg(err))
 
 
-def ban_global_remove(uid):
+def ban_remove(uid, board=''):
     try:
         query = User.select().where(User.id == uid)
         if(not query):
             return (1, _('No such user.'))
-        user = query.get()
-        bans = user.banned_global
+        user_rec = query.get()
+        if(not board):
+            bans = user.banned_global
+        else:
+            query = Board.select().where(Board.short_name == board)
+            if(not query):
+                return (2, _('No such board.'))
+            board_rec = query.get()
+            bans = Ban.select().where(
+                Ban.user == user_rec
+                and Ban.board == board_rec
+            )
         if(not bans or now() >= bans[0].expire_date):
-            return (2, _('User %s is not being banned.' % user.name))
+            if(not board):
+                return (3, _('User %s is not being banned globally.'
+                             % user_rec.name))
+            else:
+                return (3, _('User %s is not being banned in board %s.'
+                             % (user_rec.name, board)) )
         else:
             bans[0].delete_instance()
             return (0, _('Ban on user %s cancelled successfully.' % user.name))
@@ -391,25 +472,6 @@ def ban_global_remove(uid):
 
 
 # Not Implemented Functions
-
-
-# Local and Global Ban
-#
-# def ban_global_check(uid)
-# def ban_check(uid, board)
-# def ban_global_info(uid)
-# def ban_info(uid, board)
-# def ban_global_list(page, count_per_page)
-# def ban_list(board, page, count_per_page)
-# def ban_global_add(uid, days, operator)
-#   Tip: if expire_time > original_expire_time, update;
-#        if expire_time < original_expire_time, do nothing
-#          and return a feedback.
-#   Tip: operator is also uid, not user name.
-# def ban_add(uid, board, days, operator)
-#   Tip: The same as above.
-# def ban_global_remove(uid)
-# def ban_remove(uid, board)
 
 
 # Board Administrators Management
