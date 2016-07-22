@@ -156,12 +156,12 @@ def site_admin_remove(uid):
     try:
         query = User.select().where(User.id == uid)
         if(not query):
-            return (2, _('No such user'))
+            return (2, _('No such user.'))
         user = query.get()
 
         query = SiteAdmin.select().where(SiteAdmin.user == user)
         if(not query):
-            return (3, _('No such site administrator'))
+            return (3, _('No such site administrator.'))
         admin = query.get()
 
         admin.delete_instance()
@@ -189,9 +189,9 @@ def board_list():
 
 def board_add(short_name, name, desc, announce):
     if(check_empty(short_name)):
-        return (2, _('Board ID (short name) cannot be empty'))
+        return (2, _('Board ID (short name) cannot be empty.'))
     if(check_empty(name)):
-        return (3, _('Board name cannot be empty'))
+        return (3, _('Board name cannot be empty.'))
     try:
         if(Board.select().where(Board.short_name == short_name)):
             return (4, _('Board with ID (short name) %s already exists.'
@@ -214,7 +214,7 @@ def board_remove(short_name):
     try:
         query = Board.select().where(Board.short_name == short_name)
         if(not query):
-            return (2, _('No such board'))
+            return (2, _('No such board.'))
         board = query.get()
         board.delete_instance()
         return (0, _('Board named %s removed successfully.' % board.name))
@@ -227,7 +227,7 @@ def board_update(original_short_name, short_name, name, desc, announce):
     try:
         query = Board.select().where(Board.short_name == original_short_name)
         if(not query):
-            return (2, _('No such board'))
+            return (2, _('No such board.'))
         board = query.get()
         board.short_name = short_name
         board.name = name
