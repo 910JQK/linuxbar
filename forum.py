@@ -250,7 +250,7 @@ def board_update(original_short_name, short_name, name, desc, announce):
         return(1, db_err_msg(err))
 
 
-def ban_check_global(uid):
+def ban_global_check(uid):
     try:
         query = User.select().where(User.id == uid)
         if(not query):
@@ -268,7 +268,7 @@ def ban_check_global(uid):
         return (0, OK_MSG, {'banned': False})
 
 
-def ban_info_global(uid):
+def ban_global_info(uid):
     try:
         query = User.select().where(User.id == uid)
         if(not query):
@@ -292,7 +292,7 @@ def ban_info_global(uid):
         return (1, db_err_msg(err))
 
 
-def ban_list_global(page, count_per_page):
+def ban_global_list(page, count_per_page):
     date = now()
     try:
         query = (
@@ -324,7 +324,7 @@ def ban_list_global(page, count_per_page):
     return (0, {'list': list, 'count': len(list)})
 
 
-def ban_global(uid, expire_time, operator):
+def ban_global_add(uid, expire_time, operator):
     # "operator" is UID of the operator, which must be valid.
     date = now()
     try:
@@ -362,7 +362,7 @@ def ban_global(uid, expire_time, operator):
         return (1, db_err_msg(err))
 
 
-def ban_remove_global(uid):
+def ban_global_remove(uid):
     try:
         query = User.select().where(User.id == uid)
         if(not query):
