@@ -43,7 +43,7 @@ class Board(BaseModel):
 
 
 class Ban(BaseModel):
-    user = ForeignKeyField(User, related_name='banned', unique=True, index=True)
+    user = ForeignKeyField(User, related_name='banned', index=True)
     operator = ForeignKeyField(User, related_name='banning', index=True)
     board = ForeignKeyField(Board, related_name='banning', index=True)
     date = DateTimeField(index=True)
