@@ -135,8 +135,8 @@ def admin_check(uid, board=''):
             if(not query):
                 return (3, _('No such board.'))
             admin = BoardAdmin.select().where(
-                BoardAdmin.user == user_rec
-                and BoardAdmin.board == board_rec
+                BoardAdmin.user == user_rec,
+                BoardAdmin.board == board_rec
             )
     except Exception as err:
         return (1, db_err_msg(err))
@@ -190,14 +190,14 @@ def admin_add(uid, board='', level=1):
             if(not query):
                 return (3, _('No such board.'))
             board_rec = query.get()
-            board_admin = BoardAdmin.select().where(
-                BoardAdmin.user == user_rec
-                and BoardAdmin.board == board_rec
+            query = BoardAdmin.select().where(
+                BoardAdmin.user == user_rec,
+                BoardAdmin.board == board_rec
             )
-            if(board_admin):
+            if(query):
                 return (4, _(
                     'User %s is already a level-%d administrator of board %s.'
-                    % (user_rec.name, board_admin.level, board)) )
+                    % (user_rec.name, query[0].level, board_rec.name)) )
             else:
                 BoardAdmin.create(
                     user = user_rec,
@@ -205,8 +205,8 @@ def admin_add(uid, board='', level=1):
                     level = level
                 )
                 return (0, _(
-                    'New level-%d board administrator %s added successfully.'
-                    % (level, user_rec.name)) )
+                    'New level-%d administrator of board %s - %s added successfully.'
+                    % (level, board_rec.name, user_rec.name)) )
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -231,15 +231,16 @@ def admin_remove(uid, board=''):
                 return (3, _('No such board.'))
             board_rec = query.get()
             admin = BoardAdmin.select().where(
-                BoardAdmin.user == user_rec
-                and BoardAdmin.board == board_rec
+                BoardAdmin.user == user_rec,
+                BoardAdmin.board == board_rec
             )
             if(not admin):
-                return (4, _('No such administrator of board %s.' % board))
+                return (4, _('No such administrator of board %s.'
+                             % board_rec.name))
             else:
                 admin[0].delete_instance()
                 return (0, _('Administrator %s of board %s removed successfully.'
-                             % (user_rec.name, board)) )
+                             % (user_rec.name, board_rec.name)) )
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -329,8 +330,8 @@ def ban_check(uid, board=''):
                 return (3, _('No such board.'))
             board_rec = query.get()
             bans = Ban.select().where(
-                Ban.user == user_rec
-                and Ban.board == board_rec
+                Ban.user == user_rec,
+                Ban.board == board_rec
             )
     except Exception as err:
         return (1, db_err_msg(err))
@@ -351,6 +352,7 @@ def ban_info(uid, board=''):
         user_rec = query.get()
 
         bans = None
+        board_rec = None
         if(not board):
             bans = user_rec.banned_global
         else:
@@ -359,8 +361,8 @@ def ban_info(uid, board=''):
                 return (3, _('No such board.'))
             board_rec = query.get()
             bans = Ban.select().where(
-                Ban.user == user_rec
-                and Ban.board == board_rec
+                Ban.user == user_rec,
+                Ban.board == board_rec
             )
         if(not bans or now() >= bans[0].expire_date):
             if(not board):
@@ -368,7 +370,7 @@ def ban_info(uid, board=''):
                              % user_rec.name))
             else:
                 return (4, _('User %s is not being banned on board %s.'
-                             % (user_rec.name, board)) )
+                             % (user_rec.name, board_rec.name)) )
         else:
             ban = bans[0]
             return (0, OK_MSG, {
@@ -410,8 +412,8 @@ def ban_list(page, count_per_page, board=''):
                 .select(Ban, User)
                 .join(User)
                 .where(
-                    Ban.board == board_rec
-                    and date < Ban.expire_date
+                    Ban.board == board_rec,
+                    date < Ban.expire_date
                 )
                 .order_by(Ban.date.desc())
                 .paginate(page, count_per_page)
@@ -459,8 +461,8 @@ def ban_add(uid, days, operator, board=''):
                 return (3, _('No such board.'))
             board_rec = query.get()
             bans = Ban.select().where(
-                Ban.user == user_rec
-                and Ban.board == board_rec
+                Ban.user == user_rec,
+                Ban.board == board_rec
             )
         if(bans):
             ban = bans[0]
@@ -512,6 +514,7 @@ def ban_remove(uid, board=''):
             return (1, _('No such user.'))
         user_rec = query.get()
         bans = None
+        board_rec = None
         if(not board):
             bans = user_rec.banned_global
         else:
@@ -520,8 +523,8 @@ def ban_remove(uid, board=''):
                 return (2, _('No such board.'))
             board_rec = query.get()
             bans = Ban.select().where(
-                Ban.user == user_rec
-                and Ban.board == board_rec
+                Ban.user == user_rec,
+                Ban.board == board_rec
             )
         if(not bans or now() >= bans[0].expire_date):
             if(not board):
@@ -529,7 +532,7 @@ def ban_remove(uid, board=''):
                              % user_rec.name))
             else:
                 return (3, _('User %s is not being banned on board %s.'
-                             % (user_rec.name, board)) )
+                             % (user_rec.name, board_rec.name)) )
         else:
             bans[0].delete_instance()
             return (0, _('Ban on user %s cancelled successfully.'
@@ -539,15 +542,6 @@ def ban_remove(uid, board=''):
 
 
 # Not Implemented Functions
-
-
-# Board Administrators Management
-#
-# def board_admin_check(uid, board)
-#   Tip: return the level: 1 = assistant, 0 = moderator
-# def board_admin_list(board)
-# def board_admin_add(uid, board)
-# def board_admin_remove(uid, board)
 
 
 # Topic
