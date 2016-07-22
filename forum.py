@@ -293,8 +293,8 @@ def ban_info_global(uid):
 
 
 def ban_list_global(page, count_per_page):
+    date = now()
     try:
-        date = now()
         query = (
             BanGlobal
             .select(BanGlobal, User)
@@ -324,7 +324,39 @@ def ban_list_global(page, count_per_page):
     return (0, {'list': list, 'count': len(list)})
 
 
-#def ban_global()
+def ban_global(uid, expire_time, operator):
+    date = now()
+    try:
+        query = User.select().where(User.id == uid)
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
+        ban = user.banned_global
+        if(ban):
+            if(expire_date > ban.expire_date):
+                ban.expire_date = expire_date
+                ban.save()
+                return (0, _('Ban on user %s entered into force.' % user.name))
+            else:
+                return (3, _('Ban with longer term already exists.'), {
+                    'operator': {
+                        'uid': ban.operator.id,
+                        'name': ban.operator.name,
+                        'mail': ban.operator.mail
+                    },
+                    'date': ban.date,
+                    'expire_date': ban.expire_date
+                })
+        else:
+            BanGlobal.create(
+                user = user,
+                operator_id = operator,
+                date = date,
+                expire_date = expire_date
+            )
+            return (0, _('Ban on user %s entered into force.' % user.name))
+    except Exception as err:
+        return (1, db_err_msg(err))
 
 
 # Not Implemented Functions
