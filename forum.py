@@ -327,7 +327,7 @@ def ban_global_list(page, count_per_page):
                 (ban.expire_date - ban.date).total_seconds() / 86400
             )
         })
-    return (0, {'list': list, 'count': len(list)})
+    return (0, OK_MSG, {'list': list, 'count': len(list)})
 
 
 def ban_global_add(uid, days, operator):
