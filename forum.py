@@ -134,6 +134,7 @@ def admin_check(uid, board=''):
             query = Board.select().where(Board.short_name == board)
             if(not query):
                 return (3, _('No such board.'))
+            board_rec = query.get()
             admin = BoardAdmin.select().where(
                 BoardAdmin.user == user_rec,
                 BoardAdmin.board == board_rec
