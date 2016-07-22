@@ -110,6 +110,17 @@ def user_get_uid(name):
     return (0, OK_MSG, {'uid': user.id})
 
 
+def user_get_name(uid):
+    try:
+        query = User.select().where(User.id == uid)
+    except Exception as err:
+        return (1, db_err_msg(err))
+    if(not query):
+        return (2, _('No such user.'))
+    user = query.get()
+    return (0, OK_MSG, {'name': user.name})
+
+
 def site_admin_check(uid):
     try:
         query = User.select().where(User.id == uid)
@@ -239,6 +250,83 @@ def board_update(original_short_name, short_name, name, desc, announce):
         return(1, db_err_msg(err))
 
 
+def ban_check_global(uid):
+    try:
+        query = User.select().where(User.id == uid)
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
+        banned = user.banned_global
+    except Exception as err:
+        return (1, db_err_msg(err))
+    if(banned and now() < banned[0].expire_date):
+        return (0, OK_MSG, {
+            'banned': True,
+            'expire_date': banned[0].expire_date
+        })
+    else:
+        return (0, OK_MSG, {'banned': False})
+
+
+def ban_info_global(uid):
+    try:
+        query = User.select().where(User.id == uid)
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
+        ban = user.banned_global()
+        if(not ban or date >= ban.expire_date):
+            return (3, _('User %s is not being banned' % user.name))
+        else:
+            operator = ban.operator
+            return (0, OK_MSG, {
+                'operator': {
+                    'uid': operator.id,
+                    'name': operator.name,
+                    'mail': operator.mail
+                },
+                'date': ban.date,
+                'expire_date': ban.expire_date
+            })
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def ban_list_global(page, count_per_page):
+    try:
+        date = now()
+        query = (
+            BanGlobal
+            .select(BanGlobal, User)
+            .join(User)
+            .where(date < BanGlobal.expire_date)
+            .order_by(BanGlobal.date.desc())
+            .paginate(page, count_per_page)
+        )
+    except Exception as err:
+        return (1, db_err_msg(err))
+    list = []
+    for ban in query:
+        list.append({
+            'user': {
+                'uid': ban.user.id,
+                'name': ban.user.name,
+                'mail': ban.user.mail
+            },
+            'operator': {
+                'uid': ban.operator.id,
+                'name': ban.operator.name,
+                'mail': ban.operator.mail
+            },
+            'date': ban.date,
+            'expire_date': ban.expire_date
+        })
+    return (0, {'list': list, 'count': len(list)})
+
+
+#def ban_global()
+
+
 # Not Implemented Functions
 
 
@@ -246,8 +334,10 @@ def board_update(original_short_name, short_name, name, desc, announce):
 #
 # def ban_check_global(uid)
 # def ban_check(uid, board)
-# def ban_list_global()
-# def ban_list(board)
+# def ban_info_global(uid)
+# def ban_info(uid, board)
+# def ban_list_global(page, count_per_page)
+# def ban_list(board, page, count_per_page)
 # def ban_global(uid, expire_time, operator)
 #   Tip: if expire_time > original_expire_time, update;
 #        if expire_time < original_expire_time, do nothing
