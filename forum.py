@@ -350,7 +350,7 @@ def ban_global_add(uid, days, operator):
                 ban.save()
                 return (0, _('Ban on user %s entered into force.' % user.name))
             else:
-                return (3, _('Ban with longer term already exists.'), {
+                return (3, _('Ban with same or longer term already exists.'), {
                     'operator': {
                         'uid': ban.operator.id,
                         'name': ban.operator.name,
