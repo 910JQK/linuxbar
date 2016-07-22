@@ -125,8 +125,8 @@ class Image(BaseModel):
     uploader = ForeignKeyField(User, related_name='images', index=True)
 
 
-tables = [Config, User, Salt, SiteAdmin, Board, Ban, BoardAdmin, Topic, Post,
-          Subpost, AtFromPost, AtFromSubpost, Image]
+tables = [Config, User, Salt, SiteAdmin, Board, Ban, BanGlobal, BoardAdmin,
+          Topic, Post, Subpost, AtFromPost, AtFromSubpost, Image]
 
 
 if __name__ == '__main__':
