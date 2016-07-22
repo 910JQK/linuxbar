@@ -448,7 +448,7 @@ def ban_remove(uid, board=''):
             return (1, _('No such user.'))
         user_rec = query.get()
         if(not board):
-            bans = user.banned_global
+            bans = user_rec.banned_global
         else:
             query = Board.select().where(Board.short_name == board)
             if(not query):
