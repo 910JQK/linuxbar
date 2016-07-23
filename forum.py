@@ -839,6 +839,68 @@ def post_revert(id, subpost=False):
         return (1, db_err_msg(err))
 
 
+def post_list(parent, page, count_per_page, subpost=False):
+    query = None
+    if(not subpost):
+        Parent = Topic
+        Table = Post
+        parent_field = Post.topic
+        post_type = 'post'
+        id_name = 'pid'
+    else:
+        Parent = Post
+        Table = Subpost
+        parent_field = Subpost.reply1
+        post_type = 'subpost'
+        id_name = 'sid'
+    try:
+        query = Parent.select().where(Parent.id == parent)
+        if(not query):
+            return (2, _('No such %s.' % post_type))
+        parent_rec = query.get()
+        count = Table.select().where(parent_field == parent_rec).count()
+        query = (
+            Table
+            .select(Table, User)
+            .join(User)
+            .where(parent_field == parent_rec)
+            .order_by(Table.id)
+            .paginate(page, count_per_page)
+        )
+    except Exception as err:
+        return (1, db_err_msg(err))
+    list = []
+    for post in query:
+        item = None
+        if(post.deleted):
+            item = {
+                id_name: post.id,
+                'deleted': True
+            }
+        else:
+            item = {
+                'content': post.content,
+                'author': {
+                    'uid': post.author.id,
+                    'name': post.author.name,
+                    'mail': post.author.mail
+                },
+                'date': post.date.timestamp(),
+                'deleted': False
+            })
+            item[id_name] = post.id
+            if(post.edited):
+                item['edited'] = True
+                item['edit_date'] = post.edit_date
+            else:
+                item['edited'] = False
+        list.append(item)
+    return (0, OK_MSG, {'list': list, 'count': count})
+
+
+# def post_show_deleted(board, page, count_per_page)
+
+
 # Not Implemented Functions
 
 
