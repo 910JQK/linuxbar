@@ -69,6 +69,7 @@ class Topic(BaseModel):
     board = ForeignKeyField(Board, related_name='topics')
     author = ForeignKeyField(User, related_name='topics')
     summary = TextField()
+    reply_count = IntegerField(default=0)
     last_post_date = DateTimeField(index=True)
     last_post_author = ForeignKeyField(User)
     deleted = BooleanField(default=False)
