@@ -542,7 +542,7 @@ def ban_remove(uid, board=''):
         return (1, db_err_msg(err))
 
 
-def topic_add(board, title, author, post_body):
+def topic_add(board, title, author, summary, post_body):
     # Parameter "author" is the UID of the author, which must be valid.
     date = now()
     if(check_empty(title)):
@@ -558,6 +558,7 @@ def topic_add(board, title, author, post_body):
             title = title,
             board = board_rec,
             author_id = author,
+            summary = summary,
             date = date,
             last_post_date = date,
             last_post_author_id = author
@@ -590,22 +591,16 @@ def topic_remove(tid, operator):
         return (1, db_err_msg(err))
 
 
+def topic_list(board, page, count_per_page):
+    query = Board.select().where(Board.short_name == board)
+    if(not query):
+        return (2, _('No such board.'))
+    board_rec = query.get()
+#    query = (Topic
+#             .select(Topic, User)
+
+
 # Not Implemented Functions
-
-
-# Topic
-#
-# def topic_add(board, title, author, post_body)
-#   Tip: board -> short_name, author -> uid
-#   Tip: Don't forget to save the date.
-#   Tip: Don't forget to update last_post_date, which intends for sorting.
-# def topic_remove(tid, operator)
-#   Tip: Just set deleted = True, not removing the record.
-#   Tip: Don't forget to save the operator and the date.
-#   Tip: Checking permission of user is unnecessary.
-#        (That isn't the responsibility of this function)
-# def topic_list(board, page, count_per_page)
-#   Tip: Return both topics and count for paging.
 
 
 # Post
