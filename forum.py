@@ -583,6 +583,30 @@ def topic_add(board, title, author, summary, post_body):
         return (1, db_err_msg(err))
 
 
+def topic_move(tid, board):
+    try:
+        query = Board.select().where(Board.short_name == board)
+        if(not query):
+            return (2, _('No such board.'))
+        board_rec = query.get()
+        query = Topic.select().where(
+            Topic.id == tid,
+            Topic.deleted == False
+        )
+        if(not query):
+            return (3, _('Topic does not exist or has been deleted.'))
+        topic_rec = query.get()
+        if(topic_rec.board == board_rec):
+            return (4, _('Invalid move.'))
+        original_name = topic_rec.board.name
+        topic_rec.board = board_rec
+        topic_rec.save()
+        return (0, _('Topic %d moved from board %s to board %s successfully.'
+                     % (topic_rec.id, original_name, board_rec.name)) )
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
 def topic_remove(tid, operator):
     # Parameter "operator" is the UID of the operator, which must be valid.
     try:
@@ -710,7 +734,7 @@ def post_add(parent, author, content, subpost=False, reply=0):
             if(reply):
                 query = Subpost.select().where(
                     Subpost.id == reply,
-                    Subpost.post == post,
+                    Subpost.reply1 == post,
                     Subpost.deleted == False
                 )
                 if(not query):
@@ -730,10 +754,10 @@ def post_add(parent, author, content, subpost=False, reply=0):
             )
         topic.last_post_date = date
         topic.last_post_author_id = author
-        topic.reply_count = topic_reply_count + 1
+        topic.reply_count = topic.reply_count + 1
         topic.save()
     except Exception as err:
-        return(1, db_err_msg(err))
+        return (1, db_err_msg(err))
     if(not subpost):
         return (0, _('Post published successfully.'), {'pid': new_post.id})
     else:
