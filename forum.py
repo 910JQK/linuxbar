@@ -620,7 +620,7 @@ def topic_remove(tid, operator):
         topic.delete_date = now()
         topic.delete_operator_id = operator
         topic.save()
-        return (0, _('Topic %d removed successfully.' % tid))
+        return (0, _('Topic %d deleted successfully.' % tid))
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -783,6 +783,58 @@ def post_edit(id, new_content, subpost=False):
         post.edit_date = now()
         post.save()
         return (0, _('Edit saved successfully.'))
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def post_remove(id, operator, subpost=False):
+    # Parameter "operator" is the UID of the operator, which must be valid.
+    Table = None
+    post_type = ''
+    if(not subpost):
+        Table = Post
+        post_type = 'Post'
+    else:
+        Table = Subpost
+        post_type = 'Subpost'
+    try:
+        query = Table.select().where(Table.id == id)
+        if(not query):
+            return (2, _('No such %s.' % post_type.lower()))
+        post = query.get()
+        if(post.deleted):
+            return (3, _('%s %d has already been deleted.' % (post_type, id)) )
+        post.deleted = True
+        post.delete_date = now()
+        post.delete_operator_id = operator
+        post.save()
+        return (0, _('%s %d deleted successfully.' % (post_type, id)) )
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def post_revert(id, subpost=False):
+    # Parameter "operator" is the UID of the operator, which must be valid.
+    Table = None
+    post_type = ''
+    if(not subpost):
+        Table = Post
+        post_type = 'Post'
+    else:
+        Table = Subpost
+        post_type = 'Subpost'
+    try:
+        query = Table.select().where(Table.id == id)
+        if(not query):
+            return (2, _('No such %s.' % post_type.lower()))
+        post = query.get()
+        if(not post.deleted):
+            return (3, _('%s %d has NOT been deleted.' % (post_type, id)) )
+        post.deleted = False
+        post.delete_date = None
+        post.delete_operator_id = None
+        post.save()
+        return (0, _('%s %d reverted successfully.' % (post_type, id)) )
     except Exception as err:
         return (1, db_err_msg(err))
 
