@@ -592,12 +592,42 @@ def topic_remove(tid, operator):
 
 
 def topic_list(board, page, count_per_page):
-    query = Board.select().where(Board.short_name == board)
-    if(not query):
-        return (2, _('No such board.'))
-    board_rec = query.get()
-#    query = (Topic
-#             .select(Topic, User)
+    try:
+        query = Board.select().where(Board.short_name == board)
+        if(not query):
+            return (2, _('No such board.'))
+        board_rec = query.get()
+        count = Topic.select().where(Topic.deleted == False).count()
+        query = (
+            Topic
+            .select(Topic, User)
+            .join(User)
+            .where(Topic.board == board_rec, Topic.deleted == False)
+            .order_by(Topic.last_post_date.desc())
+            .paginate(page, count_per_page)
+        )
+    except Exception as err:
+        return (1, db_err_msg(err))
+    list = []
+    for topic in query:
+        list.append({
+            'title': topic.title,
+            'summary': topic.summary,
+            'author': {
+                'uid': topic.author.id,
+                'name': topic.author.name,
+                'mail': topic.author.mail
+            },
+            'last_post_author': {
+                'uid': topic.last_post_author.id,
+                'name': topic.last_post_author.name,
+                'mail': topic.last_post_author.mail
+            },
+            'reply_count': topic.reply_count,
+            'date': topic.date.timestamp(),
+            'last_post_date': topic.last_post_date.timestamp()
+        })
+    return (0, OK_MSG, {'list': list, 'count': count})
 
 
 # Not Implemented Functions
