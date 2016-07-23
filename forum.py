@@ -874,7 +874,6 @@ def post_list(parent, page, count_per_page, subpost=False):
         if(post.deleted):
             item = {
                 id_name: post.id,
-                'deleted': True,
                 'delete_date': post.delete_date.timestamp(),
                 'delete_operator': {
                     'uid': post.delete_operator.id,
@@ -927,7 +926,7 @@ def post_deleted_info(id, subpost=False):
         'content': post.content,
         'author': {
             'uid': post.author.id,
-            'name': post.author.user,
+            'name': post.author.name,
             'mail': post.author.mail
         },
         'delete_operator': {
