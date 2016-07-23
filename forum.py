@@ -578,7 +578,7 @@ def topic_add(board, title, author, summary, post_body):
             topic_author_id = author,
             date = date
         )
-        return (0, _('Topic created successfully.'), {'tid': topic.id})
+        return (0, _('Topic published successfully.'), {'tid': topic.id})
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -672,6 +672,69 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
     return (0, OK_MSG, {'list': list, 'count': count})
 
 
+def post_add(parent, author, content, subpost=False, reply=0):
+    # Parameter "author" is the UID of the author, which must be valid.
+    date = now()
+    topic = None
+    new_post = None
+    new_subpost = None
+    try:
+        if(not subpost):
+            query = Topic.select().where(
+                Topic.id == parent,
+                Topic.deleted == False
+            )
+            if(not query):
+                return (2, _('No such topic.'))
+            topic = query.get()
+            new_post = Post.create(
+                topic = topic,
+                author_id = author,
+                content = content,
+                date = date,
+                topic_author = topic.author
+            )
+        else:
+            query = Post.select().where(Post.id == parent)
+            if(not query):
+                return (2, _('No such post.'))
+            post = query.get()
+            topic = post.topic
+            reply_rec = None
+            reply_rec_author = None
+            if(reply):
+                query = Subpost.select().where(
+                    Subpost.id == reply,
+                    Subpost.post == post,
+                    Subpost.deleted == False
+                )
+                if(not query):
+                    return (3, _('Invalid reply sid.'))
+                reply_rec = query.get()
+                reply_rec_author = reply_rec.author
+            new_subpost = Subpost.create(
+                content = content,
+                author_id = author,
+                date = date,
+                reply0 = topic,
+                reply0_author = topic.author,
+                reply1 = post,
+                reply1_author = post.author,
+                reply2 = reply_rec,
+                reply2_author = reply_rec_author
+            )
+        topic.last_post_date = date
+        topic.last_post_author_id = author
+        topic.reply_count = topic_reply_count + 1
+        topic.save()
+    except Exception as err:
+        return(1, db_err_msg(err))
+    if(not subpost):
+        return (0, _('Post published successfully.'), {'pid': post.id})
+    else:
+        return (0, _('Subpost published successfully.'), {'sid': subpost.id})
+
+
 # Not Implemented Functions
 
 
@@ -696,7 +759,7 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
 
 # Subpost (a.k.a Post in Post)
 #
-# def subpost_add(pid, author, content)
+# def subpost_add(pid, author, content, reply=0)
 #   Tip: author -> uid
 #   Tip: Don't forget to save the date.
 #   Tip: Don't forget to update last_post_date of its topic.
