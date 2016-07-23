@@ -840,7 +840,6 @@ def post_revert(id, subpost=False):
 
 
 def post_list(parent, page, count_per_page, subpost=False):
-    query = None
     if(not subpost):
         Parent = Topic
         Table = Post
@@ -875,7 +874,13 @@ def post_list(parent, page, count_per_page, subpost=False):
         if(post.deleted):
             item = {
                 id_name: post.id,
-                'deleted': True
+                'deleted': True,
+                'delete_date': post.delete_date.timestamp(),
+                'delete_operator': {
+                    'uid': post.delete_operator.id,
+                    'name': post.delete_operator.name,
+                    'mail': post.delete_operator.mail
+                }
             }
         else:
             item = {
@@ -889,58 +894,56 @@ def post_list(parent, page, count_per_page, subpost=False):
             }
             item[id_name] = post.id
             if(post.edited):
-                item['edited'] = True
                 item['edit_date'] = post.edit_date.timestamp()
-            else:
-                item['edited'] = False
             if(subpost and post.reply2):
                 item['reply'] = post.reply2.id
         list.append(item)
     return (0, OK_MSG, {'list': list, 'count': count})
 
 
-# def post_deleted_info(id, subpost=False)
+def post_deleted_info(id, subpost=False):
+    if(not subpost):
+        Table = Post
+        post_type = 'post'
+    else:
+        Table = Subpost
+        post_type = 'subpost'
+    try:
+        query = (
+            Table
+            .select(Table, User)
+            .join(User)
+            .where(
+                Table.id == id,
+                Table.deleted == True
+            )
+        )
+    except Exception as err:
+        return (1, db_err_msg(err))
+    if(not query):
+        return (2, _('No such deleted %s.' % post_type))
+    post = query.get()
+    info = {
+        'content': post.content,
+        'author': {
+            'uid': post.author.id,
+            'name': post.author.user,
+            'mail': post.author.mail
+        },
+        'delete_operator': {
+            'uid': post.delete_operator.id,
+            'name': post.delete_operator.name,
+            'mail': post.delete_operator.mail
+        },
+        'date': post.date.timestamp(),
+        'delete_date': post.delete_date.timestamp()
+    }
+    if(post.edited):
+        info['edit_date'] = post.edit_date.timestamp()
+    return (0, OK_MSG, info)
 
 
 # Not Implemented Functions
-
-
-# Post
-#
-# def post_add(tid, author, content)
-#   Tip: author -> uid
-#   Tip: Don't forget to save the date.
-#   Tip: Don't forget to update last_post_date of its topic.
-#   Tip: Don't forget to set field topic_author to emit a reply.
-#   Tip: Don't extract At from the content, which is not the responsibility of
-#          this function.
-# def post_edit(pid, new_content)
-#   Tip: Don't forget to save the edit date.
-# def post_remove(pid, operator)
-#   Tip: The same as topic_remove()
-#   Tip: Reject the requests of removing top posts (a.k.a floor #1).
-# def post_revert(pid)
-# def post_list(tid, page, count_per_page)
-#   Tip: Return both posts and count for paging.
-
-
-# Subpost (a.k.a Post in Post)
-#
-# def subpost_add(pid, author, content, reply=0)
-#   Tip: author -> uid
-#   Tip: Don't forget to save the date.
-#   Tip: Don't forget to update last_post_date of its topic.
-#   Tip: Don't forget to fill fields reply{0,1,2} and reply{0,1,2}_author
-#          to emit replies.
-#   Tip: Don't extract At from the content, which is not the responsibility of
-#          this function.
-# def subpost_edit(sid, new_content)
-#   Tip: Don't forget to save the edit date.
-# def subpost_remove(sid, operator)
-#   Tip: The same as topic_remove()
-# def subpost_revert(sid)
-# def subpost_list(pid, page, count_per_page)
-#   Tip: Return both subposts and count for paging.
 
 
 # Reply
