@@ -766,16 +766,25 @@ def post_add(parent, author, content, subpost=False, reply=0):
 
 def post_edit(id, new_content, subpost=False):
     Table = None
-    Name = ''
+    post_type = ''
     if(not subpost):
         Table = Post
-        Name = 'post'
+        post_type = 'post'
     else:
         Table = Subpost
-        Name = 'subpost'
-    query = Table.select().where(Table.id == id)
-#    if(not query):
-#        return (2
+        post_type = 'subpost'
+    try:
+        query = Table.select().where(Table.id == id)
+        if(not query):
+            return (2, _('No such %s.' % post_type))
+        post = query.get()
+        post.content = new_content
+        post.edited = True
+        post.edit_date = now()
+        post.save()
+        return (0, _('Edit saved successfully.'))
+    except Exception as err:
+        return (1, db_err_msg(err))
 
 
 # Not Implemented Functions
