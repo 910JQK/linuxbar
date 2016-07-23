@@ -599,6 +599,21 @@ def topic_remove(tid, operator):
         return (1, db_err_msg(err))
 
 
+def topic_revert(tid):
+    try:
+        query = Topic.select().where(Topic.id == tid)
+        if(not query):
+            return (2, _('No such topic.'))
+        topic = query.get()
+        topic.deleted = False
+        topic.delete_date = None
+        topic.delete_operator_id = None
+        topic.save()
+        return (0, _('Topic %d reverted successfully.' % tid))
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
 def topic_list(board, page, count_per_page, only_show_deleted=False):
     try:
         query = Board.select().where(Board.short_name == board)
@@ -642,8 +657,8 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
             'last_post_date': topic.last_post_date.timestamp()
         }
         if(only_show_deleted):
-            item.delete_date = topic.delete_date
-            item.delte_operator = {
+            item['delete_date'] = topic.delete_date.timestamp()
+            item['delete_operator'] = {
                 'uid': topic.delete_operator.id,
                 'name': topic.delete_operator.name,
                 'mail': topic.delete_operator.mail
@@ -669,6 +684,7 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
 # def post_remove(pid, operator)
 #   Tip: The same as topic_remove()
 #   Tip: Reject the requests of removing top posts (a.k.a floor #1).
+# def post_revert(pid)
 # def post_list(tid, page, count_per_page)
 #   Tip: Return both posts and count for paging.
 
@@ -687,6 +703,7 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
 #   Tip: Don't forget to save the edit date.
 # def subpost_remove(sid, operator)
 #   Tip: The same as topic_remove()
+# def subpost_revert(sid)
 # def subpost_list(pid, page, count_per_page)
 #   Tip: Return both subposts and count for paging.
 
