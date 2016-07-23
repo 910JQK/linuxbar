@@ -599,7 +599,7 @@ def topic_remove(tid, operator):
         return (1, db_err_msg(err))
 
 
-def topic_list(board, page, count_per_page):
+def topic_list(board, page, count_per_page, only_show_deleted=False):
     try:
         query = Board.select().where(Board.short_name == board)
         if(not query):
@@ -607,13 +607,16 @@ def topic_list(board, page, count_per_page):
         board_rec = query.get()
         count = Topic.select().where(
             Topic.board == board_rec,
-            Topic.deleted == False
+            Topic.deleted == only_show_deleted
         ).count()
         query = (
             Topic
             .select(Topic, User)
             .join(User)
-            .where(Topic.board == board_rec, Topic.deleted == False)
+            .where(
+                Topic.board == board_rec,
+                Topic.deleted == only_show_deleted
+            )
             .order_by(Topic.last_post_date.desc())
             .paginate(page, count_per_page)
         )
@@ -621,7 +624,7 @@ def topic_list(board, page, count_per_page):
         return (1, db_err_msg(err))
     list = []
     for topic in query:
-        list.append({
+        item = {
             'title': topic.title,
             'summary': topic.summary,
             'author': {
@@ -637,7 +640,15 @@ def topic_list(board, page, count_per_page):
             'reply_count': topic.reply_count,
             'date': topic.date.timestamp(),
             'last_post_date': topic.last_post_date.timestamp()
-        })
+        }
+        if(only_show_deleted):
+            item.delete_date = topic.delete_date
+            item.delte_operator = {
+                'uid': topic.delete_operator.id,
+                'name': topic.delete_operator.name,
+                'mail': topic.delete_operator.mail
+            }
+        list.append(item)
     return (0, OK_MSG, {'list': list, 'count': count})
 
 
