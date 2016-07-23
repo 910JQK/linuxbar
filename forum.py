@@ -444,7 +444,7 @@ def ban_list(page, count_per_page, board=''):
 
 
 def ban_add(uid, days, operator, board=''):
-    # "operator" is UID of the operator, which must be valid.
+    # Parameter "operator" is UID of the operator, which must be valid.
     date = now()
     delta = datetime.timedelta(days=days)
     expire_date = date + delta
@@ -538,6 +538,38 @@ def ban_remove(uid, board=''):
             bans[0].delete_instance()
             return (0, _('Ban on user %s cancelled successfully.'
                          % user_rec.name))
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def topic_add(board, title, author, post_body):
+    # Parameter "author" is the UID of the author, which must be valid.
+    date = now()
+    if(check_empty(title)):
+        return (3, _('Title cannot be empty.'))
+    if(check_empty(post_body)):
+        return (4, _('Post content cannot be empty'))
+    try:
+        query = Board.select().where(Board.short_name == board)
+        if(not query):
+            return (2, _('No such board'))
+        board_rec = query.get()
+        topic = Topic.create(
+            title = title,
+            board = board_rec,
+            author_id = author,
+            date = date,
+            last_post_date = date,
+            last_post_author_id = author
+        )
+        Post.create(
+            content = post_body,
+            author = author,
+            topic = topic,
+            topic_author_id = author,
+            date = date
+        )
+        return (0, _('Topic created successfully.'), {'tid': topic.id})
     except Exception as err:
         return (1, db_err_msg(err))
 
