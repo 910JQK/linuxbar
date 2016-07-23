@@ -394,7 +394,11 @@ def ban_list(page, count_per_page, board=''):
     date = now()
     try:
         bans = None
+        count = 0
         if(not board):
+            count = BanGlobal.select().where(
+                date < BanGlobal.expire_date
+            ).count()
             bans = (
                 BanGlobal
                 .select(BanGlobal, User)
@@ -408,6 +412,10 @@ def ban_list(page, count_per_page, board=''):
             if(not query):
                 return (2, _('No such board.'))
             board_rec = query.get()
+            count = Ban.select().where(
+                Ban.board == board_rec,
+                date < Ban.expire_date
+            ).count()
             bans = (
                 Ban
                 .select(Ban, User)
@@ -440,7 +448,7 @@ def ban_list(page, count_per_page, board=''):
                 (ban.expire_date - ban.date).total_seconds() / 86400
             )
         })
-    return (0, OK_MSG, {'list': list, 'count': len(list)})
+    return (0, OK_MSG, {'list': list, 'count': count})
 
 
 def ban_add(uid, days, operator, board=''):
@@ -597,7 +605,10 @@ def topic_list(board, page, count_per_page):
         if(not query):
             return (2, _('No such board.'))
         board_rec = query.get()
-        count = Topic.select().where(Topic.deleted == False).count()
+        count = Topic.select().where(
+            Topic.board == board_rec,
+            Topic.deleted == False
+        ).count()
         query = (
             Topic
             .select(Topic, User)
