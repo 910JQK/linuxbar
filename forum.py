@@ -590,6 +590,8 @@ def topic_remove(tid, operator):
         if(not query):
             return (2, _('No such topic.'))
         topic = query.get()
+        if(topic.deleted):
+            return (3, _('Topic %d has already been deleted.' % tid))
         topic.deleted = True
         topic.delete_date = now()
         topic.delete_operator_id = operator
@@ -605,6 +607,8 @@ def topic_revert(tid):
         if(not query):
             return (2, _('No such topic.'))
         topic = query.get()
+        if(not topic.deleted):
+            return (3, _('Topic %d has NOT been deleted.' % tid))
         topic.deleted = False
         topic.delete_date = None
         topic.delete_operator_id = None
