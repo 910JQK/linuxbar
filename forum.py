@@ -548,7 +548,7 @@ def topic_add(board, title, author, post_body):
     if(check_empty(title)):
         return (3, _('Title cannot be empty.'))
     if(check_empty(post_body)):
-        return (4, _('Post content cannot be empty'))
+        return (4, _('Post content cannot be empty.'))
     try:
         query = Board.select().where(Board.short_name == board)
         if(not query):
@@ -570,6 +570,22 @@ def topic_add(board, title, author, post_body):
             date = date
         )
         return (0, _('Topic created successfully.'), {'tid': topic.id})
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def topic_remove(tid, operator):
+    # Parameter "operator" is the UID of the operator, which must be valid.
+    try:
+        query = Topic.select().where(Topic.id == tid)
+        if(not query):
+            return (2, _('No such topic.'))
+        topic = query.get()
+        topic.deleted = True
+        topic.delete_date = now()
+        topic.delete_operator_id = operator
+        topic.save()
+        return (0, _('Topic %d removed successfully.' % tid))
     except Exception as err:
         return (1, db_err_msg(err))
 
