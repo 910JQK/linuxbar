@@ -735,9 +735,9 @@ def post_add(parent, author, content, subpost=False, reply=0):
     except Exception as err:
         return(1, db_err_msg(err))
     if(not subpost):
-        return (0, _('Post published successfully.'), {'pid': post.id})
+        return (0, _('Post published successfully.'), {'pid': new_post.id})
     else:
-        return (0, _('Subpost published successfully.'), {'sid': subpost.id})
+        return (0, _('Subpost published successfully.'), {'sid': new_subpost.id})
 
 
 # Not Implemented Functions
