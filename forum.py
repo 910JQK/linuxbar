@@ -738,7 +738,7 @@ def post_add(parent, author, content, subpost=False, reply=0):
                     Subpost.deleted == False
                 )
                 if(not query):
-                    return (3, _('Invalid reply sid.'))
+                    return (4, _('Invalid reply.'))
                 reply_rec = query.get()
                 reply_rec_author = reply_rec.author
             new_subpost = Subpost.create(
@@ -762,6 +762,20 @@ def post_add(parent, author, content, subpost=False, reply=0):
         return (0, _('Post published successfully.'), {'pid': new_post.id})
     else:
         return (0, _('Subpost published successfully.'), {'sid': new_subpost.id})
+
+
+def post_edit(id, new_content, subpost=False):
+    Table = None
+    Name = ''
+    if(not subpost):
+        Table = Post
+        Name = 'post'
+    else:
+        Table = Subpost
+        Name = 'subpost'
+    query = Table.select().where(Table.id == id)
+#    if(not query):
+#        return (2
 
 
 # Not Implemented Functions
