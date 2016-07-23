@@ -640,6 +640,7 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
     list = []
     for topic in query:
         item = {
+            'tid': topic.id,
             'title': topic.title,
             'summary': topic.summary,
             'author': {
