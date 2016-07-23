@@ -885,20 +885,21 @@ def post_list(parent, page, count_per_page, subpost=False):
                     'name': post.author.name,
                     'mail': post.author.mail
                 },
-                'date': post.date.timestamp(),
-                'deleted': False
-            })
+                'date': post.date.timestamp()
+            }
             item[id_name] = post.id
             if(post.edited):
                 item['edited'] = True
-                item['edit_date'] = post.edit_date
+                item['edit_date'] = post.edit_date.timestamp()
             else:
                 item['edited'] = False
+            if(subpost and post.reply2):
+                item['reply'] = post.reply2.id
         list.append(item)
     return (0, OK_MSG, {'list': list, 'count': count})
 
 
-# def post_show_deleted(board, page, count_per_page)
+# def post_deleted_info(id, subpost=False)
 
 
 # Not Implemented Functions
