@@ -685,7 +685,7 @@ def post_add(parent, author, content, subpost=False, reply=0):
                 Topic.deleted == False
             )
             if(not query):
-                return (2, _('No such topic.'))
+                return (2, _('Topic does not exist or has been deleted.'))
             topic = query.get()
             new_post = Post.create(
                 topic = topic,
@@ -695,11 +695,16 @@ def post_add(parent, author, content, subpost=False, reply=0):
                 topic_author = topic.author
             )
         else:
-            query = Post.select().where(Post.id == parent)
+            query = Post.select().where(
+                Post.id == parent,
+                Post.deleted == False
+            )
             if(not query):
-                return (2, _('No such post.'))
+                return (2, _('Post does not exist or has been deleted.'))
             post = query.get()
             topic = post.topic
+            if(topic.deleted):
+                return (3, _('The topic has already been deleted'))
             reply_rec = None
             reply_rec_author = None
             if(reply):
