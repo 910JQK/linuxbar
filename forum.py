@@ -1012,9 +1012,7 @@ def reply_get(uid, page, count_per_page):
         )
         count = ( query_post | query_subpost ).count()
         query = (
-            (
-                query_post | query_subpost
-            )
+            (query_post | query_subpost)
             .order_by(
                 # Something ugly - SQL('"date" DESC') result in error
                 # Moreover, this error won't happen if Topic is NOT joined.
@@ -1064,6 +1062,85 @@ def at_add(id, caller, callee, subpost=False):
                 callee_id = callee
             )
         return (0, _('Data stored successfully'))
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def at_get(uid, page, count_per_page):
+    try:
+        query_post = (
+            AtFromPost
+            .select(
+                AtFromPost.post,
+                AtFromPost.caller,
+                Post.id,
+                Post.content,
+                Post.date,
+                Post.edit_date,
+                Post.topic,
+                Topic.title,
+                SQL('0 as subpost')
+            )
+            .join(
+                Post
+            )
+            .join(
+                Topic
+            )
+            .where(
+                callee_id == uid
+            )
+        )
+        query_subpost = (
+            AtFromSubpost
+            .select(
+                SQL('subpost_id AS post_id'),
+                AtFromSubpost.caller,
+                Subpost.id,
+                Subpost.content,
+                Subpost.date,
+                Subpost.edit_date,
+                SQL('subpost.reply1_id AS subpost.topic_id'),
+                Topic.title,
+                SQL('1 AS subpost')
+            )
+            .join(
+                Subpost
+            )
+            .join(
+                Topic
+            )
+            .where(
+                callee_id == uid
+            )
+        )
+        count = (query_post | query_subpost).count()
+        query = (
+            (query_post | query_subpost)
+            .order_by(SQL('date DESC'))
+            .paginate(page, count_per_page)
+        )
+        list = []
+        for at in query:
+            item = {
+                'content': at.post.content,
+                'date': at.post.date.timestamp(),
+                'author': {
+                    'uid': at.caller.id,
+                    'name': at.caller.name,
+                    'mail': at.caller.mail
+                }
+            }
+            if(at.post.edit_date):
+                item['edit_date'] = at.post.edit_date.timestamp()
+            if(not at.subpost):
+                item['pid'] = at.post.id
+            else:
+                item['sid'] = at.post.id
+            item['tid'] = at.post.topic
+            item['topic_title'] = at.post.topic.title
+            list.append(item)
+        return (0, OK_MSG, {'list': list, 'count': count})
     except Exception as err:
         return (1, db_err_msg(err))
 
