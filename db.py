@@ -125,6 +125,8 @@ class AtFromSubpost(BaseModel):
 class Image(BaseModel):
     sha256 = FixedCharField(max_length=64, primary_key=True, index=True)
     uploader = ForeignKeyField(User, related_name='images', index=True)
+    name = CharField(max_length=64, null=True, index=True)
+    date = DateTimeField(index=True)
 
 
 tables = [Config, User, Salt, SiteAdmin, Board, Ban, BanGlobal, BoardAdmin,
