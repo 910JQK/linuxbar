@@ -943,6 +943,90 @@ def post_deleted_info(id, subpost=False):
         return (1, db_err_msg(err))
 
 
+def reply_get(uid, page, count_per_page):
+    try:
+        query_user = User.select().where(User.id == uid)
+        if(not query_user):
+            return (2, _('No such user.'))
+        user = query_user.get()
+        query_post = (
+            Post
+            .select(
+                Post.id,
+                Post.topic,
+                Post.content,
+                Post.author,
+                Post.date,
+                Post.edit_date,
+                SQL('0 AS subpost'),
+                User
+            )
+            .join(
+                User
+            )
+            .where(
+                Post.topic_author == user,
+                Post.deleted == False
+            )
+        )
+        query_subpost = (
+            Subpost
+            .select(
+                Subpost.id,
+                SQL('reply0_id AS topic_id'),
+                Subpost.content,
+                Subpost.author,
+                Subpost.date,
+                Subpost.edit_date,
+                SQL('1 AS subpost'),
+                User
+            )
+            .join(
+                User
+            )
+            .where(
+                (
+                    (Subpost.reply0_author == user)
+                    | (Subpost.reply1_author == user)
+                    | (Subpost.reply2_author == user)
+                )
+                & Subpost.deleted == False
+            )
+        )
+        count = ( query_post | query_subpost ).count()
+        query = (
+            (
+                query_post | query_subpost
+            )
+            .order_by(
+                SQL('date DESC')
+            )
+            .paginate(page, count_per_page)
+        )
+        list = []
+        for reply in query:
+            item = {
+                'content': reply.content,
+                'date': reply.date.timestamp(),
+                'author': {
+                    'uid': reply.author.id,
+                    'name': reply.author.name,
+                    'mail': reply.author.mail
+                }
+            }
+            if(reply.edit_date):
+                item['edit_date'] = reply.edit_date.timestamp()
+            if(not reply.subpost):
+                item['pid'] = reply.id
+            else:
+                item['sid'] = reply.id
+            item['topic'] = reply.topic.id
+            list.append(item)
+        return (0, OK_MSG, {'list': list, 'count': count})
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
 # Not Implemented Functions
 
 
@@ -956,7 +1040,7 @@ def post_deleted_info(id, subpost=False):
 
 # At
 # def at_from_post_add(pid, caller, callee)
-# Tip: caller, callee -> uid
+# Tip: caller, callee -> name
 # def at_from_subpost_add(sid, caller, callee)
 # Tip: The same as above.
 # def at_get(uid, page, count_per_page)
