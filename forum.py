@@ -1063,7 +1063,7 @@ def at_add(id, caller, callee, subpost=False):
                 caller_id = caller,
                 callee_id = callee
             )
-        return (0, _('Data stored successfully'))
+        return (0, _('Data stored successfully.'))
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -1086,7 +1086,7 @@ def at_get(uid, page, count_per_page):
                 Post.topic,
                 Topic.id,
                 Topic.title,
-                SQL('0 as subpost')
+                SQL('0 AS subpost')
             )
             .join(
                 Post
@@ -1153,22 +1153,92 @@ def at_get(uid, page, count_per_page):
         return (1, db_err_msg(err))
 
 
-# Not Implemented Functions
+def image_add(sha256, uid, name=None):
+    # Parameter "sha256" and "uid" must be valid
+    try:
+        if(name):
+            user = User.get(User.id == uid)
+            query = Image.select().where(
+                Image.uploader == user,
+                Image.name == name
+            )
+            if(query):
+                return (2, _('Name %s already in use.' % name))
+        Image.create(
+            sha256 = sha256,
+            uploader_id = uid,
+            name = name
+        )
+        return (0, _('Data stored successfully.'))
+    except Exception as err:
+        return (1, db_err_msg(err))
 
 
-# At
-# def at_get(uid, page, count_per_page)
-#   Tip: Get At that user with uid "uid" received.
-#   Tip: Take a union set (query) of records from the two sources.
-#   Tip: Return both posts and count for paging.
+def image_remove(sha256):
+    try:
+        query = Image.select().where(Image.sha256 == sha256)
+        if(not query):
+            return (2, _('No such image.'))
+        image = query.get()
+        image.delete_instance()
+        return (0, _('Image %s deleted successfully.' % sha256))
+    except Exception as err:
+        return (1, db_err_msg(err))
 
 
-# Image
-#
-# def image_add(sha256, uid)
-#   Tip: This function is only for importing the record {sha256, uid} into the
-#          database. Uploading is the responsibility of the higher layer.
-# def image_remove(sha256)
-#   Tip: Only for database record. (as above)
-# def image_list(uid, page, images_per_page)
-#   Tip: Return both images and count for paging.
+def image_info(sha256):
+    try:
+        query = Image.select().where(Image.sha256 == sha256)
+        if(not query):
+            return (2, _('No such image.'))
+        image = query.get()
+        return (0, OK_MSG, {
+            'uploader': image.uploader.id,
+            'name': image.name,
+            'date': image.date.timestamp()
+        })
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def image_get(uid, name):
+    try:
+        query = User.select().where(User.id == uid)
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
+        query = Image.select().where(
+            Image.uploader == user,
+            Image.name == name
+        )
+        if(not query):
+            return (3, _('No such image.'))
+        image = query.get()
+        return (0, OK_MSG, {'sha256': image.sha256})
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def image_list(uid, page, count_per_page):
+    try:
+        query = User.select().where(User.id == uid)
+        if(not query):
+            return (2, _('No such user'))
+        user = query.get()
+        count = Image.select().where(Image.uploader == user).count()
+        query = (
+            Image
+            .select()
+            .where(Image.uploader == user)
+            .paginate(page, count_per_page)
+        )
+        list = []
+        for image in query:
+            list.append({
+                'sha256': image.sha256,
+                'name': image.name,
+                'date': image.date.timestamp()
+            })
+        return (0, OK_MSG, {'list': list, 'count': count})
+    except Exception as err:
+        return (1, db_err_msg(err))
