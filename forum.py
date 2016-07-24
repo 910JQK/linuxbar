@@ -161,15 +161,15 @@ def admin_list(board=''):
                 return (2, _('No such board.'))
             board_rec = query.get()
             query = BoardAdmin.select().where(BoardAdmin.board == board_rec)
+        list = []
+        for admin in query:
+            if(not board):
+                list.append(admin.user.id)
+            else:
+                list.append({'uid': admin.user.id, 'level': admin.level})
+        return (0, OK_MSG, {'list': list, 'count': len(list)})
     except Exception as err:
         return (1, db_err_msg(err))
-    list = []
-    for admin in query:
-        if(not board):
-            list.append(admin.user.id)
-        else:
-            list.append({'uid': admin.user.id, 'level': admin.level})
-    return (0, OK_MSG, {'list': list, 'count': len(list)})
 
 
 def admin_add(uid, board='', level=1):
@@ -249,18 +249,18 @@ def admin_remove(uid, board=''):
 def board_list():
     try:
         query = Board.select()
+        list = []
+        for board in query:
+            list.append({
+                'bid': board.id,
+                'short_name': board.short_name,
+                'name': board.name,
+                'desc': board.description,
+                'announce': board.announcement
+            })
+        return (0, OK_MSG, {'list': list, 'count': len(list)})
     except Exception as err:
         return (1, db_err_msg(err))
-    list = []
-    for board in query:
-        list.append({
-            'bid': board.id,
-            'short_name': board.short_name,
-            'name': board.name,
-            'desc': board.description,
-            'announce': board.announcement
-        })
-    return (0, OK_MSG, {'list': list, 'count': len(list)})
 
 
 def board_add(short_name, name, desc, announce):
@@ -287,6 +287,7 @@ def board_add(short_name, name, desc, announce):
 
 def board_remove(short_name):
     # regard short name as ID for convenience
+    # dangerous operation: provide interface cautiously
     try:
         query = Board.select().where(Board.short_name == short_name)
         if(not query):
@@ -427,28 +428,28 @@ def ban_list(page, count_per_page, board=''):
                 .order_by(Ban.date.desc())
                 .paginate(page, count_per_page)
             )
+        list = []
+        for ban in bans:
+            list.append({
+                'user': {
+                    'uid': ban.user.id,
+                    'name': ban.user.name,
+                    'mail': ban.user.mail
+                },
+                'operator': {
+                    'uid': ban.operator.id,
+                    'name': ban.operator.name,
+                    'mail': ban.operator.mail
+                },
+                'date': ban.date.timestamp(),
+                'expire_date': ban.expire_date.timestamp(),
+                'days': round(
+                    (ban.expire_date - ban.date).total_seconds() / 86400
+                )
+            })
+        return (0, OK_MSG, {'list': list, 'count': count})
     except Exception as err:
         return (1, db_err_msg(err))
-    list = []
-    for ban in bans:
-        list.append({
-            'user': {
-                'uid': ban.user.id,
-                'name': ban.user.name,
-                'mail': ban.user.mail
-            },
-            'operator': {
-                'uid': ban.operator.id,
-                'name': ban.operator.name,
-                'mail': ban.operator.mail
-            },
-            'date': ban.date.timestamp(),
-            'expire_date': ban.expire_date.timestamp(),
-            'days': round(
-                (ban.expire_date - ban.date).total_seconds() / 86400
-            )
-        })
-    return (0, OK_MSG, {'list': list, 'count': count})
 
 
 def ban_add(uid, days, operator, board=''):
@@ -663,37 +664,37 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
             .order_by(Topic.last_post_date.desc())
             .paginate(page, count_per_page)
         )
+        list = []
+        for topic in query:
+            item = {
+                'tid': topic.id,
+                'title': topic.title,
+                'summary': topic.summary,
+                'author': {
+                    'uid': topic.author.id,
+                    'name': topic.author.name,
+                    'mail': topic.author.mail
+                },
+                'last_post_author': {
+                    'uid': topic.last_post_author.id,
+                    'name': topic.last_post_author.name,
+                    'mail': topic.last_post_author.mail
+                },
+                'reply_count': topic.reply_count,
+                'date': topic.date.timestamp(),
+                'last_post_date': topic.last_post_date.timestamp()
+            }
+            if(only_show_deleted):
+                item['delete_date'] = topic.delete_date.timestamp()
+                item['delete_operator'] = {
+                    'uid': topic.delete_operator.id,
+                    'name': topic.delete_operator.name,
+                    'mail': topic.delete_operator.mail
+                }
+            list.append(item)
+        return (0, OK_MSG, {'list': list, 'count': count})
     except Exception as err:
         return (1, db_err_msg(err))
-    list = []
-    for topic in query:
-        item = {
-            'tid': topic.id,
-            'title': topic.title,
-            'summary': topic.summary,
-            'author': {
-                'uid': topic.author.id,
-                'name': topic.author.name,
-                'mail': topic.author.mail
-            },
-            'last_post_author': {
-                'uid': topic.last_post_author.id,
-                'name': topic.last_post_author.name,
-                'mail': topic.last_post_author.mail
-            },
-            'reply_count': topic.reply_count,
-            'date': topic.date.timestamp(),
-            'last_post_date': topic.last_post_date.timestamp()
-        }
-        if(only_show_deleted):
-            item['delete_date'] = topic.delete_date.timestamp()
-            item['delete_operator'] = {
-                'uid': topic.delete_operator.id,
-                'name': topic.delete_operator.name,
-                'mail': topic.delete_operator.mail
-            }
-        list.append(item)
-    return (0, OK_MSG, {'list': list, 'count': count})
 
 
 def post_add(parent, author, content, subpost=False, reply=0):
@@ -866,38 +867,38 @@ def post_list(parent, page, count_per_page, subpost=False):
             .order_by(Table.id)
             .paginate(page, count_per_page)
         )
+        list = []
+        for post in query:
+            item = None
+            if(post.deleted):
+                item = {
+                    id_name: post.id,
+                    'delete_date': post.delete_date.timestamp(),
+                    'delete_operator': {
+                        'uid': post.delete_operator.id,
+                        'name': post.delete_operator.name,
+                        'mail': post.delete_operator.mail
+                    }
+                }
+            else:
+                item = {
+                    'content': post.content,
+                    'author': {
+                        'uid': post.author.id,
+                        'name': post.author.name,
+                        'mail': post.author.mail
+                    },
+                    'date': post.date.timestamp()
+                }
+                item[id_name] = post.id
+                if(post.edited):
+                    item['edit_date'] = post.edit_date.timestamp()
+                if(subpost and post.reply2):
+                    item['reply'] = post.reply2.id
+            list.append(item)
+        return (0, OK_MSG, {'list': list, 'count': count})
     except Exception as err:
         return (1, db_err_msg(err))
-    list = []
-    for post in query:
-        item = None
-        if(post.deleted):
-            item = {
-                id_name: post.id,
-                'delete_date': post.delete_date.timestamp(),
-                'delete_operator': {
-                    'uid': post.delete_operator.id,
-                    'name': post.delete_operator.name,
-                    'mail': post.delete_operator.mail
-                }
-            }
-        else:
-            item = {
-                'content': post.content,
-                'author': {
-                    'uid': post.author.id,
-                    'name': post.author.name,
-                    'mail': post.author.mail
-                },
-                'date': post.date.timestamp()
-            }
-            item[id_name] = post.id
-            if(post.edited):
-                item['edit_date'] = post.edit_date.timestamp()
-            if(subpost and post.reply2):
-                item['reply'] = post.reply2.id
-        list.append(item)
-    return (0, OK_MSG, {'list': list, 'count': count})
 
 
 def post_deleted_info(id, subpost=False):
@@ -917,29 +918,29 @@ def post_deleted_info(id, subpost=False):
                 Table.deleted == True
             )
         )
+        if(not query):
+            return (2, _('No such deleted %s.' % post_type))
+        post = query.get()
+        info = {
+            'content': post.content,
+            'author': {
+                'uid': post.author.id,
+                'name': post.author.name,
+                'mail': post.author.mail
+            },
+            'delete_operator': {
+                'uid': post.delete_operator.id,
+                'name': post.delete_operator.name,
+                'mail': post.delete_operator.mail
+            },
+            'date': post.date.timestamp(),
+            'delete_date': post.delete_date.timestamp()
+        }
+        if(post.edited):
+            info['edit_date'] = post.edit_date.timestamp()
+        return (0, OK_MSG, info)
     except Exception as err:
         return (1, db_err_msg(err))
-    if(not query):
-        return (2, _('No such deleted %s.' % post_type))
-    post = query.get()
-    info = {
-        'content': post.content,
-        'author': {
-            'uid': post.author.id,
-            'name': post.author.name,
-            'mail': post.author.mail
-        },
-        'delete_operator': {
-            'uid': post.delete_operator.id,
-            'name': post.delete_operator.name,
-            'mail': post.delete_operator.mail
-        },
-        'date': post.date.timestamp(),
-        'delete_date': post.delete_date.timestamp()
-    }
-    if(post.edited):
-        info['edit_date'] = post.edit_date.timestamp()
-    return (0, OK_MSG, info)
 
 
 # Not Implemented Functions
