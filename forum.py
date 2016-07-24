@@ -952,6 +952,8 @@ def reply_get(uid, page, count_per_page):
         query_post = (
             Post
             .select(
+                # Tip: Don't change the order of the following rows!
+                # See the sorting part for details.
                 Post.id,
                 Post.topic,
                 Post.content,
@@ -959,10 +961,19 @@ def reply_get(uid, page, count_per_page):
                 Post.date,
                 Post.edit_date,
                 SQL('0 AS subpost'),
-                User
+                User.id,
+                User.name,
+                User.mail,
+                Topic.title
             )
             .join(
                 User
+            )
+            .switch(
+                Post
+            )
+            .join(
+                Topic
             )
             .where(
                 Post.topic_author == user,
@@ -972,6 +983,7 @@ def reply_get(uid, page, count_per_page):
         query_subpost = (
             Subpost
             .select(
+                # Tip: The same as above.
                 Subpost.id,
                 SQL('reply0_id AS topic_id'),
                 Subpost.content,
@@ -979,10 +991,19 @@ def reply_get(uid, page, count_per_page):
                 Subpost.date,
                 Subpost.edit_date,
                 SQL('1 AS subpost'),
-                User
+                User.id,
+                User.name,
+                User.mail,
+                Topic.title
             )
             .join(
                 User
+            )
+            .switch(
+                Subpost
+            )
+            .join(
+                Topic
             )
             .where(
                 (
@@ -999,7 +1020,9 @@ def reply_get(uid, page, count_per_page):
                 query_post | query_subpost
             )
             .order_by(
-                SQL('date DESC')
+                # Something ugly - SQL('"date" DESC') result in error
+                # If you know how to fix it, feel free to contribute.
+                SQL('5 DESC')
             )
             .paginate(page, count_per_page)
         )
@@ -1020,7 +1043,8 @@ def reply_get(uid, page, count_per_page):
                 item['pid'] = reply.id
             else:
                 item['sid'] = reply.id
-            item['topic'] = reply.topic.id
+            item['tid'] = reply.topic.id
+            item['topic_title'] = reply.topic.title
             list.append(item)
         return (0, OK_MSG, {'list': list, 'count': count})
     except Exception as err:
@@ -1028,14 +1052,6 @@ def reply_get(uid, page, count_per_page):
 
 
 # Not Implemented Functions
-
-
-# Reply
-#
-# def reply_get(uid, page, count_per_page)
-#   Tip: Get replies that user with uid "uid" received.
-#   Tip: Take a union set (query) of records from the two sources.
-#   Tip: Return both posts and count for paging.
 
 
 # At
