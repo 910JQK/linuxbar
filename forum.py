@@ -1048,20 +1048,30 @@ def reply_get(uid, page, count_per_page):
         return (1, db_err_msg(err))
 
 
-#def at_add(id, caller, callee, subpost=True):
+def at_add(id, caller, callee, subpost=False):
     # The three parameters must be valid.
-#    if(not subpost):
-#        Table = AtFromPost
+    try:
+        if(not subpost):
+            AtFromPost.create(
+                post_id = id,
+                caller_id = caller,
+                callee_id = callee
+            )
+        else:
+            AtFromSubpost.create(
+                subpost_id = id,
+                caller_id = caller,
+                callee_id = callee
+            )
+        return (0, _('Data stored successfully'))
+    except Exception as err:
+        return (1, db_err_msg(err))
 
 
 # Not Implemented Functions
 
 
 # At
-# def at_from_post_add(pid, caller, callee)
-# Tip: caller, callee -> name
-# def at_from_subpost_add(sid, caller, callee)
-# Tip: The same as above.
 # def at_get(uid, page, count_per_page)
 #   Tip: Get At that user with uid "uid" received.
 #   Tip: Take a union set (query) of records from the two sources.
