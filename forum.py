@@ -1167,7 +1167,8 @@ def image_add(sha256, uid, name=None):
         Image.create(
             sha256 = sha256,
             uploader_id = uid,
-            name = name
+            name = name,
+            date = now()
         )
         return (0, _('Data stored successfully.'))
     except Exception as err:
