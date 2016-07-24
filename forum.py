@@ -976,8 +976,7 @@ def reply_get(uid, page, count_per_page):
                 Topic
             )
             .where(
-                Post.topic_author == user,
-                Post.deleted == False
+                Post.topic_author == user
             )
         )
         query_subpost = (
@@ -1006,12 +1005,9 @@ def reply_get(uid, page, count_per_page):
                 Topic
             )
             .where(
-                (
-                    (Subpost.reply0_author == user)
-                    | (Subpost.reply1_author == user)
-                    | (Subpost.reply2_author == user)
-                )
-                & Subpost.deleted == False
+                (Subpost.reply0_author == user)
+                | (Subpost.reply1_author == user)
+                | (Subpost.reply2_author == user)
             )
         )
         count = ( query_post | query_subpost ).count()
@@ -1021,6 +1017,7 @@ def reply_get(uid, page, count_per_page):
             )
             .order_by(
                 # Something ugly - SQL('"date" DESC') result in error
+                # Moreover, this error won't happen if Topic is NOT joined.
                 # If you know how to fix it, feel free to contribute.
                 SQL('5 DESC')
             )
@@ -1049,6 +1046,12 @@ def reply_get(uid, page, count_per_page):
         return (0, OK_MSG, {'list': list, 'count': count})
     except Exception as err:
         return (1, db_err_msg(err))
+
+
+#def at_add(id, caller, callee, subpost=True):
+    # The three parameters must be valid.
+#    if(not subpost):
+#        Table = AtFromPost
 
 
 # Not Implemented Functions
