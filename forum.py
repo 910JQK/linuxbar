@@ -964,6 +964,7 @@ def reply_get(uid, page, count_per_page):
                 User.id,
                 User.name,
                 User.mail,
+                Topic.id,
                 Topic.title
             )
             .join(
@@ -993,6 +994,7 @@ def reply_get(uid, page, count_per_page):
                 User.id,
                 User.name,
                 User.mail,
+                Topic.id,
                 Topic.title
             )
             .join(
@@ -1068,6 +1070,10 @@ def at_add(id, caller, callee, subpost=False):
 
 def at_get(uid, page, count_per_page):
     try:
+        query_user = User.select().where(User.id == uid)
+        if(not query_user):
+            return (2, _('No such user.'))
+        user = query_user.get()
         query_post = (
             AtFromPost
             .select(
@@ -1078,6 +1084,7 @@ def at_get(uid, page, count_per_page):
                 Post.date,
                 Post.edit_date,
                 Post.topic,
+                Topic.id,
                 Topic.title,
                 SQL('0 as subpost')
             )
@@ -1088,7 +1095,7 @@ def at_get(uid, page, count_per_page):
                 Topic
             )
             .where(
-                callee_id == uid
+                AtFromPost.callee == user
             )
         )
         query_subpost = (
@@ -1100,7 +1107,8 @@ def at_get(uid, page, count_per_page):
                 Subpost.content,
                 Subpost.date,
                 Subpost.edit_date,
-                SQL('subpost.reply1_id AS subpost.topic_id'),
+                SQL('reply1_id AS topic_id'),
+                Topic.id,
                 Topic.title,
                 SQL('1 AS subpost')
             )
@@ -1111,13 +1119,13 @@ def at_get(uid, page, count_per_page):
                 Topic
             )
             .where(
-                callee_id == uid
+                AtFromSubpost.callee == user
             )
         )
         count = (query_post | query_subpost).count()
         query = (
             (query_post | query_subpost)
-            .order_by(SQL('date DESC'))
+            .order_by(SQL('5 DESC')) # The same reason as above ...
             .paginate(page, count_per_page)
         )
         list = []
@@ -1137,7 +1145,7 @@ def at_get(uid, page, count_per_page):
                 item['pid'] = at.post.id
             else:
                 item['sid'] = at.post.id
-            item['tid'] = at.post.topic
+            item['tid'] = at.post.topic.id
             item['topic_title'] = at.post.topic.title
             list.append(item)
         return (0, OK_MSG, {'list': list, 'count': count})
