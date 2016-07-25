@@ -4,6 +4,10 @@
 from peewee import *
 
 
+DEFAULT_SITE_NAME = 'Linuxbar'
+DEFAULT_SITE_URL = 'http://127.0.0.1:5000'
+
+
 # use sqlite temporarily
 db = SqliteDatabase('data.db')
 
@@ -22,6 +26,7 @@ class User(BaseModel):
     mail = CharField(max_length=64, unique=True, index=True)
     name = CharField(max_length=32, unique=True, index=True)
     password = FixedCharField(max_length=64) # sha256 with salt
+    activated = BooleanField(default=False)
     reg_date = DateTimeField()
 
 
@@ -135,7 +140,14 @@ tables = [Config, User, Salt, SiteAdmin, Board, Ban, BanGlobal, BoardAdmin,
 
 if __name__ == '__main__':
     db.connect()
+
     print('Creating tables ...')
     db.create_tables(tables)
     print('Tables have been created.')
+
+    print('Writing default configurations ...')
+    Config.create(name='site_name', value=DEFAULT_SITE_NAME)
+    Config.create(name='site_url', value=DEFAULT_SITE_URL)
+    print('Default configurations have been written into database.')
+
     db.close()
