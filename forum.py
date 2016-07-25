@@ -949,23 +949,28 @@ def reply_get(uid, page, count_per_page):
         if(not query_user):
             return (2, _('No such user.'))
         user = query_user.get()
+        # Sorry for such complicated query ...
         query_post = (
             Post
             .select(
                 # Tip: Don't change the order of the following rows!
                 # See the sorting part for details.
                 Post.id,
-                Post.topic,
+                SQL('topic_id AS reply0_id'),
                 Post.content,
                 Post.author,
                 Post.date,
                 Post.edit_date,
+                Post.deleted,
+                SQL('0 AS reply1_id'),
                 SQL('0 AS subpost'),
                 User.id,
                 User.name,
                 User.mail,
+                Post.deleted,
                 Topic.id,
-                Topic.title
+                Topic.title,
+                Topic.deleted
             )
             .join(
                 User
@@ -977,7 +982,8 @@ def reply_get(uid, page, count_per_page):
                 Topic
             )
             .where(
-                Post.topic_author == user
+                Post.topic_author == user,
+                Post.author != user
             )
         )
         query_subpost = (
@@ -985,17 +991,21 @@ def reply_get(uid, page, count_per_page):
             .select(
                 # Tip: The same as above.
                 Subpost.id,
-                SQL('reply0_id AS topic_id'),
+                Subpost.reply0,
                 Subpost.content,
                 Subpost.author,
                 Subpost.date,
                 Subpost.edit_date,
+                Subpost.deleted,
+                Subpost.reply1,
                 SQL('1 AS subpost'),
                 User.id,
                 User.name,
                 User.mail,
+                Post.deleted,
                 Topic.id,
-                Topic.title
+                Topic.title,
+                Topic.deleted
             )
             .join(
                 User
@@ -1004,20 +1014,29 @@ def reply_get(uid, page, count_per_page):
                 Subpost
             )
             .join(
+                Post
+            )
+            .switch(
+                Subpost
+            )
+            .join(
                 Topic
             )
             .where(
-                (Subpost.reply0_author == user)
-                | (Subpost.reply1_author == user)
-                | (Subpost.reply2_author == user)
+                (
+                    (Subpost.reply0_author == user)
+                    | (Subpost.reply1_author == user)
+                    | (Subpost.reply2_author == user)
+                )
+                & (Subpost.author != user)
             )
         )
-        count = ( query_post | query_subpost ).count()
+        count = ( query_subpost | query_post ).count()
         query = (
-            (query_post | query_subpost)
+            (query_subpost | query_post)
             .order_by(
                 # Something ugly - SQL('"date" DESC') result in error
-                # Moreover, this error won't happen if Topic is NOT joined.
+                # Moreover, this error won't happen if there is only 1 JOIN.
                 # If you know how to fix it, feel free to contribute.
                 SQL('5 DESC')
             )
@@ -1025,6 +1044,7 @@ def reply_get(uid, page, count_per_page):
         )
         list = []
         for reply in query:
+            topic = reply.reply0
             item = {
                 'content': reply.content,
                 'date': reply.date.timestamp(),
@@ -1038,10 +1058,22 @@ def reply_get(uid, page, count_per_page):
                 item['edit_date'] = reply.edit_date.timestamp()
             if(not reply.subpost):
                 item['pid'] = reply.id
+                # Tip: Don't change the priority!
+                if(topic.deleted):
+                    item['deleted'] = 'topic'
+                elif(reply.deleted):
+                    item['deleted'] = 'self'
             else:
                 item['sid'] = reply.id
-            item['tid'] = reply.topic.id
-            item['topic_title'] = reply.topic.title
+                # Tip: Don't change the priority!
+                if(topic.deleted):
+                    item['deleted'] = 'topic'
+                elif(reply.reply1.deleted):
+                    item['deleted'] = 'post'
+                elif(reply.deleted):
+                    item['deleted'] = 'self'
+            item['tid'] = topic.id
+            item['topic_title'] = topic.title
             list.append(item)
         return (0, OK_MSG, {'list': list, 'count': count})
     except Exception as err:
