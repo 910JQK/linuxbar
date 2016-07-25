@@ -70,7 +70,7 @@ def user_register(mail, name, password):
     if(check_empty(mail)):
         return (2, _('Mail address cannot be empty.'))
     if(check_empty(name)):
-        return (3, _('User ID cannot be empty.'))
+        return (3, _('User ID (name) cannot be empty.'))
     if(check_empty(password)):
         return (4, _('Password cannot be empty.'))
 
@@ -78,7 +78,7 @@ def user_register(mail, name, password):
         if(User.select().where(User.mail == mail)):
             return (5, _('Mail address already in use.'))
         if(User.select().where(User.name == name)):
-            return (6, _('User ID already in use.'))
+            return (6, _('User ID (name) already in use.'))
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -97,7 +97,9 @@ def user_register(mail, name, password):
     except Exception as err:
         return (1, db_err_msg(err))
 
-    return (0, _('User %s registered successfully.' % name), {
+    return (0, _(
+        'User %s registered successfully. Activation email has been sent to you.' % name
+    ), {
         'uid': user_rec.id,
         'activation_code': activation_code
     })
