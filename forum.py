@@ -41,6 +41,31 @@ def encrypt_password(password, salt):
     return sha256(salt[0:4] + sha256(password) + salt[4:8])
 
 
+def config_get():
+    try:
+        query = Config.select()
+        data = {}
+        for config in query:
+            data[config.name] = config.value
+        return (0, OK_MSG, data)
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def config_set(data):
+    # Invalid config item will be ignored.
+    try:
+        query = Config.select()
+        for config in query:
+            for name in data:
+                if(name == config.name):
+                    config.value = data[config.name]
+                    config.save()
+        return (0, _('Config updated successfully.'))
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
 def user_register(mail, name, password):
     if(check_empty(mail)):
         return (2, _('Mail address cannot be empty.'))
@@ -59,6 +84,7 @@ def user_register(mail, name, password):
 
     salt = gen_salt()
     encrypted_pw = encrypt_password(password, salt)
+    activation_code = encrypt_password(name, salt)
 
     try:
         user_rec = User.create(
@@ -71,7 +97,27 @@ def user_register(mail, name, password):
     except Exception as err:
         return (1, db_err_msg(err))
 
-    return (0, _('User %s registered successfully.' % name))
+    return (0, _('User %s registered successfully.' % name), {
+        'uid': user_rec.id,
+        'activation_code': activation_code
+    })
+
+
+def user_activate(uid, code):
+    try:
+        query = User.select().where(User.id == uid)
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
+        salt = user.salt[0].salt
+        if(code == encrypt_password(user.name, salt)):
+            user.activated = True
+            user.save()
+            return (0, _('User %s activated successfully.' % user.name))
+        else:
+            return (3, _('Wrong activation code.'))
+    except Exception as err:
+        return (1, db_err_msg(err))
 
 
 def user_login(login_name, password):
@@ -79,46 +125,46 @@ def user_login(login_name, password):
         query = User.select().where(User.name == login_name)
         if(not query):
             query = User.select().where(User.mail == login_name)
-    except Exception as err:
-        return (1, db_err_msg(err))
 
-    if(not query):
-        return (2, _('No such user.'))
-    user = query.get()
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
 
-    try:
         salt = user.salt[0].salt
+
+        encrypted_pw = encrypt_password(password, salt)
+        if(encrypted_pw != user.password):
+            return (3, _('Wrong password.'))
+
+        if(not user.activated):
+            return (4, _('User %s have NOT been activated.' % user.name))
+
+        data = {'uid': user.id, 'name': user.name, 'mail': user.mail}
+        return (0, _('Login successfully.'), data)
     except Exception as err:
         return (1, db_err_msg(err))
-
-    encrypted_pw = encrypt_password(password, salt)
-    if(encrypted_pw != user.password):
-        return (3, _('Wrong password.'))
-
-    data = {'uid': user.id, 'name': user.name, 'mail': user.mail}
-    return (0, _('Login successfully.'), data)
 
 
 def user_get_uid(name):
     try:
         query = User.select().where(User.name == name)
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
+        return (0, OK_MSG, {'uid': user.id})
     except Exception as err:
         return (1, db_err_msg(err))
-    if(not query):
-        return (2, _('No such user.'))
-    user = query.get()
-    return (0, OK_MSG, {'uid': user.id})
 
 
 def user_get_name(uid):
     try:
         query = User.select().where(User.id == uid)
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
+        return (0, OK_MSG, {'name': user.name})
     except Exception as err:
         return (1, db_err_msg(err))
-    if(not query):
-        return (2, _('No such user.'))
-    user = query.get()
-    return (0, OK_MSG, {'name': user.name})
 
 
 def admin_check(uid, board=''):
