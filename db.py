@@ -36,6 +36,13 @@ class Salt(BaseModel):
     salt = FixedCharField(max_length=8)
 
 
+class PasswordReset(BaseModel):
+    user = ForeignKeyField(User, related_name='password_reset',
+                           primary_key=True)
+    token = FixedCharField(max_length=64, index=True)
+    expire_date = DateTimeField()
+
+
 class SiteAdmin(BaseModel):
     user = ForeignKeyField(User, related_name='site_managing', primary_key=True)
 
@@ -134,8 +141,8 @@ class Image(BaseModel):
     date = DateTimeField(index=True)
 
 
-tables = [Config, User, Salt, SiteAdmin, Board, Ban, BanGlobal, BoardAdmin,
-          Topic, Post, Subpost, AtFromPost, AtFromSubpost, Image]
+tables = [Config, User, Salt, PasswordReset, SiteAdmin, Board, Ban, BanGlobal,
+          BoardAdmin, Topic, Post, Subpost, AtFromPost, AtFromSubpost, Image]
 
 
 if __name__ == '__main__':
