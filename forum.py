@@ -30,11 +30,19 @@ def sha256(string):
     return hashlib.sha256(bytes(string, encoding='utf8')).hexdigest()
 
 
-def gen_salt():
+def gen_random_hex_string(length):
     result = ''
-    for i in range(0, 8):
+    for i in range(0, length):
         result += random.choice('0123456789abcdef')
     return result
+
+
+def gen_salt():
+    return gen_random_hex_string(8)
+
+
+def gen_token():
+    return gen_random_hex_string(64)
 
 
 def encrypt_password(password, salt):
@@ -84,7 +92,7 @@ def user_register(mail, name, password):
 
     salt = gen_salt()
     encrypted_pw = encrypt_password(password, salt)
-    activation_code = encrypt_password(name, salt)
+    activation_code = encrypt_password(name, sha256(salt))
 
     try:
         user_rec = User.create(
@@ -105,6 +113,58 @@ def user_register(mail, name, password):
     })
 
 
+def user_password_reset_get_token(uid):
+    expire_date = now() + datetime.timedelta(minutes=10)
+    token = gen_token()
+    try:
+        query = User.select().where(User.id == uid)
+        if(not query):
+            return (1, _('No such user.'))
+        user = query.get()
+        encrypted_token = sha256(token)
+        query = PasswordReset.select().where(PasswordReset.user == user)
+        if(not query):
+            PasswordReset.create(
+                user = user,
+                token = encrypted_token,
+                expire_date = expire_date
+            )
+        else:
+            rec = query.get()
+            rec.token = encrypted_token
+            rec.expire_date = expire_date
+            rec.save()
+        return (0, _('Token generated successfully.'), {'token': token})
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def user_password_reset(uid, token, password):
+    try:
+        date = now()
+        query = User.select().where(User.id == uid)
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
+        salt = user.salt[0].salt
+        encrypted_token = sha256(token)
+        query = PasswordReset.select().where(
+            PasswordReset.user == user,
+            PasswordReset.token == encrypted_token,
+            PasswordReset.expire_date > date
+        )
+        if(query):
+            user.password = encrypt_password(password, user.salt[0].salt)
+            user.save()
+            return (0, _('Your password reset successfully.'))
+        else:
+            return (3, _(
+                'Password reset failed: Invalid or out-of-date token.'
+            ))
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
 def user_activate(uid, code):
     try:
         query = User.select().where(User.id == uid)
@@ -112,7 +172,7 @@ def user_activate(uid, code):
             return (2, _('No such user.'))
         user = query.get()
         salt = user.salt[0].salt
-        if(code == encrypt_password(user.name, salt)):
+        if(code == encrypt_password(user.name, sha256(salt)) ):
             user.activated = True
             user.save()
             return (0, _('User %s activated successfully.' % user.name))
