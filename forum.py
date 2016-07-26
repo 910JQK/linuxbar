@@ -1163,9 +1163,11 @@ def at_get(uid, page, count_per_page):
                 Post.content,
                 Post.date,
                 Post.edit_date,
+                Post.deleted,
                 Post.topic,
                 Topic.id,
                 Topic.title,
+                Topic.deleted,
                 SQL('0 AS subpost')
             )
             .join(
@@ -1187,9 +1189,11 @@ def at_get(uid, page, count_per_page):
                 Subpost.content,
                 Subpost.date,
                 Subpost.edit_date,
-                SQL('reply1_id AS topic_id'),
+                Subpost.deleted,
+                SQL('reply0_id AS topic_id'),
                 Topic.id,
                 Topic.title,
+                Topic.deleted,
                 SQL('1 AS subpost')
             )
             .join(
@@ -1223,8 +1227,24 @@ def at_get(uid, page, count_per_page):
                 item['edit_date'] = at.post.edit_date.timestamp()
             if(not at.subpost):
                 item['pid'] = at.post.id
+                # Don't change the priority!
+                if(at.post.topic.deleted):
+                    item['deleted'] = 'topic'
+                elif(at.post.deleted):
+                    item['deleted'] = 'self'
             else:
                 item['sid'] = at.post.id
+                # The same as above.
+                if(at.post.topic.deleted):
+                    item['deleted'] = 'topic'
+                # The following code causes an extra query.
+                # If you know how to fix it, feel free to contribute.
+                else:
+                    subpost_rec = Subpost.get(Subpost.id == at.post.id)
+                    if(subpost_rec.reply1.deleted):
+                        item['deleted'] = 'post'
+                    elif(at.post.deleted):
+                        item['deleted'] = 'self'
             item['tid'] = at.post.topic.id
             item['topic_title'] = at.post.topic.title
             list.append(item)
