@@ -21,8 +21,16 @@ def _(string):
     return string # reserved for l10n
 
 
-def send_mail(subject, addr_from, addr_to, content):
-    msg = MIMEText(content)
+def send_mail_html(subject, addr_from, addr_to, content):
+    '''Send an HTML email
+
+    @param str subject
+    @param str addr_from
+    @param str addr_to
+    @param str content
+    @return void
+    '''
+    msg = MIMEText(content, 'html')
     msg['Subject'] = subject
     msg['From'] = addr_from
     msg['To'] = addr_to
@@ -34,7 +42,7 @@ def send_mail(subject, addr_from, addr_to, content):
 def json_response(result):
     '''Generate JSON responses from the return values of functions of forum.py
 
-    @param tuple result
+    @param tuple result (int, str[, dict])
     @return Response
     '''
     formatted_result = {'code': result[0], 'msg': result[1]}
@@ -98,7 +106,7 @@ def user_register():
     site_name = config['site_name']
     site_url = config['site_url']
     activation_url = (
-        '%s/api/user/activate/%d/%s' % (
+        '%s/user/activate/%d/%s' % (
             site_url,
             data['uid'],
             data['activation_code']
@@ -106,17 +114,20 @@ def user_register():
     )
     # remove info of activation code (very important !!!)
     del data['activation_code']
-    send_mail(
+    send_mail_html(
         subject = 'Activation Mail of %s' % site_name,
         addr_from = EMAIL_ADDRESS,
         addr_to = mail,
-        content = activation_url
+        content = (
+            '<a target="_blank" href="%s">%s</a>'
+            % (activation_url, activation_url)
+        )
     )
 
     return json_response(result)
 
 
-@app.route('/api/user/activate/<int:uid>/<code>')
+@app.route('/user/activate/<int:uid>/<code>')
 def user_activate(uid, code):
     # TODO: change into a page, not API returning unfriendly JSON.
     # And don't forget to change URL sent above.
