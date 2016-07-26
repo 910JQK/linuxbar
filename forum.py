@@ -693,25 +693,41 @@ def topic_revert(tid):
 
 def topic_list(board, page, count_per_page, only_show_deleted=False):
     try:
-        query = Board.select().where(Board.short_name == board)
-        if(not query):
-            return (2, _('No such board.'))
-        board_rec = query.get()
-        count = Topic.select().where(
-            Topic.board == board_rec,
-            Topic.deleted == only_show_deleted
-        ).count()
-        query = (
-            Topic
-            .select(Topic, User)
-            .join(User)
-            .where(
+        if(board):
+            query = Board.select().where(Board.short_name == board)
+            if(not query):
+                return (2, _('No such board.'))
+            board_rec = query.get()
+            count = Topic.select().where(
                 Topic.board == board_rec,
                 Topic.deleted == only_show_deleted
+            ).count()
+            query = (
+                Topic
+                .select(Topic, User)
+                .join(User)
+                .where(
+                    Topic.board == board_rec,
+                    Topic.deleted == only_show_deleted
+                )
+                .order_by(Topic.last_post_date.desc())
+                .paginate(page, count_per_page)
             )
-            .order_by(Topic.last_post_date.desc())
-            .paginate(page, count_per_page)
-        )
+        else:
+            # list topics of all boards
+            count = Topic.select().where(
+                Topic.deleted == only_show_deleted
+            ).count()
+            query = (
+                Topic
+                .select(Topic, User)
+                .join(User)
+                .where(
+                    Topic.deleted == only_show_deleted
+                )
+                .order_by(Topic.last_post_date.desc())
+                .paginate(page, count_per_page)
+            )
         list = []
         for topic in query:
             item = {
