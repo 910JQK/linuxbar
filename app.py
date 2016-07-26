@@ -37,7 +37,7 @@ def send_mail(subject, addr_from, addr_to, content, html_content=''):
     msg['To'] = addr_to
     msg_plaintext = MIMEText(content)
     msg.attach(msg_plaintext)
-    if html_content != '':
+    if(html_content):
         msg_html = MIMEText(html_content, 'html')
         msg.attach(msg_html)
     smtp = smtplib.SMTP('localhost')
@@ -88,8 +88,8 @@ def user_get_uid(name):
 @app.route('/api/user/register', methods=['POST'])
 def user_register():
     def send_activation_mail(site_name, mail_to, activation_url):
-        '''
-        Make an activation mail and send it by `send_mail`
+        '''Make an activation mail and send it by `send_mail`
+
         @param str site_name
         @param str mail_to
         @param str activation_url
