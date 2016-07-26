@@ -7,6 +7,7 @@ app = Flask(__name__)
 import json
 import smtplib
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 import forum
 from validation import *
@@ -21,7 +22,7 @@ def _(string):
     return string # reserved for l10n
 
 
-def send_mail_html(subject, addr_from, addr_to, content):
+def send_mail(subject, addr_from, addr_to, content, html_content=''):
     '''Send an HTML email
 
     @param str subject
@@ -30,10 +31,15 @@ def send_mail_html(subject, addr_from, addr_to, content):
     @param str content
     @return void
     '''
-    msg = MIMEText(content, 'html')
+    msg= MIMEMultipart()
     msg['Subject'] = subject
     msg['From'] = addr_from
     msg['To'] = addr_to
+    msg_plaintext = MIMEText(content)
+    msg.attach(msg_plaintext)
+    if html_content != '':
+        msg_html = MIMEText(html_content, 'html')
+        msg.attach(msg_html)
     smtp = smtplib.SMTP('localhost')
     smtp.send_message(msg)
     smtp.quit()
@@ -81,6 +87,23 @@ def user_get_uid(name):
 
 @app.route('/api/user/register', methods=['POST'])
 def user_register():
+    def send_activation_mail(site_name, mail_to, activation_url):
+        '''
+        Make an activation mail and send it by `send_mail`
+        @param str site_name
+        @param str mail_to
+        @param str activation_url
+        '''
+        send_mail(
+            subject = 'Activation Mail of %s' % site_name,
+            addr_from = EMAIL_ADDRESS,
+            addr_to = mail_to,
+            content = _('Activation link: ') + activation_url,
+            html_content = _('Activation link: ')
+                + ('<a target="_blank" href="%s">%s</a>'
+                % (activation_url, activation_url))
+        )
+
     mail = request.form['mail']
     name = request.form['name']
     # unencrypted password: TLS is necessary
@@ -114,15 +137,8 @@ def user_register():
     )
     # remove info of activation code (very important !!!)
     del data['activation_code']
-    send_mail_html(
-        subject = 'Activation Mail of %s' % site_name,
-        addr_from = EMAIL_ADDRESS,
-        addr_to = mail,
-        content = (
-            '<a target="_blank" href="%s">%s</a>'
-            % (activation_url, activation_url)
-        )
-    )
+
+    send_activation_mail(site_name, mail, activation_url)
 
     return json_response(result)
 
