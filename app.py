@@ -4,6 +4,7 @@
 from flask import Flask, Response, request
 app = Flask(__name__)
 
+import io
 import re
 import json
 import smtplib
@@ -11,6 +12,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 import forum
+import captcha
 from validation import *
 
 
@@ -70,6 +72,17 @@ def validation_err_response(err):
 @app.route('/')
 def index():
     return '<h1>It just works, but very ugly.</h1>'
+
+
+@app.route('/captcha/get')
+def captcha_get():
+    code = captcha.gen_captcha()
+    # TODO: session
+    image = captcha.gen_image(code)
+    output = io.BytesIO()
+    image.save(output, format='PNG')
+    image_data = output.getvalue()
+    return Response(image_data, mimetype='image/png')
 
 
 @app.route('/api/user/get/name/<int:uid>')
