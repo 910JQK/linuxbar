@@ -167,13 +167,15 @@ def user_activate(uid, code):
         if(not query):
             return (2, _('No such user.'))
         user = query.get()
+        if(user.activated):
+            return (3, _('User %s has already been activated.' % user.name))
         if(code == user.activation_code):
             user.activated = True
             user.activation_code = None
             user.save()
             return (0, _('User %s activated successfully.' % user.name))
         else:
-            return (3, _('Wrong activation code.'))
+            return (4, _('Wrong activation code.'))
     except Exception as err:
         return (1, db_err_msg(err))
 
