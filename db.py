@@ -27,6 +27,7 @@ class User(BaseModel):
     name = CharField(max_length=32, unique=True, index=True)
     password = FixedCharField(max_length=64) # sha256 with salt
     activated = BooleanField(default=False)
+    activation_code = FixedCharField(max_length=16, null=True)
     reg_date = DateTimeField()
 
 
