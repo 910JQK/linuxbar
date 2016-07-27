@@ -6,6 +6,7 @@ import re
 
 # Whether an email address is valid is finally checked by the activation mail
 email_regex = re.compile('[^@]+@[^@]+')
+token_regex = re.compile('[0-9A-z]{16}')
 sha256_regex = re.compile('[0123456789abcdef]{64}')
 
 
@@ -35,6 +36,14 @@ def validate(field, string, min=0, max=0, not_empty=False, regex=None):
 
 def validate_email(field, string):
     validate(field, string, regex=email_regex)
+
+
+def validate_username(field, string):
+    validate(field, string, min=3, max=32)
+
+
+def validate_token(field, string):
+    validate(field, string, regex=token_regex)
 
 
 def validate_sha256(field, string):
