@@ -21,17 +21,17 @@ def _(string):
 def validate(field, string, min=0, max=0, not_empty=False, regex=None):
     size = len(string.encode('utf8'))
     if(min and size < min):
-        raise ValidationError(_(
-            '%s should be at least %d bytes.' % (field, min)
-        ))
+        raise ValidationError(
+            _('%s should be at least %d bytes.') % (field, min)
+        )
     if(max and size > max):
-        raise ValidationError(_(
-            '%s should be at most %d bytes.' % (field, max)
-        ))
+        raise ValidationError(
+            _('%s should be at most %d bytes.') % (field, max)
+        )
     if(not_empty and size == 0):
-        raise ValidationError(_('%s should not be empty.' % field))
+        raise ValidationError(_('%s should not be empty.') % field)
     if(regex and not regex.fullmatch(string)):
-        raise ValidationError(_('%s: Wrong format.' % field))
+        raise ValidationError(_('%s: Wrong format.') % field)
 
 
 def validate_email(field, string):
