@@ -11,6 +11,8 @@ def _(string):
     return string  # reserved for l10n
 
 
+HEX_DIGITS = '0123456789abcdef'
+TOKEN_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 OK_MSG = _('Data retrieved successfully.')
 
 
@@ -30,19 +32,12 @@ def sha256(string):
     return hashlib.sha256(bytes(string, encoding='utf8')).hexdigest()
 
 
-def gen_random_hex_string(length):
-    result = ''
-    for i in range(0, length):
-        result += random.choice('0123456789abcdef')
-    return result
-
-
 def gen_salt():
-    return gen_random_hex_string(8)
+    return ''.join(random.choice(HEX_DIGITS) for i in range(0, 8))
 
 
 def gen_token():
-    return gen_random_hex_string(64)
+    return ''.join(random.choice(TOKEN_CHARS) for i in range(0, 16))
 
 
 def encrypt_password(password, salt):
@@ -92,13 +87,14 @@ def user_register(mail, name, password):
 
     salt = gen_salt()
     encrypted_pw = encrypt_password(password, salt)
-    activation_code = encrypt_password(name, sha256(salt))
+    activation_code = gen_token()
 
     try:
         user_rec = User.create(
             mail = mail,
             name = name,
             password = encrypted_pw,
+            activation_code = activation_code,
             reg_date = now()
         )
         salt_rec = Salt.create(user=user_rec, salt=salt)
@@ -171,9 +167,9 @@ def user_activate(uid, code):
         if(not query):
             return (2, _('No such user.'))
         user = query.get()
-        salt = user.salt[0].salt
-        if(code == encrypt_password(user.name, sha256(salt)) ):
+        if(code == user.activation_code):
             user.activated = True
+            user.activation_code = None
             user.save()
             return (0, _('User %s activated successfully.' % user.name))
         else:

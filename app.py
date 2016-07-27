@@ -4,6 +4,7 @@
 from flask import Flask, Response, request
 app = Flask(__name__)
 
+import re
 import json
 import smtplib
 from email.mime.text import MIMEText
@@ -31,15 +32,15 @@ def send_mail(subject, addr_from, addr_to, content, html_content=''):
     @param str content
     @return void
     '''
-    msg= MIMEMultipart()
+    msg= MIMEMultipart('alternative')
     msg['Subject'] = subject
     msg['From'] = addr_from
     msg['To'] = addr_to
     msg_plaintext = MIMEText(content)
-    msg.attach(msg_plaintext)
     if(html_content):
         msg_html = MIMEText(html_content, 'html')
         msg.attach(msg_html)
+    msg.attach(msg_plaintext)
     smtp = smtplib.SMTP('localhost')
     smtp.send_message(msg)
     smtp.quit()
@@ -138,9 +139,15 @@ def user_register():
     # remove info of activation code (very important !!!)
     del data['activation_code']
 
-    send_activation_mail(site_name, mail, activation_url)
+    try:
+        send_activation_mail(site_name, mail, activation_url)
+    except Exception as err:
+        return json_response((253, _('Failed to send mail: %s' % str(err)) ) )
 
     return json_response(result)
+
+
+# TODO: re-send activation mail
 
 
 @app.route('/user/activate/<int:uid>/<code>')
@@ -148,10 +155,13 @@ def user_activate(uid, code):
     # TODO: change into a page, not API returning unfriendly JSON.
     # And don't forget to change URL sent above.
     try:
-        validate_sha256(_('Activation Code'), code)
+        validate(_('Activation Code'), code, regex=re.compile('[0-9A-z]{16}'))
     except ValidationError as err:
         return validation_err_response(err)
     return json_response(forum.user_activate(uid, code))
+
+
+# TODO: user_password_reset
 
 
 if __name__ == '__main__':
