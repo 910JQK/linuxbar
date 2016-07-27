@@ -6,11 +6,12 @@ import random
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
+from PIL import ImageOps
 from PIL import ImageFilter
 
 
-CAPTCHA_CHARS = '2345678ABDEFGHJKLMNRTYabdefghkmnrty'
-CAPTCHA_REGEX = re.compile('[2-8ABD-HJ-NRTYabd-hkmnrty]{4}')
+CAPTCHA_CHARS = '345ACEFGHKLMNPRSTUVWXZacdefhkmnpsuwx'
+CAPTCHA_REGEX = re.compile('[0-9A-z]{4}')
 
 
 WIDTH = 180
@@ -113,5 +114,6 @@ def gen_image(content):
             width = random.choice([2, 3])
         )
 
+    image = ImageOps.invert(image)
     image = image.filter(ImageFilter.SMOOTH)
     return image
