@@ -110,12 +110,13 @@ def user_register(mail, name, password):
 
 
 def user_password_reset_get_token(uid):
-    expire_date = now() + datetime.timedelta(minutes=10)
+    date = now()
+    expire_date = date + datetime.timedelta(minutes=10)
     token = gen_token()
     try:
         query = User.select().where(User.id == uid)
         if(not query):
-            return (1, _('No such user.'))
+            return (2, _('No such user.'))
         user = query.get()
         encrypted_token = sha256(token)
         query = PasswordReset.select().where(PasswordReset.user == user)
@@ -127,6 +128,8 @@ def user_password_reset_get_token(uid):
             )
         else:
             rec = query.get()
+            if(date < rec.expire_date):
+                return (3, _('A valid token has already sent.'))
             rec.token = encrypted_token
             rec.expire_date = expire_date
             rec.save()
@@ -151,6 +154,9 @@ def user_password_reset(uid, token, password):
             PasswordReset.expire_date > date
         )
         if(query):
+            reset_rec = query.get()
+            reset_rec.expire_date = date
+            reset_rec.save()
             user.password = encrypt_password(password, user.salt[0].salt)
             user.save()
             return (0, _('Your password reset successfully.'))

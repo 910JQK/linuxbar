@@ -34,15 +34,17 @@ def send_mail(subject, addr_from, addr_to, content, html_content=''):
     @param str content
     @return void
     '''
-    msg= MIMEMultipart('alternative')
+    if(html_content):
+        msg = MIMEMultipart('alternative')
+        msg_plaintext = MIMEText(content, 'plain')
+        msg_html = MIMEText(html_content, 'html')
+        msg.attach(msg_html)
+        msg.attach(msg_plaintext)
+    else:
+        msg = MIMEText(content, 'plain')
     msg['Subject'] = subject
     msg['From'] = addr_from
     msg['To'] = addr_to
-    msg_plaintext = MIMEText(content)
-    if(html_content):
-        msg_html = MIMEText(html_content, 'html')
-        msg.attach(msg_html)
-    msg.attach(msg_plaintext)
     smtp = smtplib.SMTP('localhost')
     smtp.send_message(msg)
     smtp.quit()
@@ -109,7 +111,7 @@ def user_register():
         @param str activation_url
         '''
         send_mail(
-            subject = 'Activation Mail - %s' % site_name,
+            subject = _('Activation Mail - %s') % site_name,
             addr_from = EMAIL_ADDRESS,
             addr_to = mail_to,
             content = _('Activation link: ') + activation_url,
@@ -175,14 +177,14 @@ def user_activate(uid, code):
     return json_response(forum.user_activate(uid, code))
 
 
-@app.route('/user/password-reset/get-token/<username>')
+@app.route('/api/user/password-reset/get-token/<username>')
 def user_password_reset_get_token(username):
     try:
         validate_username(_('Username'), username)
     except ValidationError as err:
         return validation_err_response(err)
 
-    result_getuid = form.user_get_uid(username)
+    result_getuid = forum.user_get_uid(username)
     if(result_getuid[0] != 0):
         return json_response(result_getuid)
     uid = result_getuid[2]['uid']
@@ -199,7 +201,7 @@ def user_password_reset_get_token(username):
 
     try:
         send_mail(
-            subject = _('Password Reset - %s') % config.site_name,
+            subject = _('Password Reset - %s') % config['site_name'],
             addr_from = EMAIL_ADDRESS,
             addr_to = data['mail'],
             content = (
@@ -207,13 +209,14 @@ def user_password_reset_get_token(username):
                 % data['token']
             )
         )
+        del data['mail']
         del data['token']
         return json_response(result)
     except Exception as err:
-        return json_response(253, _('Failed to send mail: %s') % str(err))
+        return json_response((253, _('Failed to send mail: %s') % str(err)) )
 
 
-@app.route('/user/reset-password/reset', methods=['POST'])
+@app.route('/api/user/password-reset/reset', methods=['POST'])
 def user_reset_password():
     username = request.form['username']
     token = request.form['token']
@@ -225,12 +228,12 @@ def user_reset_password():
     except ValidationError as err:
         return validation_err_response(err)
 
-    result_getuid = form.user_get_uid(username)
+    result_getuid = forum.user_get_uid(username)
     if(result_getuid[0] != 0):
         return json_response(result_getuid)
     uid = result_getuid[2]['uid']
 
-    return json_response(forum.user_reset_password(uid, token, password))
+    return json_response(forum.user_password_reset(uid, token, password))
 
 
 if __name__ == '__main__':
