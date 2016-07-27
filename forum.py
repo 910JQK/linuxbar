@@ -287,12 +287,12 @@ def admin_add(uid, board='', level=1):
         user_rec = query.get()
         if(not board):
             if(user_rec.site_managing):
-                return (4, _('User %s is already a site administrator.'
-                             % user_rec.name))
+                return (4, _('User %s is already a site administrator.')
+                             % user_rec.name)
             else:
                 SiteAdmin.create(user=user_rec)
-                return (0, _('New site administrator %s added successfully.'
-                             % user_rec.name))
+                return (0, _('New site administrator %s added successfully.')
+                             % user_rec.name)
         else:
             query = Board.select().where(Board.short_name == board)
             if(not query):
@@ -304,8 +304,8 @@ def admin_add(uid, board='', level=1):
             )
             if(query):
                 return (4, _(
-                    'User %s is already a level-%d administrator of board %s.'
-                    % (user_rec.name, query[0].level, board_rec.name)) )
+                    'User %s is already a level-%d administrator of board %s.')
+                    % (user_rec.name, query[0].level, board_rec.name))
             else:
                 BoardAdmin.create(
                     user = user_rec,
@@ -313,8 +313,8 @@ def admin_add(uid, board='', level=1):
                     level = level
                 )
                 return (0, _(
-                    'New level-%d administrator of board %s - %s added successfully.'
-                    % (level, board_rec.name, user_rec.name)) )
+                    'New level-%d administrator of board %s - %s added successfully.')
+                    % (level, board_rec.name, user_rec.name))
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -331,8 +331,8 @@ def admin_remove(uid, board=''):
                 return (4, _('No such site administrator.'))
             else:
                 admin[0].delete_instance()
-                return (0, _('Site administrator %s removed successfully.'
-                             % user_rec.name))
+                return (0, _('Site administrator %s removed successfully.')
+                             % user_rec.name)
         else:
             query = Board.select().where(Board.short_name == board)
             if(not query):
@@ -343,12 +343,12 @@ def admin_remove(uid, board=''):
                 BoardAdmin.board == board_rec
             )
             if(not admin):
-                return (4, _('No such administrator of board %s.'
-                             % board_rec.name))
+                return (4, _('No such administrator of board %s.')
+                             % board_rec.name)
             else:
                 admin[0].delete_instance()
-                return (0, _('Administrator %s of board %s removed successfully.'
-                             % (user_rec.name, board_rec.name)) )
+                return (0, _('Administrator %s of board %s removed successfully.')
+                             % (user_rec.name, board_rec.name))
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -377,8 +377,8 @@ def board_add(short_name, name, desc, announce):
         return (3, _('Board name cannot be empty.'))
     try:
         if(Board.select().where(Board.short_name == short_name)):
-            return (4, _('Board with ID (short name) %s already exists.'
-                         % short_name))
+            return (4, _('Board with ID (short name) %s already exists.')
+                         % short_name)
         if(Board.select().where(Board.name == name)):
             return (5, _('Board named %s already exists.') % name)
         Board.create(
@@ -475,11 +475,11 @@ def ban_info(uid, board=''):
             )
         if(not bans or now() >= bans[0].expire_date):
             if(not board):
-                return (4, _('User %s is not being banned globally.'
-                             % user_rec.name))
+                return (4, _('User %s is not being banned globally.')
+                             % user_rec.name)
             else:
-                return (4, _('User %s is not being banned on board %s.'
-                             % (user_rec.name, board_rec.name)) )
+                return (4, _('User %s is not being banned on board %s.')
+                             % (user_rec.name, board_rec.name))
         else:
             ban = bans[0]
             return (0, OK_MSG, {
@@ -588,8 +588,8 @@ def ban_add(uid, days, operator, board=''):
                 ban.operator_id = operator
                 ban.expire_date = expire_date
                 ban.save()
-                return (0, _('Ban on user %s entered into force.'
-                             % user_rec.name))
+                return (0, _('Ban on user %s entered into force.')
+                             % user_rec.name)
             else:
                 return (4, _('Ban with same or longer term already exists.'), {
                     'operator': {
@@ -645,15 +645,15 @@ def ban_remove(uid, board=''):
             )
         if(not bans or now() >= bans[0].expire_date):
             if(not board):
-                return (3, _('User %s is not being banned globally.'
-                             % user_rec.name))
+                return (3, _('User %s is not being banned globally.')
+                             % user_rec.name)
             else:
-                return (3, _('User %s is not being banned on board %s.'
-                             % (user_rec.name, board_rec.name)) )
+                return (3, _('User %s is not being banned on board %s.')
+                             % (user_rec.name, board_rec.name))
         else:
             bans[0].delete_instance()
-            return (0, _('Ban on user %s cancelled successfully.'
-                         % user_rec.name))
+            return (0, _('Ban on user %s cancelled successfully.')
+                         % user_rec.name)
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -709,8 +709,8 @@ def topic_move(tid, board):
         original_name = topic_rec.board.name
         topic_rec.board = board_rec
         topic_rec.save()
-        return (0, _('Topic %d moved from board %s to board %s successfully.'
-                     % (topic_rec.id, original_name, board_rec.name)) )
+        return (0, _('Topic %d moved from board %s to board %s successfully.')
+                     % (topic_rec.id, original_name, board_rec.name))
     except Exception as err:
         return (1, db_err_msg(err))
 
