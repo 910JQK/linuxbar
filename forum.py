@@ -17,7 +17,7 @@ OK_MSG = _('Data retrieved successfully.')
 
 
 def db_err_msg(err):
-    return _('Database Error: %s' % str(err))
+    return _('Database Error: %s') % str(err)
 
 
 def check_empty(string):
@@ -130,7 +130,8 @@ def user_password_reset_get_token(uid):
             rec.token = encrypted_token
             rec.expire_date = expire_date
             rec.save()
-        return (0, _('Token generated successfully.'), {'token': token})
+        return (0, _('Verification code has sent to your email address.'),
+                {'mail': user.mail, 'token': token})
     except Exception as err:
         return (1, db_err_msg(err))
 
