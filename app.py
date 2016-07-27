@@ -66,7 +66,7 @@ def validation_err_response(err):
     @param ValidationError err
     @return Response
     '''
-    return json_response((255, _('Validation error: %s' % str(err)) ) )
+    return json_response((255, _('Validation error: %s') % str(err)) )
 
 
 @app.route('/')
@@ -90,13 +90,13 @@ def user_get_name(uid):
     return json_response(forum.user_get_name(uid))
 
 
-@app.route('/api/user/get/uid/<name>')
-def user_get_uid(name):
+@app.route('/api/user/get/uid/<username>')
+def user_get_uid(username):
     try:
-        validate(_('Name'), name, min=3, max=32)
+        validate_username(_('Username'), username)
     except ValidationError as err:
         return validation_err_response(err)
-    return json_response(forum.user_get_uid(name))
+    return json_response(forum.user_get_uid(username))
 
 
 @app.route('/api/user/register', methods=['POST'])
@@ -109,7 +109,7 @@ def user_register():
         @param str activation_url
         '''
         send_mail(
-            subject = 'Activation Mail of %s' % site_name,
+            subject = 'Activation Mail - %s' % site_name,
             addr_from = EMAIL_ADDRESS,
             addr_to = mail_to,
             content = _('Activation link: ') + activation_url,
@@ -125,8 +125,9 @@ def user_register():
 
     try:
         validate_email(_('Mail address'), mail)
-        validate(_('Username'), name, min=3, max=32)
+        validate_username(_('Username'))
         validate(_('Password'), password, not_empty=True)
+        # TODO: captcha
     except ValidationError as err:
         return validation_err_response(err)
 
@@ -135,10 +136,10 @@ def user_register():
         return json_response(result)
     data = result[2]
 
-    config_result = forum.config_get()
-    if(config_result[0] != 0):
-        return json_response(config_result)
-    config = config_result[2]
+    result_config = forum.config_get()
+    if(result_config[0] != 0):
+        return json_response(result_config)
+    config = result_config[2]
 
     site_name = config['site_name']
     site_url = config['site_url']
@@ -155,7 +156,7 @@ def user_register():
     try:
         send_activation_mail(site_name, mail, activation_url)
     except Exception as err:
-        return json_response((253, _('Failed to send mail: %s' % str(err)) ) )
+        return json_response((253, _('Failed to send mail: %s') % str(err)) )
 
     return json_response(result)
 
@@ -168,13 +169,68 @@ def user_activate(uid, code):
     # TODO: change into a page, not API returning unfriendly JSON.
     # And don't forget to change URL sent above.
     try:
-        validate(_('Activation Code'), code, regex=re.compile('[0-9A-z]{16}'))
+        validate_token(_('Activation Code'), code)
     except ValidationError as err:
         return validation_err_response(err)
     return json_response(forum.user_activate(uid, code))
 
 
-# TODO: user_password_reset
+@app.route('/user/password-reset/get-token/<username>')
+def user_password_reset_get_token(username):
+    try:
+        validate_username(_('Username'), username)
+    except ValidationError as err:
+        return validation_err_response(err)
+
+    result_getuid = form.user_get_uid(username)
+    if(result_getuid[0] != 0):
+        return json_response(result_getuid)
+    uid = result_getuid[2]['uid']
+
+    result = forum.user_password_reset_get_token(uid)
+    if(result[0] != 0):
+        return json_response(result)
+    data = result[2]
+
+    result_config = forum.config_get()
+    if(result_config[0] != 0):
+        return json_response(result_config)
+    config = result_config[2]
+
+    try:
+        send_mail(
+            subject = _('Password Reset - %s') % config.site_name,
+            addr_from = EMAIL_ADDRESS,
+            addr_to = data['mail'],
+            content = (
+                _('Verification Code: %s (Valid in 10 minutes)')
+                % data['token']
+            )
+        )
+        del data['token']
+        return json_response(result)
+    except Exception as err:
+        return json_response(253, _('Failed to send mail: %s') % str(err))
+
+
+@app.route('/user/reset-password/reset', methods=['POST'])
+def user_reset_password():
+    username = request.form['username']
+    token = request.form['token']
+    password = request.form['password']
+
+    try:
+        validate_username(_('Username'), username)
+        validate_token(_('Token'), token)
+    except ValidationError as err:
+        return validation_err_response(err)
+
+    result_getuid = form.user_get_uid(username)
+    if(result_getuid[0] != 0):
+        return json_response(result_getuid)
+    uid = result_getuid[2]['uid']
+
+    return json_response(forum.user_reset_password(uid, token, password))
 
 
 if __name__ == '__main__':
