@@ -169,12 +169,12 @@ def user_activate(uid, code):
             return (2, _('No such user.'))
         user = query.get()
         if(user.activated):
-            return (3, _('User %s has already been activated.' % user.name))
+            return (3, _('User %s has already been activated.') % user.name)
         if(code == user.activation_code):
             user.activated = True
             user.activation_code = None
             user.save()
-            return (0, _('User %s activated successfully.' % user.name))
+            return (0, _('User %s activated successfully.') % user.name)
         else:
             return (4, _('Wrong activation code.'))
     except Exception as err:
@@ -198,7 +198,7 @@ def user_login(login_name, password):
             return (3, _('Wrong password.'))
 
         if(not user.activated):
-            return (4, _('User %s have NOT been activated.' % user.name))
+            return (4, _('User %s have NOT been activated.') % user.name)
 
         data = {'uid': user.id, 'name': user.name, 'mail': user.mail}
         return (0, _('Login successfully.'), data)
@@ -380,14 +380,14 @@ def board_add(short_name, name, desc, announce):
             return (4, _('Board with ID (short name) %s already exists.'
                          % short_name))
         if(Board.select().where(Board.name == name)):
-            return (5, _('Board named %s already exists.' % name))
+            return (5, _('Board named %s already exists.') % name)
         Board.create(
             short_name = short_name,
             name = name,
             description = desc,
             announcement = announce
         )
-        return (0, _('Board named %s created successfully.' % name))
+        return (0, _('Board named %s created successfully.') % name)
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -401,7 +401,7 @@ def board_remove(short_name):
             return (2, _('No such board.'))
         board = query.get()
         board.delete_instance()
-        return (0, _('Board named %s removed successfully.' % board.name))
+        return (0, _('Board named %s removed successfully.') % board.name)
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -418,7 +418,7 @@ def board_update(original_short_name, short_name, name, desc, announce):
         board.description = desc
         board.announcement = announce
         board.save()
-        return (0, _('Info of board named %s updated successfully.' % name))
+        return (0, _('Info of board named %s updated successfully.') % name)
     except Exception as err:
         return(1, db_err_msg(err))
 
@@ -619,7 +619,7 @@ def ban_add(uid, days, operator, board=''):
                     date = date,
                     expire_date = expire_date
                 )
-            return (0, _('Ban on user %s entered into force.' % user_rec.name))
+            return (0, _('Ban on user %s entered into force.') % user_rec.name)
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -723,12 +723,12 @@ def topic_remove(tid, operator):
             return (2, _('No such topic.'))
         topic = query.get()
         if(topic.deleted):
-            return (3, _('Topic %d has already been deleted.' % tid))
+            return (3, _('Topic %d has already been deleted.') % tid)
         topic.deleted = True
         topic.delete_date = now()
         topic.delete_operator_id = operator
         topic.save()
-        return (0, _('Topic %d deleted successfully.' % tid))
+        return (0, _('Topic %d deleted successfully.') % tid)
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -740,12 +740,12 @@ def topic_revert(tid):
             return (2, _('No such topic.'))
         topic = query.get()
         if(not topic.deleted):
-            return (3, _('Topic %d has NOT been deleted.' % tid))
+            return (3, _('Topic %d has NOT been deleted.') % tid)
         topic.deleted = False
         topic.delete_date = None
         topic.delete_operator_id = None
         topic.save()
-        return (0, _('Topic %d reverted successfully.' % tid))
+        return (0, _('Topic %d reverted successfully.') % tid)
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -900,7 +900,7 @@ def post_edit(id, new_content, subpost=False):
     try:
         query = Table.select().where(Table.id == id)
         if(not query):
-            return (2, _('No such %s.' % post_type))
+            return (2, _('No such %s.') % post_type)
         post = query.get()
         post.content = new_content
         post.edited = True
@@ -924,15 +924,15 @@ def post_remove(id, operator, subpost=False):
     try:
         query = Table.select().where(Table.id == id)
         if(not query):
-            return (2, _('No such %s.' % post_type.lower()))
+            return (2, _('No such %s.') % post_type.lower())
         post = query.get()
         if(post.deleted):
-            return (3, _('%s %d has already been deleted.' % (post_type, id)) )
+            return (3, _('%s %d has already been deleted.') % (post_type, id) )
         post.deleted = True
         post.delete_date = now()
         post.delete_operator_id = operator
         post.save()
-        return (0, _('%s %d deleted successfully.' % (post_type, id)) )
+        return (0, _('%s %d deleted successfully.') % (post_type, id) )
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -950,15 +950,15 @@ def post_revert(id, subpost=False):
     try:
         query = Table.select().where(Table.id == id)
         if(not query):
-            return (2, _('No such %s.' % post_type.lower()))
+            return (2, _('No such %s.') % post_type.lower())
         post = query.get()
         if(not post.deleted):
-            return (3, _('%s %d has NOT been deleted.' % (post_type, id)) )
+            return (3, _('%s %d has NOT been deleted.') % (post_type, id) )
         post.deleted = False
         post.delete_date = None
         post.delete_operator_id = None
         post.save()
-        return (0, _('%s %d reverted successfully.' % (post_type, id)) )
+        return (0, _('%s %d reverted successfully.') % (post_type, id) )
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -979,7 +979,7 @@ def post_list(parent, page, count_per_page, subpost=False):
     try:
         query = Parent.select().where(Parent.id == parent)
         if(not query):
-            return (2, _('No such %s.' % post_type))
+            return (2, _('No such %s.') % post_type)
         parent_rec = query.get()
         count = Table.select().where(parent_field == parent_rec).count()
         query = (
@@ -1042,7 +1042,7 @@ def post_deleted_info(id, subpost=False):
             )
         )
         if(not query):
-            return (2, _('No such deleted %s.' % post_type))
+            return (2, _('No such deleted %s.') % post_type)
         post = query.get()
         info = {
             'content': post.content,
@@ -1338,7 +1338,7 @@ def image_add(sha256, uid, name=None):
                 Image.name == name
             )
             if(query):
-                return (2, _('Name %s already in use.' % name))
+                return (2, _('Name %s already in use.') % name)
         Image.create(
             sha256 = sha256,
             uploader_id = uid,
@@ -1357,7 +1357,7 @@ def image_remove(sha256):
             return (2, _('No such image.'))
         image = query.get()
         image.delete_instance()
-        return (0, _('Image %s deleted successfully.' % sha256))
+        return (0, _('Image %s deleted successfully.') % sha256)
     except Exception as err:
         return (1, db_err_msg(err))
 
