@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from flask import Flask, Response, request
+from flask import Flask, Response, request, session, redirect, url_for, escape
 app = Flask(__name__)
 
 import io
@@ -57,7 +57,7 @@ def json_response(result):
     @return Response
     '''
     formatted_result = {'code': result[0], 'msg': result[1]}
-    if(len(result) == 3):
+    if(len(result) == 3 and result[2]):
         formatted_result['data'] = result[2]
     return Response(json.dumps(formatted_result), mimetype='application/json')
 
@@ -120,10 +120,10 @@ def user_register():
                 % (activation_url, activation_url))
         )
 
-    mail = request.form['mail']
-    name = request.form['name']
+    mail = request.form.get('mail')
+    name = request.form.get('name')
     # unencrypted password: TLS is necessary
-    password = request.form['password']
+    password = request.form.get('password')
 
     try:
         validate_email(_('Mail address'), mail)
@@ -218,13 +218,14 @@ def user_password_reset_get_token(username):
 
 @app.route('/api/user/password-reset/reset', methods=['POST'])
 def user_reset_password():
-    username = request.form['username']
-    token = request.form['token']
-    password = request.form['password']
+    username = request.form.get('username')
+    token = request.form.get('token')
+    password = request.form.get('password')
 
     try:
         validate_username(_('Username'), username)
         validate_token(_('Token'), token)
+        validate(_('Password'), password, not_empty=True)
     except ValidationError as err:
         return validation_err_response(err)
 
