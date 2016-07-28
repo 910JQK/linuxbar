@@ -308,6 +308,53 @@ def ban_info(uid):
     return json_response(forum.ban_info(uid, board))
 
 
+@app.route('/api/ban/list')
+def ban_list():
+    board = request.args.get('board', '')
+    pn = request.args.get('pn', '1')
+    count = request.args.get('count', '10')
+    try:
+        validate_integer(_('Page Number'), pn)
+        validate_integer(_('Count per Page'), count)
+    except ValidationError as err:
+        return validation_err_response(err)
+    return json_response(forum.ban_list(int(pn), int(count), board))
+
+
+@app.route('/api/topic/list')
+def topic_list():
+    board = request.args.get('board', '')
+    pn = request.args.get('pn', '1')
+    count = request.args.get('count', '10')
+    deleted = request.args.get('deleted', '')
+    try:
+        validate(_('Board'), board, not_empty=True)
+        validate_integer(_('Page Number'), pn)
+        validate_integer(_('Count per Page'), count)
+    except ValidationError as err:
+        return validation_err_response(err)
+    return json_response(
+        forum.topic_list(board, int(pn), int(count), bool(deleted))
+    )
+
+
+@app.route('/api/post/list')
+def post_list():
+    parent = request.args.get('parent', '')
+    pn = request.args.get('pn', '1')
+    count = request.args.get('count', '10')
+    subpost = request.args.get('subpost', '')
+    try:
+        validate_integer(_('Parent Post ID'), parent)
+        validate_integer(_('Page Number'), pn)
+        validate_integer(_('Count per Page'), count)
+    except ValidationError as err:
+        return validation_err_response(err)
+    return json_response(
+        forum.post_list(int(parent), int(pn), int(count), bool(subpost))
+    )
+
+
 if __name__ == '__main__':
     app.secret_key = os.urandom(24)
     app.run(debug=DEBUG)
