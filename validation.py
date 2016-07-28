@@ -35,7 +35,7 @@ def validate(field, string, min=0, max=0, not_empty=False, regex=None):
 
 
 def validate_email(field, string):
-    validate(field, string, regex=email_regex)
+    validate(field, string, min=3, max=64, regex=email_regex)
 
 
 def validate_username(field, string):
