@@ -296,6 +296,18 @@ def board_list():
     return json_response(forum.board_list())
 
 
+@app.route('/api/ban/check/<int:uid>')
+def ban_check(uid):
+    board = request.args.get('board', '')
+    return json_response(forum.ban_check(uid, board))
+
+
+@app.route('/api/ban/info/<int:uid>')
+def ban_info(uid):
+    board = request.args.get('board', '')
+    return json_response(forum.ban_info(uid, board))
+
+
 if __name__ == '__main__':
     app.secret_key = os.urandom(24)
     app.run(debug=DEBUG)
