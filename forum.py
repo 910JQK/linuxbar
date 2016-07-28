@@ -281,19 +281,35 @@ def admin_list(board=''):
     try:
         query = None
         if(not board):
-            query = SiteAdmin.select()
+            query = SiteAdmin.select(SiteAdmin, User).join(User)
         else:
             query = Board.select().where(Board.short_name == board)
             if(not query):
                 return (2, _('No such board.'))
             board_rec = query.get()
-            query = BoardAdmin.select().where(BoardAdmin.board == board_rec)
+            query = (
+                BoardAdmin
+                .select(BoardAdmin, User)
+                .join(User)
+                .where(BoardAdmin.board == board_rec)
+            )
         list = []
         for admin in query:
             if(not board):
-                list.append(admin.user.id)
+                list.append({
+                    'uid': admin.user.id,
+                    'name': admin.user.name,
+                    'mail': admin.user.mail
+                })
             else:
-                list.append({'uid': admin.user.id, 'level': admin.level})
+                list.append({
+                    'user': {
+                        'uid': admin.user.id,
+                        'name': admin.user.name,
+                        'mail': admin.user.mail
+                    },
+                    'level': admin.level
+                })
         return (0, OK_MSG, {'list': list, 'count': len(list)})
     except Exception as err:
         return (1, db_err_msg(err))
