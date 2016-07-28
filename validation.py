@@ -5,6 +5,7 @@ import re
 
 
 # Whether an email address is valid is finally checked by the activation mail
+integer_regex = re.compile('[1-9][0-9]*')
 email_regex = re.compile('[^@]+@[^@]+')
 token_regex = re.compile('[0-9A-z]{16}')
 sha256_regex = re.compile('[0123456789abcdef]{64}')
@@ -34,7 +35,14 @@ def validate(field, string, min=0, max=0, not_empty=False, regex=None):
     if(not_empty and size == 0):
         raise ValidationError(_('%s should not be empty.') % field)
     if(regex and not regex.fullmatch(string)):
-        raise ValidationError(_('%s: Wrong format.') % field)
+        if(size == 0):
+            raise ValidationError(_('%s should not be empty.') % field)
+        else:
+            raise ValidationError(_('%s: Wrong format.') % field)
+
+
+def validate_integer(field, string):
+    validate(field, string, regex=integer_regex)
 
 
 def validate_email(field, string):
