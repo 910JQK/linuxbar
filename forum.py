@@ -483,7 +483,7 @@ def ban_check(uid, board=''):
     if(bans and now() < bans[0].expire_date):
         return (0, OK_MSG, {
             'banned': True,
-            'expire_date': bans[0].expire_date
+            'expire_date': bans[0].expire_date.timestamp()
         })
     else:
         return (0, OK_MSG, {'banned': False})
