@@ -4,6 +4,7 @@
 from flask import Flask, Response, request, session, redirect, url_for, escape
 app = Flask(__name__)
 
+import os
 import io
 import re
 import json
@@ -73,7 +74,13 @@ def validation_err_response(err):
 
 @app.route('/')
 def index():
-    return '<h1>It just works, but very ugly.</h1>'
+    uid = session.get('uid')
+    if(uid):
+        # for debugging
+        tip = '<p>[Signed in] UID = %d</p>' % uid
+    else:
+        tip = ''
+    return '<h1>It just works, but very ugly.</h1>' + tip
 
 
 @app.route('/captcha/get')
@@ -237,5 +244,33 @@ def user_reset_password():
     return json_response(forum.user_password_reset(uid, token, password))
 
 
+@app.route('/api/user/login', methods=['POST'])
+def login():
+    login_name = request.form.get('login_name')
+    password = request.form.get('password')
+    # checkbox
+    long_term = request.form.get('long_term')
+    try:
+        validate(_('Login Name'), login_name, min=3, max=64)
+        validate(_('Password'), password, not_empty=True)
+    except ValidationError as err:
+        return validation_err_response(err)
+    result = forum.user_login(login_name, password)
+    if(result[0] == 0):
+        session['uid'] = result[2]['uid']
+        if(long_term):
+            session.permanent = True
+        else:
+            session.permanent = False
+    return json_response(result)
+
+
+@app.route('/user/logout')
+def logout():
+    session.pop('uid', None)
+    return redirect(url_for('index'))
+
+
 if __name__ == '__main__':
+    app.secret_key = os.urandom(24)
     app.run(debug=DEBUG)
