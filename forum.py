@@ -109,6 +109,20 @@ def user_register(mail, name, password):
     })
 
 
+def user_remove(uid):
+    # used only when activation mail failed to send
+    try:
+        query = User.select().where(User.id == uid)
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
+        user.salt[0].delete_instance()
+        user.delete_instance()
+        return (0, _('User %s deleted successfully.') % user.name)
+    except Exception as err:
+        return (1, db_err_msg(err0))
+
+
 def user_password_reset_get_token(uid):
     date = now()
     expire_date = date + datetime.timedelta(minutes=10)
@@ -204,7 +218,7 @@ def user_login(login_name, password):
             return (3, _('Wrong password.'))
 
         if(not user.activated):
-            return (4, _('User %s have NOT been activated.') % user.name)
+            return (4, _('User %s has NOT been activated.') % user.name)
 
         data = {'uid': user.id, 'name': user.name, 'mail': user.mail}
         return (0, _('Login successfully.'), data)
