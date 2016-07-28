@@ -86,7 +86,7 @@ def index():
 @app.route('/captcha/get')
 def captcha_get():
     code = captcha.gen_captcha()
-    # TODO: session
+    session['captcha'] = code.lower()
     image = captcha.gen_image(code)
     output = io.BytesIO()
     image.save(output, format='PNG')
@@ -127,18 +127,26 @@ def user_register():
                 % (activation_url, activation_url))
         )
 
+    if(session.get('uid')):
+        return json_response((251, _('Already signed in.')))
+
     mail = request.form.get('mail')
     name = request.form.get('name')
     # unencrypted password: TLS is necessary
     password = request.form.get('password')
+    captcha_text = request.form.get('captcha')
 
     try:
         validate_email(_('Mail address'), mail)
-        validate_username(_('Username'))
+        validate_username(_('Username'), name)
         validate(_('Password'), password, not_empty=True)
-        # TODO: captcha
+        validate(_('Captcha'), captcha_text, regex=captcha.CAPTCHA_REGEX)
     except ValidationError as err:
         return validation_err_response(err)
+
+    if(captcha_text.lower() != session.get('captcha')):
+        return json_response((250, _('Wrong captcha.')) )
+    session.pop('captcha', None)
 
     result = forum.user_register(mail, name, password)
     if(result[0] != 0):
@@ -165,12 +173,10 @@ def user_register():
     try:
         send_activation_mail(site_name, mail, activation_url)
     except Exception as err:
+        forum.user_remove(data['uid'])
         return json_response((253, _('Failed to send mail: %s') % str(err)) )
 
     return json_response(result)
-
-
-# TODO: re-send activation mail
 
 
 @app.route('/user/activate/<int:uid>/<code>')
@@ -246,6 +252,8 @@ def user_reset_password():
 
 @app.route('/api/user/login', methods=['POST'])
 def login():
+    if(session.get('uid')):
+        return json_response((251, _('Already signed in.')) )
     login_name = request.form.get('login_name')
     password = request.form.get('password')
     # checkbox
