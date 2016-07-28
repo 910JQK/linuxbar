@@ -130,11 +130,11 @@ def user_register():
     if(session.get('uid')):
         return json_response((251, _('Already signed in.')))
 
-    mail = request.form.get('mail')
-    name = request.form.get('name')
+    mail = request.form.get('mail', '')
+    name = request.form.get('name', '')
     # unencrypted password: TLS is necessary
-    password = request.form.get('password')
-    captcha_text = request.form.get('captcha')
+    password = request.form.get('password', '')
+    captcha_text = request.form.get('captcha', '')
 
     try:
         validate_email(_('Mail address'), mail)
@@ -231,9 +231,9 @@ def user_password_reset_get_token(username):
 
 @app.route('/api/user/password-reset/reset', methods=['POST'])
 def user_reset_password():
-    username = request.form.get('username')
-    token = request.form.get('token')
-    password = request.form.get('password')
+    username = request.form.get('username' ,'')
+    token = request.form.get('token', '')
+    password = request.form.get('password', '')
 
     try:
         validate_username(_('Username'), username)
@@ -254,10 +254,10 @@ def user_reset_password():
 def login():
     if(session.get('uid')):
         return json_response((251, _('Already signed in.')) )
-    login_name = request.form.get('login_name')
-    password = request.form.get('password')
+    login_name = request.form.get('login_name', '')
+    password = request.form.get('password', '')
     # checkbox
-    long_term = request.form.get('long_term')
+    long_term = request.form.get('long_term', '')
     try:
         validate(_('Login Name'), login_name, min=3, max=64)
         validate(_('Password'), password, not_empty=True)
@@ -277,6 +277,23 @@ def login():
 def logout():
     session.pop('uid', None)
     return redirect(url_for('index'))
+
+
+@app.route('/api/admin/check/<int:uid>')
+def admin_check(uid):
+    board = request.args.get('board', '')
+    return json_response(forum.admin_check(uid, board))
+
+
+@app.route('/api/admin/list')
+def admin_list():
+    board = request.args.get('board', '')
+    return json_response(forum.admin_list(board))
+
+
+@app.route('/api/board/list')
+def board_list():
+    return json_response(forum.board_list())
 
 
 if __name__ == '__main__':
