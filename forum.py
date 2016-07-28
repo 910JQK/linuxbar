@@ -176,7 +176,7 @@ def user_password_reset(uid, token, password):
             return (0, _('Your password reset successfully.'))
         else:
             return (3, _(
-                'Password reset failed: Invalid or out-of-date token.'
+                'Password reset failed: Invalid or out-of-date verification code.'
             ))
     except Exception as err:
         return (1, db_err_msg(err))
