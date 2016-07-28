@@ -19,6 +19,9 @@ def _(string):
 
 
 def validate(field, string, min=0, max=0, not_empty=False, regex=None):
+    if(not string):
+        # may be None
+        string = ''
     size = len(string.encode('utf8'))
     if(min and size < min):
         raise ValidationError(
