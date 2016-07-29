@@ -549,7 +549,7 @@ def topic_remove(tid):
 
     operator = session.get('uid')
     if(not operator):
-        return json_response((254, _('Permission denied')) )
+        return json_response((254, _('Permission denied.')) )
 
     result_board = forum.topic_get_board(tid)
     if(result_board[0] != 0):
@@ -563,7 +563,7 @@ def topic_remove(tid):
             else:
                 return json_response(forum.topic_revert(tid))
         else:
-            return json_response((254, _('Permission denied')) )
+            return json_response((254, _('Permission denied.')) )
     except ForumPermissionCheckError as err:
         return permission_err_response(err)
 
