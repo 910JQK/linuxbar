@@ -5,10 +5,12 @@ import re
 
 
 # Whether an email address is valid is finally checked by the activation mail
-integer_regex = re.compile('[1-9][0-9]*')
+id_regex = re.compile('[1-9][0-9]*')
+uint_regex = re.compile('0|[1-9][0-9]*')
 email_regex = re.compile('[^@]+@[^@]+')
-token_regex = re.compile('[0-9A-z]{16}')
+token_regex = re.compile('[0-9A-Za-z]{16}')
 sha256_regex = re.compile('[0123456789abcdef]{64}')
+board_short_name_regex = re.compile('[0-9A-Za-z-]{1,32}')
 
 
 class ValidationError(Exception):
@@ -41,8 +43,12 @@ def validate(field, string, min=0, max=0, not_empty=False, regex=None):
             raise ValidationError(_('%s: Wrong format.') % field)
 
 
-def validate_integer(field, string):
-    validate(field, string, regex=integer_regex)
+def validate_id(field, string):
+    validate(field, string, regex=id_regex)
+
+
+def validate_uint(field, string):
+    validate(field, string, regex=uint_regex)
 
 
 def validate_email(field, string):
@@ -59,3 +65,7 @@ def validate_token(field, string):
 
 def validate_sha256(field, string):
     validate(field, string, regex=sha256_regex)
+
+
+def validate_board(field, string):
+    validate(field, string, regex=board_short_name_regex)
