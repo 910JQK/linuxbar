@@ -607,6 +607,36 @@ def post_add():
     )
 
 
+@app.route('/api/post/remove/<int:id>')
+def post_remove(id):
+    revert = request.args.get('revert')
+    subpost = request.args.get('subpost')
+
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((254, _('Permission denied.')) )
+
+    result_board = forum.post_get_board(id, subpost=bool(subpost))
+    if(result_board[0] != 0):
+        return json_response(result_board)
+    board = result_board[2]['board']
+
+    try:
+        if(check_permission(operator, board)):
+            if(not revert):
+                return json_response(
+                    forum.post_remove(id, operator, subpost=bool(subpost))
+                )
+            else:
+                return json_response(
+                    forum.post_revert(id, subpost=bool(subpost))
+                )
+        else:
+            return json_response((254, _('Permission denied.')) )
+    except ForumPermissionCheckError as err:
+        return permission_err_response(err)
+
+
 @app.route('/api/post/list')
 def post_list():
     parent = request.args.get('parent', '')
