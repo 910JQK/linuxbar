@@ -22,6 +22,10 @@ DEBUG = True
 EMAIL_ADDRESS = 'no_reply@foo.bar'
 
 
+class ForumPermissionCheckError(Exception):
+    pass
+
+
 def _(string):
     return string # reserved for l10n
 
@@ -51,6 +55,25 @@ def send_mail(subject, addr_from, addr_to, content, html_content=''):
     smtp.quit()
 
 
+def check_permission(operator, board):
+    '''Check if `operator` is administrator of `board` ('' means global)
+
+    @param int operator
+    @param str board
+    @return bool
+    '''
+    check_global = forum.admin_check(operator)
+    if(check_global[0] != 0):
+        raise ForumPermissionCheckError(check_global)
+    if(not board):
+        return check_global[2]['admin']
+    else:
+        check = forum.admin_check(operator, board)
+        if(check[0] != 0):
+            raise ForumPermissionCheckError(check)
+        return (check_global[2]['admin'] or check[2]['admin'])
+
+
 def json_response(result):
     '''Generate JSON responses from the return values of functions of forum.py
 
@@ -70,6 +93,15 @@ def validation_err_response(err):
     @return Response
     '''
     return json_response((255, _('Validation error: %s') % str(err)) )
+
+
+def permission_err_response(err):
+    '''Generate responses for permission check errors
+
+    @param ForumPermissionCheckError err
+    @return Response
+    '''
+    return json_response(err.args[0])
 
 
 @app.route('/')
@@ -452,16 +484,28 @@ def ban_add(uid):
     operator = session.get('uid')
     if(not operator):
         return json_response((254, _('Permission denied.')) )
-    check_global = forum.admin_check(operator)
-    if(check_global[0] != 0):
-        return json_response(check_global)
-    check = forum.admin_check(operator, board)
-    if(check[0] != 0):
-        return json_response(check)
-    if(check_global[2]['admin'] or check[2]['admin']):
-        return json_response(forum.ban_add(uid, int(days), operator, board))
-    else:
+    try:
+        if(check_permission(operator, board)):
+            return json_response(forum.ban_add(uid, int(days), operator, board))
+        else:
+            return json_response((254, _('Permission denied.')) )
+    except ForumPermissionCheckError as err:
+        return permission_err_response(err)
+
+
+@app.route('/api/ban/remove/<int:uid>')
+def ban_remove(uid):
+    board = request.args.get('board', '')
+    operator = session.get('uid')
+    if(not operator):
         return json_response((254, _('Permission denied.')) )
+    try:
+        if(check_permission(operator, board)):
+            return json_response(forum.ban_remove(uid, board))
+        else:
+            return json_response((254, _('Permission denied.')) )
+    except ForumPermissionCheckError as err:
+        return permission_err_response(err)
 
 
 @app.route('/api/ban/list')
