@@ -523,6 +523,24 @@ def ban_list():
     return json_response(forum.ban_list(int(pn), int(count), board))
 
 
+@app.route('/api/topic/add', methods=['POST'])
+def topic_add():
+    board = request.form.get('board', '')
+    title = request.form.get('title', '')
+    content = request.form.get('content', '')
+    # TODO: summary
+    summary = ''
+    try:
+        validate_board(_('Board Name'), board)
+        validate(_('Title'), title, max=64, not_empty=True)
+    except ValidationError as err:
+        return validation_err_response(err)
+    uid = session.get('uid')
+    if(not uid):
+        return json_response((249, _('Not signed in.')) )
+    return json_response(forum.topic_add(board, title, uid, summary, content))
+
+
 @app.route('/api/topic/list')
 def topic_list():
     board = request.args.get('board', '')
