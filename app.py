@@ -286,6 +286,11 @@ def logout():
 @app.route('/api/admin/check/<int:uid>')
 def admin_check(uid):
     board = request.args.get('board', '')
+    try:
+        if(board):
+            validate_board(_('Board Name'), board)
+    except ValidationError as err:
+        return validation_err_response(err)
     return json_response(forum.admin_check(uid, board))
 
 
@@ -298,17 +303,17 @@ def admin_add(uid):
     board = request.args.get('board', '')
     level = request.args.get('level', '1')
     try:
-        if(board):
-            validate_board(_('Board Name'), board)
+        validate_board(_('Board Name'), board)
         validate_uint(_('Administrator Level'), level)
     except ValidationError as err:
         return validation_err_response(err)
-    if(not board or level == '0'):
+
+    if(level == '0'):
         check = forum.admin_check(operator)
         if(check[0] != 0):
             return json_response(check)
         if(check[2]['admin']):
-            return json_response(forum.admin_add(int(uid), board, int(level)) )
+            return json_response(forum.admin_add(uid, board, int(level)) )
         else:
             return json_response((254, _('Permission denied.')) )
     else:
@@ -320,7 +325,46 @@ def admin_add(uid):
             return json_response(check_board)
         if(check_site[2]['admin']
            or (check_board[2]['admin'] and check_board[2]['level'] == 0)):
-            return json_response(forum.admin_add(int(uid), board, int(level)) )
+            return json_response(forum.admin_add(uid, board, int(level)) )
+        else:
+            return json_response((254, _('Permission denied.')) )
+
+
+@app.route('/api/admin/remove/<int:uid>')
+def admin_remove(uid):
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((254, _('Permission denied.')) )
+
+    board = request.args.get('board', '')
+    try:
+        validate_board(_('Board Name'), board)
+    except ValidationError as err:
+        return validation_err_response(err)
+
+    check = forum.admin_check(uid, board)
+    if(check[0] != 0):
+        return json_response(check)
+    if(not check[2]['admin']):
+        return json_response((4, _('No such board administrator.')) )
+    if(check[2]['level'] == 0):
+        check_op = forum.admin_check(operator)
+        if(check_op[0] != 0):
+            return json_response(check_op)
+        if(check_op[2]['admin']):
+            return json_response(forum.admin_remove(uid, board))
+        else:
+            return json_response((254, _('Permission denied.')) )
+    else:
+        check_site = forum.admin_check(operator)
+        check_board = forum.admin_check(operator, board)
+        if(check_site[0] != 0):
+            return json_response(check_site)
+        if(check_board[0] != 0):
+            return json_response(check_board)
+        if(check_site[2]['admin']
+           or (check_board[2]['admin'] and check_board[2]['level'] == 0)):
+            return json_response(forum.admin_remove(uid, board))
         else:
             return json_response((254, _('Permission denied.')) )
 
@@ -328,6 +372,11 @@ def admin_add(uid):
 @app.route('/api/admin/list')
 def admin_list():
     board = request.args.get('board', '')
+    try:
+        if(board):
+            validate_board(_('Board Name'), board)
+    except ValidationError as err:
+        return validation_err_response(err)
     return json_response(forum.admin_list(board))
 
 
@@ -339,12 +388,22 @@ def board_list():
 @app.route('/api/ban/check/<int:uid>')
 def ban_check(uid):
     board = request.args.get('board', '')
+    try:
+        if(board):
+            validate_board(_('Board Name'), board)
+    except ValidationError as err:
+        return validation_err_response(err)
     return json_response(forum.ban_check(uid, board))
 
 
 @app.route('/api/ban/info/<int:uid>')
 def ban_info(uid):
     board = request.args.get('board', '')
+    try:
+        if(board):
+            validate_board(_('Board Name'), board)
+    except ValidationError as err:
+        return validation_err_response(err)
     return json_response(forum.ban_info(uid, board))
 
 
@@ -354,6 +413,8 @@ def ban_list():
     pn = request.args.get('pn', '1')
     count = request.args.get('count', '10')
     try:
+        if(board):
+            validate_board(_('Board Name'), board)
         validate_id(_('Page Number'), pn)
         validate_id(_('Count per Page'), count)
     except ValidationError as err:
