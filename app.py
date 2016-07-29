@@ -541,6 +541,31 @@ def topic_add():
     return json_response(forum.topic_add(board, title, uid, summary, content))
 
 
+@app.route('/api/topic/remove/<int:tid>')
+def topic_remove(tid):
+    revert = request.args.get('revert')
+
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((254, _('Permission denied')) )
+
+    result_board = forum.topic_get_board(tid)
+    if(result_board[0] != 0):
+        return json_response(result_board)
+    board = result_board[2]['board']
+
+    try:
+        if(check_permission(operator, board)):
+            if(not revert):
+                return json_response(forum.topic_remove(tid, operator))
+            else:
+                return json_response(forum.topic_revert(tid))
+        else:
+            return json_response((254, _('Permission denied')) )
+    except ForumPermissionCheckError as err:
+        return permission_err_response(err)
+
+
 @app.route('/api/topic/list')
 def topic_list():
     board = request.args.get('board', '')
