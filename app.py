@@ -528,6 +528,8 @@ def topic_add():
     board = request.form.get('board', '')
     title = request.form.get('title', '')
     content = request.form.get('content', '')
+    if(not content):
+        content = title
     # TODO: summary
     summary = ''
     try:
@@ -583,6 +585,28 @@ def topic_list():
     )
 
 
+@app.route('/api/post/add', methods=['POST'])
+def post_add():
+    parent = request.form.get('parent', '')
+    content = request.form.get('content', '')
+    reply = request.form.get('reply', '0')
+    # subpost: argument from url
+    subpost = request.args.get('subpost', '')
+    try:
+        validate_id(_('Parent Topic/Post ID'), parent)
+        validate(_('Content'), content, not_empty=True)
+        if(reply != '0'):
+            validate_id(_('Subpost to Reply'), reply)
+    except ValidationError as err:
+        return validation_err_response(err)
+    uid = session.get('uid')
+    if(not uid):
+        return json_response((249, _('Not signed in.')) )
+    return json_response(
+        forum.post_add(parent, uid, content, bool(subpost), int(reply))
+    )
+
+
 @app.route('/api/post/list')
 def post_list():
     parent = request.args.get('parent', '')
@@ -590,7 +614,7 @@ def post_list():
     count = request.args.get('count', '10')
     subpost = request.args.get('subpost', '')
     try:
-        validate_id(_('Parent Post ID'), parent)
+        validate_id(_('Parent Topic/Post ID'), parent)
         validate_id(_('Page Number'), pn)
         validate_id(_('Count per Page'), count)
     except ValidationError as err:
