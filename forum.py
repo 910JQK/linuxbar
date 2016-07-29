@@ -694,6 +694,17 @@ def ban_remove(uid, board=''):
         return (1, db_err_msg(err))
 
 
+def topic_get_board(tid):
+    try:
+        query = Topic.select().where(Topic.id == tid)
+        if(not query):
+            return (2, _('No such topic.'))
+        topic = query.get()
+        return (0, OK_MSG, {'board': topic.board.short_name})
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
 def topic_add(board, title, author, summary, post_body):
     # Parameter "author" is the UID of the author, which must be valid.
     date = now()
