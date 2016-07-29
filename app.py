@@ -441,6 +441,29 @@ def ban_info(uid):
     return json_response(forum.ban_info(uid, board))
 
 
+@app.route('/api/ban/add/<int:uid>')
+def ban_add(uid):
+    board = request.args.get('board', '')
+    days = request.args.get('days', '1')
+    try:
+        validate(_('Days'), days, in_list=['1', '3', '10', '30'])
+    except ValidationError as err:
+        return validation_err_response(err)
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((254, _('Permission denied.')) )
+    check_global = forum.admin_check(operator)
+    if(check_global[0] != 0):
+        return json_response(check_global)
+    check = forum.admin_check(operator, board)
+    if(check[0] != 0):
+        return json_response(check)
+    if(check_global[2]['admin'] or check[2]['admin']):
+        return json_response(forum.ban_add(uid, int(days), operator, board))
+    else:
+        return json_response((254, _('Permission denied.')) )
+
+
 @app.route('/api/ban/list')
 def ban_list():
     board = request.args.get('board', '')
