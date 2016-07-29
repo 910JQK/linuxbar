@@ -867,6 +867,26 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
         return (1, db_err_msg(err))
 
 
+def post_get_board(id, subpost=False):
+    try:
+        if(not subpost):
+            query = Post.select().where(Post.id == id)
+            if(not query):
+                return (2, _('No such post.'))
+            post = query.get()
+            board = post.topic.board.short_name
+            return (0, OK_MSG, {'board': board})
+        else:
+            query = Subpost.select().where(Subpost.id == id)
+            if(not query):
+                return (2, _('No such post.'))
+            subpost = query.get()
+            board = subpost.reply0.board.short_name
+            return (0, OK_MSG, {'board': board})
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
 def post_add(parent, author, content, subpost=False, reply=0):
     # Parameter "author" is the UID of the author, which must be valid.
     date = now()
@@ -1028,6 +1048,8 @@ def post_list(parent, page, count_per_page, subpost=False):
         if(not query):
             return (2, _('No such %s.') % post_type)
         parent_rec = query.get()
+        if(parent_rec.deleted):
+            return (3, _('Parent topic/post has been deleted.'))
         count = Table.select().where(parent_field == parent_rec).count()
         query = (
             Table
