@@ -80,7 +80,11 @@ def index():
         tip = '<p>[Signed in] UID = %d</p>' % uid
     else:
         tip = ''
-    return '<h1>It just works, but very ugly.</h1>' + tip
+    return (
+        '<script type="text/javascript" src="static/debug.js"></script>'
+        + '<h1>It just works, but very ugly.</h1>'
+        + tip
+    )
 
 
 @app.route('/captcha/get')
@@ -285,6 +289,42 @@ def admin_check(uid):
     return json_response(forum.admin_check(uid, board))
 
 
+@app.route('/api/admin/add/<int:uid>')
+def admin_add(uid):
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((254, _('Permission denied.')) )
+
+    board = request.args.get('board', '')
+    level = request.args.get('level', '1')
+    try:
+        if(board):
+            validate_board(_('Board Name'), board)
+        validate_uint(_('Administrator Level'), level)
+    except ValidationError as err:
+        return validation_err_response(err)
+    if(not board or level == '0'):
+        check = forum.admin_check(operator)
+        if(check[0] != 0):
+            return json_response(check)
+        if(check[2]['admin']):
+            return json_response(forum.admin_add(int(uid), board, int(level)) )
+        else:
+            return json_response((254, _('Permission denied.')) )
+    else:
+        check_site = forum.admin_check(operator)
+        check_board = forum.admin_check(operator, board)
+        if(check_site[0] != 0):
+            return json_response(check_site)
+        if(check_board[0] != 0):
+            return json_response(check_board)
+        if(check_site[2]['admin']
+           or (check_board[2]['admin'] and check_board[2]['level'] == 0)):
+            return json_response(forum.admin_add(int(uid), board, int(level)) )
+        else:
+            return json_response((254, _('Permission denied.')) )
+
+
 @app.route('/api/admin/list')
 def admin_list():
     board = request.args.get('board', '')
@@ -314,8 +354,8 @@ def ban_list():
     pn = request.args.get('pn', '1')
     count = request.args.get('count', '10')
     try:
-        validate_integer(_('Page Number'), pn)
-        validate_integer(_('Count per Page'), count)
+        validate_id(_('Page Number'), pn)
+        validate_id(_('Count per Page'), count)
     except ValidationError as err:
         return validation_err_response(err)
     return json_response(forum.ban_list(int(pn), int(count), board))
@@ -329,8 +369,8 @@ def topic_list():
     deleted = request.args.get('deleted', '')
     try:
         validate(_('Board'), board, not_empty=True)
-        validate_integer(_('Page Number'), pn)
-        validate_integer(_('Count per Page'), count)
+        validate_id(_('Page Number'), pn)
+        validate_id(_('Count per Page'), count)
     except ValidationError as err:
         return validation_err_response(err)
     return json_response(
@@ -345,9 +385,9 @@ def post_list():
     count = request.args.get('count', '10')
     subpost = request.args.get('subpost', '')
     try:
-        validate_integer(_('Parent Post ID'), parent)
-        validate_integer(_('Page Number'), pn)
-        validate_integer(_('Count per Page'), count)
+        validate_id(_('Parent Post ID'), parent)
+        validate_id(_('Page Number'), pn)
+        validate_id(_('Count per Page'), count)
     except ValidationError as err:
         return validation_err_response(err)
     return json_response(
