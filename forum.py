@@ -919,7 +919,7 @@ def post_add(parent, author, content, subpost=False, reply=0):
             post = query.get()
             topic = post.topic
             if(topic.deleted):
-                return (3, _('The topic has already been deleted'))
+                return (3, _('The topic has been deleted'))
             reply_rec = None
             reply_rec_author = None
             if(reply):
