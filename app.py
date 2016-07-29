@@ -296,10 +296,6 @@ def admin_check(uid):
 
 @app.route('/api/admin/add/<int:uid>')
 def admin_add(uid):
-    operator = session.get('uid')
-    if(not operator):
-        return json_response((254, _('Permission denied.')) )
-
     board = request.args.get('board', '')
     level = request.args.get('level', '1')
     try:
@@ -307,6 +303,10 @@ def admin_add(uid):
         validate_uint(_('Administrator Level'), level)
     except ValidationError as err:
         return validation_err_response(err)
+
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((254, _('Permission denied.')) )
 
     if(level == '0'):
         check = forum.admin_check(operator)
@@ -332,15 +332,15 @@ def admin_add(uid):
 
 @app.route('/api/admin/remove/<int:uid>')
 def admin_remove(uid):
-    operator = session.get('uid')
-    if(not operator):
-        return json_response((254, _('Permission denied.')) )
-
     board = request.args.get('board', '')
     try:
         validate_board(_('Board Name'), board)
     except ValidationError as err:
         return validation_err_response(err)
+
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((254, _('Permission denied.')) )
 
     check = forum.admin_check(uid, board)
     if(check[0] != 0):
@@ -378,6 +378,40 @@ def admin_list():
     except ValidationError as err:
         return validation_err_response(err)
     return json_response(forum.admin_list(board))
+
+
+@app.route('/api/board/add', methods=['POST'])
+def board_add_or_update():
+    board = request.form.get('board', '')
+    name = request.form.get('name', '')
+    desc = request.form.get('desc', '')
+    announce = request.form.get('announce', '')
+    update = request.args.get('update', '')
+    original_board = request.args.get('original', '')
+    try:
+        validate_board(_('URL Name'), board)
+        validate(_('Name'), name, max=64, not_empty=True)
+        validate(_('Description'), desc, max=255, not_empty=True)
+        validate(_('Announcement'), announce)
+        if(update):
+            validate_board(_('Original URL Name'), original_board)
+    except ValidationError as err:
+        return validation_err_response(err)
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((254, _('Permission denied.')) )
+    check = forum.admin_check(operator)
+    if(check[0] != 0):
+        return json_response(check)
+    if(check[2]['admin']):
+        if(not update):
+            return json_response(forum.board_add(board, name, desc, announce))
+        else:
+            return json_response(forum.board_update(
+                original_board, board, name, desc, announce
+            ))
+    else:
+        return json_response((254, _('Permission denied.')) )
 
 
 @app.route('/api/board/list')
