@@ -21,7 +21,7 @@ def _(string):
     return string # reserved for l10n
 
 
-def validate(field, string, min=0, max=0, not_empty=False, regex=None):
+def validate(field, string, min=0, max=0, not_empty=False, in_list=None, regex=None):
     if(not string):
         # may be None
         string = ''
@@ -36,6 +36,8 @@ def validate(field, string, min=0, max=0, not_empty=False, regex=None):
         )
     if(not_empty and size == 0):
         raise ValidationError(_('%s should not be empty.') % field)
+    if(in_list and string not in in_list):
+        raise ValidationError(_('%s: Invalid value.') % field)
     if(regex and not regex.fullmatch(string)):
         if(size == 0):
             raise ValidationError(_('%s should not be empty.') % field)
