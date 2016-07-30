@@ -664,6 +664,12 @@ def post_remove(id):
         return permission_err_response(err)
 
 
+@app.route('/api/post/deleted-info/<int:id>')
+def post_deleted_info(id):
+    subpost = request.args.get('subpost')
+    return json_response(forum.post_deleted_info(id, bool(subpost)) )
+
+
 @app.route('/api/post/list')
 def post_list():
     parent = request.args.get('parent', '')
