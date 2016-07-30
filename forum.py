@@ -887,6 +887,18 @@ def post_get_board(id, subpost=False):
         return (1, db_err_msg(err))
 
 
+def post_get_author(id, subpost=False):
+    try:
+        if(not subpost):
+            query = Post.select().where(Post.id == id)
+        else:
+            query = Subpost.select().where(Subpost.id == id)
+        post = query.get()
+        return (0, OK_MSG, {'author': post.author.id})
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
 def post_add(parent, author, content, subpost=False, reply=0):
     # Parameter "author" is the UID of the author, which must be valid.
     date = now()
