@@ -617,7 +617,7 @@ def post_add():
     parent = request.form.get('parent', '')
     content = request.form.get('content', '')
     reply = request.form.get('reply', '0')
-    # subpost: argument from url
+    # subpost: argument from URL
     subpost = request.args.get('subpost', '')
     try:
         validate_id(_('Parent Topic/Post ID'), parent)
@@ -632,6 +632,25 @@ def post_add():
     return json_response(
         forum.post_add(parent, uid, content, bool(subpost), int(reply))
     )
+
+
+@app.route('/api/post/edit/<int:id>', methods=['POST'])
+def post_edit(id):
+    new_content = request.form.get('new_content')
+    # subpost: argument from URL
+    subpost = request.args.get('subpost')
+    try:
+        validate(_('New Content'), new_content, not_empty=True)
+    except ValidationError as err:
+        return validation_err_response(err)
+    get_author = forum.post_get_author(id, bool(subpost))
+    if(get_author[0] != 0):
+        return json_response(get_author)
+    author = get_author[2]['author']
+    if(author == session.get('uid')):
+        return json_response(forum.post_edit(id, new_content, bool(subpost)) )
+    else:
+        return json_response((254, _('Permission denied.')) )
 
 
 @app.route('/api/post/remove/<int:id>')
