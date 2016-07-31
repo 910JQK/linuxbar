@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    {% if result[0] == 0 %}
+    <title>{{ _('Email Address Verified') }}</title>
+    {% else %}  
+    <title>{{ _('Error Occurred') }}</title>
+    {% endif %}
+    <link rel="stylesheet" href="/static/global.css" />
+  </head>
+  <body class="full flexbox_center">
+    <div>
+      {% if result[0] == 0 %}
+      <h2>{{ _('Your account has been activated.') }}</h2>
+      <p style="text-align: center;">
+	<a href="{{ url_for('user_login_form') }}">{{ _('Sign in') }}</a>
+      </p>
+      {% else %}
+      <h2>{{ _('Something wrong happened.') }}</h2>
+      <p style="text-align: center;">
+	{{ result[1] }}
+      </p>
+      {% endif %}
+    </div>
+  </body>
+</html>
