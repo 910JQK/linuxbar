@@ -1,0 +1,14 @@
+{% from 'macros.html' import field %}
+{% extends 'form.html' %}
+
+{% block title %}{{ _('Login - %(site)s', site=config['site_name']) }}{% endblock %}
+{% block form_title %}{{ _('Login') }}{% endblock %}
+
+{% block form %}
+{{ field('login_name', _('Login Name'), _('Login Name can be either username or email address.')) }}
+{{ field('password', _('Password'), _("Your password. Won't be encrypted if not using HTTPS.")) }}
+{% endblock %}
+
+{% block buttons %}
+<button>{{ _('Sign in') }}</button>
+{% endblock %}

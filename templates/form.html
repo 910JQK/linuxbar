@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/global.css" />
+    <style>
+      label::after { content: ":"; }
+      .form_title { text-align: center; }
+      .field_desc { color: gray; font-size: 75%; }
+      #container { padding: 1em; border: 2px solid #333; border-radius: 6px; }
+      #container-buttons { text-align: center; }
+    </style>
+    {% block head %}
+    {% endblock %}
+  </head>
+  <body class="full flexbox_center">
+    <div id="container">
+      <h1 class="form_title">{% block form_title %}{% endblock %}</h1>
+      <form>
+	{% block form %}
+	{% endblock %}
+      </form>
+      <br/>
+      <div id="container-buttons">
+	{% block buttons %}
+	{% endblock %}
+      </div>
+    </div>
+  </body>
+</html>

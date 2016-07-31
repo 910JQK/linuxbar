@@ -1,0 +1,4 @@
+{% macro field(name, label, desc, type='text') %}
+<input type="{{ type }}" name="{{ name }}" placeholder="{{ label }}"></input>
+<p class="field_desc">{{ desc }}</p>
+{% endmacro %}
