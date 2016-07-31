@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
 
-from flask import Flask, Response, request, session, redirect, url_for, escape
+from flask import Flask, Response, request, session, redirect, url_for, \
+                  render_template
+from flask.ext.babel import Babel
 app = Flask(__name__)
+babel = Babel(app)
 
 import os
 import io
@@ -20,6 +23,10 @@ from validation import *
 # Enable debug mode for test
 DEBUG = True
 EMAIL_ADDRESS = 'no_reply@foo.bar'
+
+
+# Configurations for the site
+config = {}
 
 
 class ForumPermissionCheckError(Exception):
@@ -102,6 +109,11 @@ def permission_err_response(err):
     @return Response
     '''
     return json_response(err.args[0])
+
+
+@app.context_processor
+def inject_config():
+    return dict(config=config)
 
 
 @app.route('/')
@@ -189,11 +201,6 @@ def user_register():
         return json_response(result)
     data = result[2]
 
-    result_config = forum.config_get()
-    if(result_config[0] != 0):
-        return json_response(result_config)
-    config = result_config[2]
-
     site_name = config['site_name']
     site_url = config['site_url']
     activation_url = (
@@ -217,13 +224,17 @@ def user_register():
 
 @app.route('/user/activate/<int:uid>/<code>')
 def user_activate(uid, code):
-    # TODO: change into a page, not API returning unfriendly JSON.
-    # And don't forget to change URL sent above.
     try:
         validate_token(_('Activation Code'), code)
     except ValidationError as err:
-        return validation_err_response(err)
-    return json_response(forum.user_activate(uid, code))
+        return render_template(
+            'activated.html',
+            result = (255, 'Validation Error: %s' % str(err))
+        )
+    return render_template(
+        'activated.html',
+        result = forum.user_activate(uid, code)
+    )
 
 
 @app.route('/api/user/password-reset/get-token/<username>')
@@ -242,11 +253,6 @@ def user_password_reset_get_token(username):
     if(result[0] != 0):
         return json_response(result)
     data = result[2]
-
-    result_config = forum.config_get()
-    if(result_config[0] != 0):
-        return json_response(result_config)
-    config = result_config[2]
 
     try:
         send_mail(
@@ -287,7 +293,7 @@ def user_reset_password():
 
 
 @app.route('/api/user/login', methods=['POST'])
-def login():
+def user_login():
     if(session.get('uid')):
         return json_response((251, _('Already signed in.')) )
     login_name = request.form.get('login_name', '')
@@ -309,8 +315,13 @@ def login():
     return json_response(result)
 
 
+@app.route('/user/login')
+def user_login_form():
+    return render_template('form_login.html')
+
+
 @app.route('/user/logout')
-def logout():
+def user_logout():
     session.pop('uid', None)
     return redirect(url_for('index'))
 
@@ -727,5 +738,9 @@ def api_notification(type):
 
 
 if __name__ == '__main__':
+    result_config = forum.config_get()
+    if(result_config[0] != 0):
+        raise Exception('unable to load configuration from database')
+    config = result_config[2]
     app.secret_key = os.urandom(24)
     app.run(debug=DEBUG)
