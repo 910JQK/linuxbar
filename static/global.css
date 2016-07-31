@@ -1,0 +1,9 @@
+a { text-decoration: none; color: hsl(233, 90%, 50%); }
+
+.full { margin: 0px; width: 100vw; height: 100vh; }
+
+.flexbox_center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
