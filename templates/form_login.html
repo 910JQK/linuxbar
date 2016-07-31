@@ -6,7 +6,7 @@
 
 {% block form %}
 {{ field('login_name', _('Login Name'), _('Login Name can be either username or email address.')) }}
-{{ field('password', _('Password'), _("Your password. Won't be encrypted if not using HTTPS.")) }}
+{{ field('password', _('Password'), _("Your password. Won't be encrypted if not using HTTPS."), type='password') }}
 {% endblock %}
 
 {% block buttons %}
