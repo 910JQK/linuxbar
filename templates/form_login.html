@@ -1,8 +1,13 @@
-{% from 'macros.html' import field %}
+{% from 'macros.html' import field, submit %}
 {% extends 'form.html' %}
 
-{% block title %}{{ _('Login - %(site)s', site=config['site_name']) }}{% endblock %}
-{% block form_title %}{{ _('Login') }}{% endblock %}
+{% block title %}{{ _('Sign in - %(site)s', site=config['site_name']) }}{% endblock %}
+{% block form_title %}{{ _('Sign in') }}{% endblock %}
+
+{% block script %}
+var SUBMIT_URL = '/api/user/login';
+var REDIRECT_URL = '/';
+{% endblock %}
 
 {% block form %}
 {{ field('login_name', _('Login Name'), _('Login Name can be either username or email address.')) }}
@@ -10,5 +15,5 @@
 {% endblock %}
 
 {% block buttons %}
-<button>{{ _('Sign in') }}</button>
+{{ submit(_('Sign in')) }}
 {% endblock %}

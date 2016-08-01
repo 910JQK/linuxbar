@@ -6,25 +6,66 @@
     <link rel="stylesheet" href="/static/global.css" />
     <style>
       label::after { content: ":"; }
-      .form_title { text-align: center; }
       .field_desc { color: gray; font-size: 75%; }
+      .form_title, #message { text-align: center; }
       #container-buttons { text-align: center; }
     </style>
+    <script type="text/javascript" src="/static/toolkit.js"></script>
+    <script type="text/javascript">
+      function msg(text, type){
+	  message.textContent = text;
+	  if(type == 'ok')
+	      message.style.color = 'hsl(100, 80%, 45%)'
+	  else if(type == 'err')
+	      message.style.color = 'hsl(0, 90%, 45%)'
+	  else
+	      message.style.color = 'hsl(0, 0%, 20%)'
+      }
+      function submit() {
+	  POST(SUBMIT_URL, new FormData(form), function(xhr) {
+	      submit_btn.disabled = false
+	      result = JSON.parse(xhr.responseText);
+	      if(result.code == 0){
+		  msg(result.msg, 'ok')
+		  location.replace(REDIRECT_URL);
+	      } else {
+		  msg(result.msg, 'err')
+	      }
+	  }, err);
+	  submit_btn.disabled = true;
+	  msg(_('Loading ...'));
+      }
+      function err(status, text) {
+	  submit_btn.disabled = false;
+	  if(status != 0)
+	      msg(printf(_('Error: %1 %2'), status, text), 'err')
+	  else
+	      msg(_('Connection Error or Timeout'), 'err')
+      }
+      function init(){
+	  form.addEventListener('submit', submit)
+      }
+      window.addEventListener('load', init)
+    </script>
+    <script type="text/javascript">
+      {% block script %}
+      {% endblock %}
+    </script>
     {% block head %}
     {% endblock %}
   </head>
   <body class="full flexbox_center">
     <div id="container">
       <h1 class="form_title">{% block form_title %}{% endblock %}</h1>
-      <form>
+      <form id="form" action="javascript:void(0)">
 	{% block form %}
 	{% endblock %}
+	<p id="message">&nbsp;</p>
+	<div id="container-buttons">
+	  {% block buttons %}
+	  {% endblock %}
+	</div>
       </form>
-      <br/>
-      <div id="container-buttons">
-	{% block buttons %}
-	{% endblock %}
-      </div>
     </div>
   </body>
 </html>
