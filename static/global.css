@@ -2,7 +2,7 @@ body { font-family: sans-serif; background-color: hsl(0, 0%, 90%); }
 
 a { text-decoration: none; color: hsl(233, 90%, 50%); }
 
-button::-moz-focus-inner {
+button::-moz-focus-inner, input[type="submit"]::-moz-focus-inner {
     border: 0px;
 }
 
