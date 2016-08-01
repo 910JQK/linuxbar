@@ -4,10 +4,11 @@
  * @param String url
  * @param Object data
  * @param Function ok(XMLHttpRequest xhr)
- * @param Function err(XMLHttpRequest xhr)
+ * @param Function err(Number status, String statusText)
+ * @param Number timeout = 2000
  * @return XMLHttpRequest
  */
-function GET(url, data, ok, err) {
+function GET(url, data, ok, err, timeout) {
     var params = Object.keys(data).map(
 	k => encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
     ).join('&');
@@ -15,12 +16,13 @@ function GET(url, data, ok, err) {
     if(params)
 	url = url + '?' + params;
     xhr.open('GET', url);
+    xhr.timeout = timeout? timeout: 2000;
     xhr.onreadystatechange = function() {
 	if(xhr.readyState == 4) {
-	    if(xhr.status==200)
+	    if(xhr.status == 200)
 		ok(xhr);
 	    else
-		err(xhr);
+		err(xhr.status, xhr.statusText);
 	}
     };
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
@@ -35,21 +37,23 @@ function GET(url, data, ok, err) {
  * @param String url
  * @param Object data
  * @param Function ok(XMLHttpRequest xhr)
- * @param Function err(XMLHttpRequest xhr)
+ * @param Function err(Number status, String statusText)
+ * @param Number timeout = 2000
  * @return XMLHttpRequest
  */
-function POST(url, data, ok, err) {
+function POST(url, data, ok, err, timeout) {
     var params = Object.keys(data).map(
 	k => encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
     ).join('&');
     var xhr = new XMLHttpRequest();
     xhr.open('POST', url);
+    xhr.timeout = timeout? timeout: 2000;
     xhr.onreadystatechange = function() {
 	if(xhr.readyState == 4) {
-	    if(xhr.status==200)
+	    if(xhr.status == 200)
 		ok(xhr);
 	    else
-		err(xhr);
+		err(xhr.status, xhr.statusText);
 	}
     };
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
