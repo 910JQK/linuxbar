@@ -42,9 +42,14 @@ function GET(url, data, ok, err, timeout) {
  * @return XMLHttpRequest
  */
 function POST(url, data, ok, err, timeout) {
-    var params = Object.keys(data).map(
-	k => encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
-    ).join('&');
+    var params;
+    if(data instanceof FormData) {
+	params = data;
+    } else {
+	params = Object.keys(data).map(
+	    k => encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
+	).join('&');
+    }
     var xhr = new XMLHttpRequest();
     xhr.open('POST', url);
     xhr.timeout = timeout? timeout: 2000;
@@ -57,8 +62,10 @@ function POST(url, data, ok, err, timeout) {
 	}
     };
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.setRequestHeader('Content-length', params.length);
+    if(typeof params == 'string') {
+	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xhr.setRequestHeader('Content-length', params.length);
+    }
     xhr.send(params);
     return xhr;
 }
