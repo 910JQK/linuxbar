@@ -1,3 +1,12 @@
+/**
+ * Send a GET request
+ *
+ * @param String url
+ * @param Object data
+ * @param Function ok(XMLHttpRequest xhr)
+ * @param Function err(XMLHttpRequest xhr)
+ * @return XMLHttpRequest
+ */
 function GET(url, data, ok, err) {
     var params = Object.keys(data).map(
 	k => encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
@@ -20,6 +29,15 @@ function GET(url, data, ok, err) {
 }
 
 
+/**
+ * Send a POST request
+ *
+ * @param String url
+ * @param Object data
+ * @param Function ok(XMLHttpRequest xhr)
+ * @param Function err(XMLHttpRequest xhr)
+ * @return XMLHttpRequest
+ */
 function POST(url, data, ok, err) {
     var params = Object.keys(data).map(
 	k => encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
