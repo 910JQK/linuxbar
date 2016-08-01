@@ -1,5 +1,28 @@
+/* Reserved for l10n */
+function _(string) {
+    return string;
+}
+
+
 /**
- * Send a GET request
+ * Return a copy of "str" with placeholders replaced by the rest arguments.
+ * @param String str
+ * @param String ...args
+ * @return String
+ */
+function printf(){
+    var str = arguments[0];
+    var args = arguments;
+    str = str.replace(/%(\d+)|%{(\d+)}/g, function(match, number1, number2){
+	var number = number1? number1: number2;
+	return (typeof args[number] != 'undefined')? args[number]: match;
+    });
+    return str;
+}
+
+
+/**
+ * Send a GET request.
  *
  * @param String url
  * @param Object data
@@ -32,7 +55,7 @@ function GET(url, data, ok, err, timeout) {
 
 
 /**
- * Send a POST request
+ * Send a POST request.
  *
  * @param String url
  * @param Object data
