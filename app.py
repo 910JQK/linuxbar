@@ -125,7 +125,7 @@ def index():
     else:
         tip = ''
     return (
-        '<script type="text/javascript" src="static/debug.js"></script>'
+        '<script type="text/javascript" src="static/toolkit.js"></script>'
         + '<h1>It just works, but very ugly.</h1>'
         + tip
     )
