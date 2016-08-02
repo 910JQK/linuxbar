@@ -37,7 +37,7 @@ def gen_image(content):
 
     # ======================================================================
     # Code piece modified from https://github.com/lepture/captcha
-    # LICENSE: https://github.com/lepture/captcha/blob/master/LICENSE
+    # LICENSE: New BSD License
 
     image = Image.new('RGB', (WIDTH, HEIGHT))
     draw = ImageDraw.Draw(image)
