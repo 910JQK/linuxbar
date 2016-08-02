@@ -1,5 +1,5 @@
 {% macro field(name, label, desc, type='text') %}
-<input type="{{ type }}" name="{{ name }}" placeholder="{{ label }}" />
+<input type="{{ type }}" name="{{ name }}" aria-label="{{ label }}" placeholder="{{ label }}" />
 <p class="field_desc">{{ desc }}</p>
 {% endmacro %}
 {% macro submit(label) %}
