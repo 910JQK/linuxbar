@@ -145,6 +145,15 @@ function validate_size() {
 }
 
 
+function validate_password_confirmation() {
+    var password_input = query('input[name="password"]');
+    if(this.value != password_input.value)
+	this.setCustomValidity(_('Two fields are inconsistent.'));
+    else
+	this.setCustomValidity('');
+}
+
+
 function show_validation_message() {
     var desc = this.nextElementSibling;
     if(this.validity.valid) {
@@ -168,7 +177,9 @@ function show_validation_message() {
  * @param Boolean realtime
  * @return void
  */
-function init_size_validation(realtime) {
+function init_validation(realtime) {
+    /* Don't use the following methods together. */
+    /* A custom validation will conflict with another. */
     for(let input of query_all('input[data-min], input[data-max]')) {
 	input.addEventListener('change', validate_size);
 	input.addEventListener('change', show_validation_message);
@@ -179,5 +190,10 @@ function init_size_validation(realtime) {
 	/* The browser may save the previous data. */
 	if(input.value)
 	    validate_size.call(input);
+    }
+    for(let input of query_all('input[name="password_confirm"]')) {
+	input.addEventListener('change', validate_password_confirmation);
+	input.addEventListener('change', show_validation_message);
+	/* Validation of password confirmation should not be realtime. */
     }
 }
