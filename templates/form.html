@@ -12,17 +12,20 @@
      input[name="captcha"] { width: 5em; text-align: center; }
      input[name="captcha"] + .field_desc { text-align: center; }
      #captcha_image { cursor: pointer; }
+     [data-color="ok"] { color: hsl(100, 80%, 45%); }
+     [data-color="err"] { color: hsl(0, 90%, 45%); }
+     [data-color="loading"] { color: hsl(0, 0%, 20%); }
     </style>
     <script type="text/javascript" src="/static/toolkit.js"></script>
     <script type="text/javascript">
      function msg(text, type){
 	 message.textContent = text;
 	 if(type == 'ok')
-	     message.style.color = 'hsl(100, 80%, 45%)';
+	     message.dataset.color = 'ok';
 	 else if(type == 'err')
-	     message.style.color = 'hsl(0, 90%, 45%)';
+	     message.dataset.color = 'err';
 	 else
-	     message.style.color = 'hsl(0, 0%, 20%)';
+	     message.dataset.color = 'loading';
      }
      function submit() {
 	 POST(SUBMIT_URL, new FormData(form), function(xhr) {
@@ -30,6 +33,9 @@
 	     result = JSON.parse(xhr.responseText);
 	     if(result.code == 0){
 		 msg(result.msg, 'ok');
+		 if(LOCK_FORM_AFTER_OK)
+		     for(let input of query_all('input'))
+			 input.disabled = true;
 		 if(REDIRECT_URL)
 		     location.replace(REDIRECT_URL);
 	     } else {
@@ -63,7 +69,7 @@
      }
      function init() {
 	 form.addEventListener('submit', submit);
-	 init_size_validation();
+	 init_size_validation(REALTIME_VALIDATION);
      }
      window.addEventListener('load', init);
     </script>

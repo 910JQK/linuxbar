@@ -1,7 +1,8 @@
 {% macro field(name, label, desc, type='text', min=0, max=0, required=false, maxlength=0) %}
 {% if name == 'captcha' %}<img id="captcha_image" src="/captcha/get" onclick="refresh_captcha();focus_captcha_input();"/><br/>{% endif %}
 <input type="{{ type }}" name="{{ name }}" aria-label="{{ label }}" placeholder="{{ label }}" {% if min %}data-min="{{ min }}"{% endif %} {% if max %}data-max="{{ max }}"{% endif %} {% if required %}required="required"{% endif %} {% if maxlength %}maxlength="{{ maxlength }}"{% endif %} {% if name == 'captcha' %}autocomplete="off"{% endif %} />
-<p class="field_desc">{{ desc }}</p>
+{# Tip: Don't add a element here! Input.nextElementSibling() is used to show validation message. #}
+<p class="field_desc" data-desc="{{ desc }}">{{ desc }}</p>
 {% endmacro %}
 {% macro submit(label) %}
 <input type="submit" id="submit_btn" value="{{ label }}" />
