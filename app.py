@@ -315,6 +315,11 @@ def user_login():
     return json_response(result)
 
 
+@app.route('/user/register')
+def user_register_form():
+    return render_template('form_register.html')
+
+
 @app.route('/user/login')
 def user_login_form():
     return render_template('form_login.html')
