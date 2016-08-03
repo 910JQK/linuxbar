@@ -5,8 +5,10 @@
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="/static/global.css" />
     <style>
-     .field_desc { color: gray; font-size: 75%; }
-     .form_title, #message, #container-buttons { text-align: center; }
+     .field_desc { color: gray; font-size: 75%; text-align: left; }
+     .form_title, #form, #message, #container-buttons { text-align: center; }
+     #message { margin: auto; max-width: 20em; }
+     #container-buttons { margin-top: 0.3em; }
     </style>
     <script type="text/javascript" src="/static/toolkit.js"></script>
     <script type="text/javascript">
@@ -25,7 +27,8 @@
 	     result = JSON.parse(xhr.responseText);
 	     if(result.code == 0){
 		 msg(result.msg, 'ok')
-		 location.replace(REDIRECT_URL);
+		 if(REDIRECT_URL)
+		     location.replace(REDIRECT_URL);
 	     } else {
 		 msg(result.msg, 'err')
 	     }
