@@ -14,7 +14,8 @@ var REALTIME_VALIDATION = true;
 {% block form %}
 {{ field('mail', _('Email Address'), _('Used to enable your account and reset your password.'), min=3, max=64, required=true) }}
 {{ field('name', _('Nickname'), _('Nickname as well as identifier.'), min=3, max=32, required=true) }}
-{{ field('password', _('Password'), _("Your password. Won't be encrypted if not using HTTPS."), type='password', required=true) }}
+{{ field('password', _('Password'), _("Your password. Won't be encrypted if not using HTTPS."), type='password', min=1, required=true) }}
+{{ field('password_confirm', _('Password Confirmation'), _('Repeat your password to confirm.'), type='password', required=true) }}
 {{ field('captcha', _('Captcha'), _('Input the text on the image. Click the image to change.'), required=true, maxlength=4) }}
 {% endblock %}
 

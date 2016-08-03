@@ -13,7 +13,7 @@ var REALTIME_VALIDATION = false;
 
 {% block form %}
 {{ field('login_name', _('Login Name'), _('Login Name can be either username or email address.'), min=3, max=32, required=true) }}
-{{ field('password', _('Password'), _("Your password. Won't be encrypted if not using HTTPS."), type='password', required=true) }}
+{{ field('password', _('Password'), _("Your password. Won't be encrypted if not using HTTPS."), type='password', min=1, required=true) }}
 {% endblock %}
 
 {% block buttons %}
