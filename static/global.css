@@ -1,3 +1,6 @@
+/* TODO: Firstly make style for PC and then make style for mobile devices. */
+/* TODO: Use different layout for different viewport sizes. */
+
 body { font-family: sans-serif; background-color: hsl(0, 0%, 90%); }
 
 a { text-decoration: none; color: hsl(233, 90%, 50%); }
