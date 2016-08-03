@@ -1,0 +1,21 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import field, submit %}
+
+{% block title %}{{ _('Sign up - %(site)s', site=config['site_name']) }}{% endblock %}
+{% block form_title %}{{ _('Sign up') }}{% endblock %}
+
+{% block script %}
+var SUBMIT_URL = '/api/user/register';
+var REDIRECT_URL = '';
+{% endblock %}
+
+{% block form %}
+{{ field('mail', _('Email Address'), _('Used to enable your account and reset your password.'), min=3, max=64, required=true) }}
+{{ field('name', _('Nickname'), _('Nickname as well as identifier.'), min=3, max=32, required=true) }}
+{{ field('password', _('Password'), _("Your password. Won't be encrypted if not using HTTPS."), type='password', required=true) }}
+{{ field('captcha', _('Captcha'), _('Input the text on the image. Click the image to change.'), required=true, maxlength=4) }}
+{% endblock %}
+
+{% block buttons %}
+{{ submit(_('Sign up')) }}
+{% endblock %}
