@@ -8,7 +8,10 @@
      .field_desc { color: gray; font-size: 75%; text-align: left; }
      .form_title, #form, #message, #container-buttons { text-align: center; }
      #message { margin: auto; max-width: 20em; }
-     #container-buttons { margin-top: 0.3em; }
+     #container-buttons { margin-top: 0.75em; }
+     input[name="captcha"] { width: 5em; text-align: center; }
+     input[name="captcha"] + .field_desc { text-align: center; }
+     #captcha_image { cursor: pointer; }
     </style>
     <script type="text/javascript" src="/static/toolkit.js"></script>
     <script type="text/javascript">
@@ -23,14 +26,20 @@
      }
      function submit() {
 	 POST(SUBMIT_URL, new FormData(form), function(xhr) {
-	     submit_btn.disabled = false
+	     submit_btn.disabled = false;
 	     result = JSON.parse(xhr.responseText);
 	     if(result.code == 0){
-		 msg(result.msg, 'ok')
+		 msg(result.msg, 'ok');
 		 if(REDIRECT_URL)
 		     location.replace(REDIRECT_URL);
 	     } else {
-		 msg(result.msg, 'err')
+		 msg(result.msg, 'err');
+		 if(query('input[name="captcha"]')) {
+		     refresh_captcha();
+		     /* 250: wrong captcha */
+		     if(result.code == 250)
+			 focus_captcha_input()
+		 }
 	     }
 	 }, err);
 	 submit_btn.disabled = true;
@@ -43,7 +52,16 @@
 	 else
 	     msg(_('Connection Error or Timeout'), 'err');
      }
-     function init(){
+     function refresh_captcha() {
+	 query('input[name="captcha"]').value = '';
+	 query('#captcha_image').src = (
+	     '/captcha/get?' + new Date().getTime()
+	 );
+     }
+     function focus_captcha_input() {
+	 query('input[name="captcha"]').focus()
+     }
+     function init() {
 	 form.addEventListener('submit', submit);
 	 init_size_validation();
      }
