@@ -1,5 +1,5 @@
-{% macro field(name, label, desc, type='text') %}
-<input type="{{ type }}" name="{{ name }}" aria-label="{{ label }}" placeholder="{{ label }}" />
+{% macro field(name, label, desc, type='text', min=0, max=0, required=false) %}
+<input type="{{ type }}" name="{{ name }}" aria-label="{{ label }}" placeholder="{{ label }}" {% if min %}data-min="{{ min }}"{% endif %} {% if max %}data-max="{{ max }}"{% endif %} {% if required %}required="required"{% endif %} />
 <p class="field_desc">{{ desc }}</p>
 {% endmacro %}
 {% macro submit(label) %}

@@ -1,5 +1,5 @@
-{% from 'macros.html' import field, submit %}
 {% extends 'form.html' %}
+{% from 'macros.html' import field, submit %}
 
 {% block title %}{{ _('Sign in - %(site)s', site=config['site_name']) }}{% endblock %}
 {% block form_title %}{{ _('Sign in') }}{% endblock %}
@@ -10,8 +10,8 @@ var REDIRECT_URL = '/';
 {% endblock %}
 
 {% block form %}
-{{ field('login_name', _('Login Name'), _('Login Name can be either username or email address.')) }}
-{{ field('password', _('Password'), _("Your password. Won't be encrypted if not using HTTPS."), type='password') }}
+{{ field('login_name', _('Login Name'), _('Login Name can be either username or email address.'), min=3, max=32) }}
+{{ field('password', _('Password'), _("Your password. Won't be encrypted if not using HTTPS."), type='password', required=true) }}
 {% endblock %}
 
 {% block buttons %}
