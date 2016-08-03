@@ -145,14 +145,37 @@ function validate_size() {
 }
 
 
+function show_validation_message() {
+    var desc = this.nextElementSibling;
+    if(this.validity.valid) {
+	desc.textContent = desc.dataset.desc;
+	desc.dataset.color = '';
+    } else {
+	desc.textContent = this.validationMessage;
+	if(this.value === '')
+	    desc.textContent = printf(
+		_('%1 cannot be empty.'),
+		this.placeholder
+	    );
+	desc.dataset.color = 'err';
+    }
+}
+
+
 /**
  * Add event handlers for size-type form validation.
  *
+ * @param Boolean realtime
  * @return void
  */
-function init_size_validation() {
+function init_size_validation(realtime) {
     for(let input of query_all('input[data-min], input[data-max]')) {
 	input.addEventListener('change', validate_size);
+	input.addEventListener('change', show_validation_message);
+	if(realtime){
+	    input.addEventListener('keyup', validate_size);
+	    input.addEventListener('keyup', show_validation_message);
+	}
 	/* The browser may save the previous data. */
 	if(input.value)
 	    validate_size.call(input);
