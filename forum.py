@@ -77,6 +77,8 @@ def user_register(mail, name, password):
     if(check_empty(password)):
         return (4, _('Password cannot be empty.'))
 
+    mail = mail.lower()
+
     try:
         if(User.select().where(User.mail == mail)):
             return (5, _('Mail address already in use.'))
@@ -205,7 +207,7 @@ def user_login(login_name, password):
     try:
         query = User.select().where(User.name == login_name)
         if(not query):
-            query = User.select().where(User.mail == login_name)
+            query = User.select().where(User.mail == login_name.lower())
 
         if(not query):
             return (2, _('No such user.'))
