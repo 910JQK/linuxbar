@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+{% from 'macros.html' import avatar %}
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    {% if index %}
+      <title>{{ config['site_name'] }}</title>
+    {% else %}
+      <title>{{ board ~ ' - ' ~ config['site_name'] }}</title>
+    {% endif %}
+    <link rel="stylesheet" href="/static/global.css" />
+    <style>
+      li { list-style-type: none; }
+      .topic { display: flex; justify-content: space-between; }
+      .reply_count { text-align: center; vertical-align: middle; }
+      .container_middle { padding: 0em 5em; }
+      .title { font-size: 115%; }
+      .container_right .avatar, .container_right .name { vertical-align: middle; }
+    </style>
+  </head>
+  <body class="box_horizontal_center">
+    <div id="container">
+      <header>
+	<h1>{{ config['site_name'] }}</h1>
+      </header>
+      <hr/>
+      <ul class="topic_list">
+	{% for topic in data['list'] %}
+	  <li class="topic" data-tid="{{ topic['tid'] }}">
+	    <div class="container_left box_center">
+	      <div class="reply_count">{{ topic['reply_count'] }}</div>
+	    </div>
+	    <div class="container_middle">
+	      <div class="title">
+		<a target="_blank" href="">{{ topic['title'] }}</a>
+	      </div>
+	      <div class="summary">{{ topic['summary'] }}</div>
+	    </div>
+	    <div class="container_right">
+	      <div class="author" data-uid="{{ topic['author']['uid'] }}">
+		{{ avatar(topic['author']['mail']) }}
+		<span class="name">{{ topic['author']['name'] }}</span>
+	      </div>
+	      <div class="last_post_author" data-uid="{{ topic['last_post_author']['uid'] }}">
+		{{ avatar(topic['last_post_author']['mail']) }}
+		<span class="name">{{ topic['last_post_author']['name'] }}</span>
+	      </div>
+	    </div>
+	  </li>
+	{% endfor %}
+      </ul>
+    </div>
+  </body>
+</html>
