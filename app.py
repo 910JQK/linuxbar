@@ -93,13 +93,19 @@ def json_response(result):
     return Response(json.dumps(formatted_result), mimetype='application/json')
 
 
-def validation_err_response(err):
+def validation_err_response(err, json=True):
     '''Generate responses for validation errors
 
     @param ValidationError err
     @return Response
     '''
-    return json_response((255, _('Validation error: %s') % str(err)) )
+    if(json):
+        return json_response((255, _('Validation error: %s') % str(err)) )
+    else:
+        return render_template(
+            'error.html',
+            result = (255, _('Validation error: %s') % str(err))
+        )
 
 
 def permission_err_response(err):
@@ -129,6 +135,26 @@ def index():
         + '<h1>It just works, but very ugly.</h1>'
         + tip
     )
+
+
+@app.route('/board/<name>')
+def board(name):
+    pn = request.args.get('pn', '1')
+    try:
+        validate_id(_('Page Number'), pn)
+    except ValidationError as err:
+        return validation_err_response(err, json=False)
+    result = forum.topic_list(name, int(pn), 30)
+    if(result[0] != 0):
+        return render_template('error.html', result=result)
+    else:
+        return render_template(
+            'topic_list.html',
+            index = False,
+            pn = int(pn),
+            board = name,
+            data = result[2]
+        )
 
 
 @app.route('/captcha/get')
@@ -227,14 +253,12 @@ def user_activate(uid, code):
     try:
         validate_token(_('Activation Code'), code)
     except ValidationError as err:
-        return render_template(
-            'activated.html',
-            result = (255, 'Validation Error: %s' % str(err))
-        )
-    return render_template(
-        'activated.html',
-        result = forum.user_activate(uid, code)
-    )
+        return validation_err_response(err, json=False)
+    result = forum.user_activate(uid, code)
+    if(result[0] != 0):
+        return render_template('error.html', result=result)
+    else:
+        return render_template('activated.html')
 
 
 @app.route('/api/user/password-reset/get-token/<username>')
