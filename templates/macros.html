@@ -4,6 +4,11 @@
 {# Tip: Don't add a element here! Input.nextElementSibling() is used to show validation message. #}
 <p class="field_desc" data-desc="{{ desc }}">{{ desc }}</p>
 {% endmacro %}
+
 {% macro submit(label) %}
 <input type="submit" id="submit_btn" value="{{ label }}" />
+{% endmacro %}
+
+{% macro avatar(email_md5, size=16) %}
+<img class="avatar" src="https://www.gravatar.com/avatar/{{ email_md5 }}?d=mm&s={{ size }}" />
 {% endmacro %}
