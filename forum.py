@@ -28,6 +28,10 @@ def now():
     return datetime.datetime.now()
 
 
+def md5(string):
+    return hashlib.md5(bytes(string, encoding='utf8')).hexdigest()
+
+
 def sha256(string):
     return hashlib.sha256(bytes(string, encoding='utf8')).hexdigest()
 
@@ -222,7 +226,7 @@ def user_login(login_name, password):
         if(not user.activated):
             return (4, _('User %s has NOT been activated.') % user.name)
 
-        data = {'uid': user.id, 'name': user.name, 'mail': user.mail}
+        data = {'uid': user.id, 'name': user.name, 'mail': md5(user.mail)}
         return (0, _('Login successfully.'), data)
     except Exception as err:
         return (1, db_err_msg(err))
@@ -301,14 +305,14 @@ def admin_list(board=''):
                 list.append({
                     'uid': admin.user.id,
                     'name': admin.user.name,
-                    'mail': admin.user.mail
+                    'mail': md5(admin.user.mail)
                 })
             else:
                 list.append({
                     'user': {
                         'uid': admin.user.id,
                         'name': admin.user.name,
-                        'mail': admin.user.mail
+                        'mail': md5(admin.user.mail)
                     },
                     'level': admin.level
                 })
@@ -524,7 +528,7 @@ def ban_info(uid, board=''):
                 'operator': {
                     'uid': ban.operator.id,
                     'name': ban.operator.name,
-                    'mail': ban.operator.mail
+                    'mail': md5(ban.operator.mail)
                 },
                 'date': ban.date.timestamp(),
                 'expire_date': ban.expire_date.timestamp(),
@@ -579,12 +583,12 @@ def ban_list(page, count_per_page, board=''):
                 'user': {
                     'uid': ban.user.id,
                     'name': ban.user.name,
-                    'mail': ban.user.mail
+                    'mail': md5(ban.user.mail)
                 },
                 'operator': {
                     'uid': ban.operator.id,
                     'name': ban.operator.name,
-                    'mail': ban.operator.mail
+                    'mail': md5(ban.operator.mail)
                 },
                 'date': ban.date.timestamp(),
                 'expire_date': ban.expire_date.timestamp(),
@@ -633,7 +637,7 @@ def ban_add(uid, days, operator, board=''):
                     'operator': {
                         'uid': ban.operator.id,
                         'name': ban.operator.name,
-                        'mail': ban.operator.mail
+                        'mail': md5(ban.operator.mail)
                     },
                     'date': ban.date.timestamp(),
                     'expire_date': ban.expire_date.timestamp(),
@@ -845,12 +849,12 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
                 'author': {
                     'uid': topic.author.id,
                     'name': topic.author.name,
-                    'mail': topic.author.mail
+                    'mail': md5(topic.author.mail)
                 },
                 'last_post_author': {
                     'uid': topic.last_post_author.id,
                     'name': topic.last_post_author.name,
-                    'mail': topic.last_post_author.mail
+                    'mail': md5(topic.last_post_author.mail)
                 },
                 'reply_count': topic.reply_count,
                 'date': topic.date.timestamp(),
@@ -861,7 +865,7 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
                 item['delete_operator'] = {
                     'uid': topic.delete_operator.id,
                     'name': topic.delete_operator.name,
-                    'mail': topic.delete_operator.mail
+                    'mail': md5(topic.delete_operator.mail)
                 }
             list.append(item)
         return (0, OK_MSG, {'list': list, 'count': count})
@@ -1083,7 +1087,7 @@ def post_list(parent, page, count_per_page, subpost=False):
                     'delete_operator': {
                         'uid': post.delete_operator.id,
                         'name': post.delete_operator.name,
-                        'mail': post.delete_operator.mail
+                        'mail': md5(post.delete_operator.mail)
                     }
                 }
             else:
@@ -1092,7 +1096,7 @@ def post_list(parent, page, count_per_page, subpost=False):
                     'author': {
                         'uid': post.author.id,
                         'name': post.author.name,
-                        'mail': post.author.mail
+                        'mail': md5(post.author.mail)
                     },
                     'date': post.date.timestamp()
                 }
@@ -1132,12 +1136,12 @@ def post_deleted_info(id, subpost=False):
             'author': {
                 'uid': post.author.id,
                 'name': post.author.name,
-                'mail': post.author.mail
+                'mail': md5(post.author.mail)
             },
             'delete_operator': {
                 'uid': post.delete_operator.id,
                 'name': post.delete_operator.name,
-                'mail': post.delete_operator.mail
+                'mail': md5(post.delete_operator.mail)
             },
             'date': post.date.timestamp(),
             'delete_date': post.delete_date.timestamp()
@@ -1257,7 +1261,7 @@ def reply_get(uid, page, count_per_page):
                 'author': {
                     'uid': reply.author.id,
                     'name': reply.author.name,
-                    'mail': reply.author.mail
+                    'mail': md5(reply.author.mail)
                 }
             }
             if(reply.edit_date):
@@ -1378,7 +1382,7 @@ def at_get(uid, page, count_per_page):
                 'author': {
                     'uid': at.caller.id,
                     'name': at.caller.name,
-                    'mail': at.caller.mail
+                    'mail': md5(at.caller.mail)
                 }
             }
             if(at.post.edit_date):
