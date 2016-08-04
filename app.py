@@ -260,7 +260,7 @@ def user_password_reset_get_token(username):
             addr_from = EMAIL_ADDRESS,
             addr_to = data['mail'],
             content = (
-                _('Verification Code: %s (Valid in 10 minutes)')
+                _('Verification Code: %s (Valid in 90 minutes)')
                 % data['token']
             )
         )
@@ -272,7 +272,7 @@ def user_password_reset_get_token(username):
 
 
 @app.route('/api/user/password-reset/reset', methods=['POST'])
-def user_reset_password():
+def user_password_reset():
     username = request.form.get('username' ,'')
     token = request.form.get('token', '')
     password = request.form.get('password', '')
@@ -329,6 +329,11 @@ def user_login_form():
 def user_logout():
     session.pop('uid', None)
     return redirect(url_for('index'))
+
+
+@app.route('/user/password-reset')
+def user_password_reset_form():
+    return render_template('form_password_reset.html')
 
 
 @app.route('/api/admin/check/<int:uid>')
