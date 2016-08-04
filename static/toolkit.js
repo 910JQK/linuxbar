@@ -122,7 +122,7 @@ function utf8sizeof(string) {
 
 
 /**
- * Check if the UTF-8 size of the value of a <input> is in appropriate range. 
+ * Check if the UTF-8 size of the value of an `<input>` is in proper range.
  * Change event handler for form validation.
  *
  * @this HTMLInputElement
@@ -145,6 +145,13 @@ function validate_size() {
 }
 
 
+/**
+ * Check if two password fields are consistent.
+ * Change event handler for form validation.
+ *
+ * @this HTMLInputElement
+ * @return void
+ */
 function validate_password_confirmation() {
     var password_input = query('input[name="password"]');
     if(this.value != password_input.value)
@@ -154,6 +161,13 @@ function validate_password_confirmation() {
 }
 
 
+/**
+ * Show validation message in the description field below an `<input>`.
+ * Change event handler for form validation.
+ *
+ * @this HTMLInputElement
+ * @return void
+ */
 function show_validation_message() {
     var desc = this.nextElementSibling;
     if(this.validity.valid) {
@@ -172,7 +186,7 @@ function show_validation_message() {
 
 
 /**
- * Add event handlers for size-type form validation.
+ * Add event handlers for size-type and password-confirmation form validation.
  *
  * @param Boolean realtime
  * @return void
@@ -191,9 +205,15 @@ function init_validation(realtime) {
 	if(input.value)
 	    validate_size.call(input);
     }
-    for(let input of query_all('input[name="password_confirm"]')) {
-	input.addEventListener('change', validate_password_confirmation);
-	input.addEventListener('change', show_validation_message);
+    var input_confirm = query('input[name="password_confirm"]');
+    if(input_confirm) {
+	let input_password = query('input[name="password"]');
+	input_confirm.addEventListener('change', validate_password_confirmation);
 	/* Validation of password confirmation should not be realtime. */
+	input_confirm.addEventListener('change', show_validation_message);
+
+	input_password.addEventListener('change', function(){
+	    input_confirm.value = '';
+	});
     }
 }
