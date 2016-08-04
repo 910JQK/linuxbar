@@ -36,12 +36,31 @@ button:disabled, input[type="submit"]:disabled {
     color: hsl(0, 0%, 60%);
 }
 
-.full { margin: 0px; width: 100vw; height: 100vh; }
+body.box_center {
+    margin: 0px;
+    width: 100vw;
+    height: 100vh;
+}
 
-.flexbox_center {
+.box_center {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+body.box_horizontal_center {
+    margin: 0px;
+    width: 100vw;
+}
+
+.box_horizontal_center {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.box_horizontal_center > #container {
+    margin-top: 3.6em;
 }
 
 #container {
