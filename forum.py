@@ -227,7 +227,7 @@ def user_login(login_name, password):
             return (4, _('User %s has NOT been activated.') % user.name)
 
         data = {'uid': user.id, 'name': user.name, 'mail': md5(user.mail)}
-        return (0, _('Login successfully.'), data)
+        return (0, _('Signed in successfully.'), data)
     except Exception as err:
         return (1, db_err_msg(err))
 
