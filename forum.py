@@ -127,7 +127,7 @@ def user_remove(uid):
 
 def user_password_reset_get_token(uid):
     date = now()
-    expire_date = date + datetime.timedelta(minutes=10)
+    expire_date = date + datetime.timedelta(minutes=90)
     token = gen_token()
     try:
         query = User.select().where(User.id == uid)
@@ -149,7 +149,7 @@ def user_password_reset_get_token(uid):
             rec.token = encrypted_token
             rec.expire_date = expire_date
             rec.save()
-        return (0, _('Verification code has sent to your email address.'),
+        return (0, _('Verification code has sent to you.'),
                 {'mail': user.mail, 'token': token})
     except Exception as err:
         return (1, db_err_msg(err))
