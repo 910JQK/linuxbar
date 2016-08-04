@@ -5,14 +5,14 @@
 {% block form_title %}{{ _('Sign in') }}{% endblock %}
 
 {% block script %}
-var SUBMIT_URL = '/api/user/login';
+var SUBMIT_URL = '{{ url_for('user_login') }}';
 var REDIRECT_URL = '/';
 var LOCK_FORM_AFTER_OK = false;
 var REALTIME_VALIDATION = false;
 {% endblock %}
 
 {% block form %}
-{{ field('login_name', _('Login Name'), _('Login Name can be either username or email address.'), min=3, max=32, required=true) }}
+{{ field('login_name', _('Login Name'), _('Login Name can be either nickname or email address.'), min=3, max=32, required=true) }}
 {{ field('password', _('Password'), _("Your password. Won't be encrypted if not using HTTPS."), type='password', min=1, required=true) }}
 {% endblock %}
 

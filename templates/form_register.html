@@ -5,7 +5,7 @@
 {% block form_title %}{{ _('Sign up') }}{% endblock %}
 
 {% block script %}
-var SUBMIT_URL = '/api/user/register';
+var SUBMIT_URL = '{{ url_for('user_register') }}';
 var REDIRECT_URL = '';
 var LOCK_FORM_AFTER_OK = true;
 var REALTIME_VALIDATION = true;

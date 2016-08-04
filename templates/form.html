@@ -16,6 +16,10 @@
      [data-color="err"] { color: hsl(0, 90%, 45%); }
      [data-color="loading"] { color: hsl(0, 0%, 20%); }
     </style>
+    <style>
+     {% block style %}
+     {% endblock %}
+    </style>
     <script type="text/javascript" src="/static/toolkit.js"></script>
     <script type="text/javascript">
      function msg(text, type){
@@ -27,8 +31,8 @@
 	 else
 	     message.dataset.color = 'loading';
      }
-     function submit() {
-	 POST(SUBMIT_URL, new FormData(form), function(xhr) {
+     function submit(url) {
+	 POST(url, new FormData(form), function(xhr) {
 	     submit_btn.disabled = false;
 	     result = JSON.parse(xhr.responseText);
 	     if(result.code == 0){
@@ -37,10 +41,10 @@
 		     for(let input of query_all('input'))
 			 input.disabled = true;
 		 if(REDIRECT_URL)
-		     location.replace(REDIRECT_URL);
+		     setTimeout(() => location.replace(REDIRECT_URL), 800)
 	     } else {
 		 msg(result.msg, 'err');
-		 if(query('input[name="captcha"]')) {
+		 if(captcha_image) {
 		     refresh_captcha();
 		     /* 250: wrong captcha */
 		     if(result.code == 250)
@@ -60,7 +64,7 @@
      }
      function refresh_captcha() {
 	 query('input[name="captcha"]').value = '';
-	 query('#captcha_image').src = (
+	 captcha_image.src = (
 	     '/captcha/get?' + new Date().getTime()
 	 );
      }
@@ -68,7 +72,7 @@
 	 query('input[name="captcha"]').focus()
      }
      function init() {
-	 form.addEventListener('submit', submit);
+	 form.addEventListener('submit', () => submit(SUBMIT_URL));
 	 init_validation(REALTIME_VALIDATION);
      }
      window.addEventListener('load', init);
