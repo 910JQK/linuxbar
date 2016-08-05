@@ -10,12 +10,24 @@
     {% endif %}
     <link rel="stylesheet" href="/static/global.css" />
     <style>
-      li { list-style-type: none; }
-      .topic { display: flex; justify-content: space-between; }
-      .reply_count { text-align: center; vertical-align: middle; }
-      .container_middle { padding: 0em 5em; }
-      .title { font-size: 115%; }
-      .container_right .avatar, .container_right .name { vertical-align: middle; }
+     li { list-style-type: none; }
+     .topic_list { padding: 0em; margin: 0em; }
+     .topic {
+	 display: flex;
+	 justify-content: space-between;
+	 border-bottom: 1px solid hsl(0, 0%, 93%);
+	 padding: 0.5em 0em;
+     }
+     .reply_count {
+	 text-align: center;
+	 padding: 0.1em 2em;
+	 border: 1px solid hsl(0, 0%, 80%);
+	 border-radius: 3px;
+	 background: hsl(0, 0%, 97%);
+     }
+     .container_middle { padding: 0em 1.2em; min-width: 40em; }
+     .title { margin-bottom: 0.25em; font-size: 115%; }
+     .container_right .avatar, .container_right .name { vertical-align: middle; }
     </style>
   </head>
   <body class="box_horizontal_center">
@@ -27,7 +39,7 @@
       <ul class="topic_list">
 	{% for topic in data['list'] %}
 	  <li class="topic" data-tid="{{ topic['tid'] }}">
-	    <div class="container_left box_center">
+	    <div class="container_left">
 	      <div class="reply_count">{{ topic['reply_count'] }}</div>
 	    </div>
 	    <div class="container_middle">
