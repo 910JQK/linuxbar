@@ -12,3 +12,19 @@
 {% macro avatar(email_md5, size=16) %}
 <img class="avatar" src="https://www.gravatar.com/avatar/{{ email_md5 }}?d=mm&s={{ size }}" />
 {% endmacro %}
+
+{% macro pager(count, items_per_page, pn) %}
+  {# TODO: a lot of pages #}
+  {% set pages = count // items_per_page %}
+  {% if pages > 1 %}
+    <div class="pager box_horizontal_center">
+      {% for i in range(1, pages+1) %}
+	{% if i != pn %}
+	  <a class="page_label page_link" href="?pn={{ i }}">{{ i }}</a>
+	{% else %}
+	  <span class="page_label page_current">{{ i }}</span>
+	{% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endmacro %}

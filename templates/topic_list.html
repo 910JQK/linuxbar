@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import avatar %}
+{% from 'macros.html' import avatar, pager %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="/static/global.css" />
     <style>
      li { list-style-type: none; }
-     .topic_list { padding: 0em; margin: 0em; }
+     .topic_list { padding: 0em; margin: 0em 0em 2em 0em; }
      .topic {
 	 display: flex;
 	 justify-content: space-between;
@@ -23,7 +23,7 @@
 	 padding: 0.1em 2em;
 	 border: 1px solid hsl(0, 0%, 80%);
 	 border-radius: 3px;
-	 background: hsl(0, 0%, 97%);
+	 background-color: hsl(0, 0%, 97%);
      }
      .container_middle { padding: 0em 1.2em; width: 35em; }
      .title { margin-bottom: 0.25em; font-size: 115%; }
@@ -76,6 +76,7 @@
 	  </li>
 	{% endfor %}
       </ul>
+      {{ pager(data['count'], items_per_page, pn) }}
     </div>
   </body>
 </html>
