@@ -25,9 +25,18 @@
 	 border-radius: 3px;
 	 background: hsl(0, 0%, 97%);
      }
-     .container_middle { padding: 0em 1.2em; min-width: 40em; }
+     .container_middle { padding: 0em 1.2em; width: 35em; }
      .title { margin-bottom: 0.25em; font-size: 115%; }
+     .container_right { width: 13.5em; }
      .container_right .avatar, .container_right .name { vertical-align: middle; }
+     .info { display: flex; justify-content: space-between; }
+     .author { flex-shrink: 1; }
+     .date { flex-shrink: 0; }
+     .title, .summary, .author {
+	 overflow: hidden;
+	 text-overflow: ellipsis;
+	 white-space: nowrap;
+     }
     </style>
   </head>
   <body class="box_horizontal_center">
@@ -49,13 +58,19 @@
 	      <div class="summary">{{ topic['summary'] }}</div>
 	    </div>
 	    <div class="container_right">
-	      <div class="author" data-uid="{{ topic['author']['uid'] }}">
-		{{ avatar(topic['author']['mail']) }}
-		<span class="name">{{ topic['author']['name'] }}</span>
+	      <div class="info info_topic">
+		<span class="author" data-uid="{{ topic['author']['uid'] }}">
+		  {{ avatar(topic['author']['mail']) }}
+		  <span class="name">{{ topic['author']['name'] }}</span>
+		</span>
+		<span class="date">{{ topic['date'] | date }}</span>
 	      </div>
-	      <div class="last_post_author" data-uid="{{ topic['last_post_author']['uid'] }}">
-		{{ avatar(topic['last_post_author']['mail']) }}
-		<span class="name">{{ topic['last_post_author']['name'] }}</span>
+	      <div class="info info_last_post">
+		<span class="author" data-uid="{{ topic['last_post_author']['uid'] }}">
+		  {{ avatar(topic['last_post_author']['mail']) }}
+		  <span class="name">{{ topic['last_post_author']['name'] }}</span>
+		</span>
+		<span class="date">{{ topic['last_post_date'] | date }}</span>
 	      </div>
 	    </div>
 	  </li>
