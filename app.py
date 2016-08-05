@@ -189,20 +189,24 @@ def index():
 @app.route('/board/<name>')
 def board(name):
     pn = request.args.get('pn', '1')
+    items_per_page = int(config['count_topic'])
     try:
         validate_id(_('Page Number'), pn)
     except ValidationError as err:
         return validation_err_response(err, json=False)
-    result = forum.topic_list(name, int(pn), 30)
+    result = forum.topic_list(name, int(pn), items_per_page)
     if(result[0] != 0):
         return render_template('error.html', result=result)
+    elif(len(result[2]['list']) == 0):
+        return render_template('error.html', result=(248, _('No such page.')) )
     else:
         return render_template(
             'topic_list.html',
             index = False,
-            pn = int(pn),
             board = name,
-            data = result[2]
+            data = result[2],
+            pn = int(pn),
+            items_per_page = items_per_page
         )
 
 
