@@ -69,3 +69,11 @@ body.box_horizontal_center {
     background-color: white;
     background-image: linear-gradient(to bottom, hsl(0, 0%, 98%), hsl(0, 0%, 99%));
 }
+
+.page_label {
+    font-size: 120%;
+    padding: 0.1em 0.5em;
+    margin: 0em 0.1em;
+    border: 1px solid hsl(0, 0%, 80%);
+    background-color: hsl(0, 0%, 97%);
+}
