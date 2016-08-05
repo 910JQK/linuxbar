@@ -6,6 +6,9 @@ from peewee import *
 
 DEFAULT_SITE_NAME = 'Linuxbar'
 DEFAULT_SITE_URL = 'http://127.0.0.1:5000'
+DEFAULT_TOPICS_PER_PAGE = '30'
+DEFAULT_POSTS_PER_PAGE = '25'
+DEFAULT_SUBPOSTS_PER_PAGE = '10'
 
 
 # use sqlite temporarily
@@ -156,6 +159,9 @@ if __name__ == '__main__':
     print('Writing default configurations ...')
     Config.create(name='site_name', value=DEFAULT_SITE_NAME)
     Config.create(name='site_url', value=DEFAULT_SITE_URL)
+    Config.create(name='count_topic', value=DEFAULT_TOPICS_PER_PAGE)
+    Config.create(name='count_post', value=DEFAULT_POSTS_PER_PAGE)
+    Config.create(name='count_subpost', value=DEFAULT_SUBPOSTS_PER_PAGE)
     print('Default configurations have been written into database.')
 
     db.close()
