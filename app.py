@@ -24,6 +24,8 @@ from validation import *
 # Enable debug mode for test
 DEBUG = True
 EMAIL_ADDRESS = 'no_reply@foo.bar'
+# Codepoints, must be greater than 3
+SUMMARY_LENGTH = 60
 
 
 # Configurations for the site
@@ -628,8 +630,8 @@ def topic_add():
     content = request.form.get('content', '')
     if(not content):
         content = title
-    # TODO: summary
-    summary = ''
+    s_len = SUMMARY_LENGTH
+    summary = (content[:s_len-3] + '...') if len(content) > s_len else content
     try:
         validate_board(_('Board Name'), board)
         validate(_('Title'), title, max=64, not_empty=True)
