@@ -78,6 +78,6 @@ body.box_horizontal_center {
     background-color: hsl(0, 0%, 97%);
 }
 
-[data-color="ok"] { color: hsl(100, 80%, 45%); }
-[data-color="err"] { color: hsl(0, 90%, 45%); }
-[data-color="loading"] { color: hsl(0, 0%, 20%); }
+p[data-color="ok"], span[data-color="ok"] { color: hsl(100, 80%, 45%); }
+p[data-color="err"], span[data-color="err"] { color: hsl(0, 90%, 45%); }
+p[data-color="loading"], span[data-color="loading"] { color: hsl(0, 0%, 20%); }
