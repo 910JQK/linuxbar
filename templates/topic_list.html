@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import avatar, pager, field %}
+{% from 'macros.html' import avatar, pager, field, submit %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -38,21 +38,29 @@
 	 text-overflow: ellipsis;
 	 white-space: nowrap;
      }
-     #add_post_form {
+     #add_topic_form {
 	 width: 45em;
      }
-     #add_post_form > textarea {
+     #add_topic_form > textarea {
 	 display: block;
 	 margin-bottom: 1em;
      }
-     #add_post_form > [name="title"], #add_post_form > [name="content"] {
+     #add_topic_form > [name="title"], #add_topic_form > [name="content"] {
 	 box-sizing: border-box;
 	 width: 100%;
      }
     </style>
     <script type="text/javascript" src="/static/toolkit.js"></script>
+    <script type="text/javascript" src="/static/form.js"></script>
     <script type="text/javascript">
+     var form_controller;
      function init() {
+	 form_controller = new AjaxForm(
+	     add_topic_form,
+	     '{{ url_for('topic_add') }}',
+	     false,
+	     '{% if index  %}/{% else %}{{ url_for('board', name=board) }}{% endif %}'
+	 );
 	 init_validation(true);
      }
      window.addEventListener('load', init);
@@ -98,10 +106,12 @@
       {{ pager(data['count'], items_per_page, pn) }}
       {% if session.get('uid') %}
 	<p class="bold">Publish a new topic</p>
-	<form id="add_post_form">
+	<form id="add_topic_form" action="javascript:void(0)">
+	  <input type="hidden" name="board" value="{{ board }}" />
 	  {{ field('title', 'Title', '', min=1, max=64, required=true, maxlength=64) }}
-	  <textarea name="content" rows="12"></textarea>
-	  <input type="submit" id="publish_btn" value="{{ _('Publish') }}" />
+	  <textarea name="content" rows="12" placeholder="[Input Content Here]"></textarea>
+	  <p class="message"></p>
+	  {{ submit(_('Publish')) }}
 	</form>
       {% endif %}
     </div>

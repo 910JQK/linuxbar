@@ -7,70 +7,28 @@
     <style>
      #container > h1 { margin-top: 0px; }
      .field_desc { color: gray; font-size: 75%; text-align: left; }
-     .form_title, #form, #message, #container-buttons { text-align: center; }
-     #message { margin: auto; max-width: 20em; }
+     .message { margin: auto; max-width: 20em; }
+     .form_title, .message, #form, #container-buttons { text-align: center; }
      #container-buttons { margin-top: 0.75em; }
      input[name="captcha"] { width: 5em; text-align: center; }
      input[name="captcha"] + .field_desc { text-align: center; }
-     #captcha_image { cursor: pointer; }
+     .captcha_image { cursor: pointer; }
     </style>
     <style>
      {% block style %}
      {% endblock %}
     </style>
     <script type="text/javascript" src="/static/toolkit.js"></script>
+    <script type="text/javascript" src="/static/form.js"></script>
     <script type="text/javascript">
-     function msg(text, type){
-	 message.textContent = text;
-	 if(type == 'ok')
-	     message.dataset.color = 'ok';
-	 else if(type == 'err')
-	     message.dataset.color = 'err';
-	 else
-	     message.dataset.color = 'loading';
-     }
-     function submit(url) {
-	 POST(url, new FormData(form), function(xhr) {
-	     submit_btn.disabled = false;
-	     result = JSON.parse(xhr.responseText);
-	     if(result.code == 0){
-		 msg(result.msg, 'ok');
-		 if(LOCK_FORM_AFTER_OK)
-		     for(let input of query_all('input'))
-			 input.disabled = true;
-		 if(REDIRECT_URL)
-		     setTimeout(() => location.replace(REDIRECT_URL), 800)
-	     } else {
-		 msg(result.msg, 'err');
-		 if(captcha_image) {
-		     refresh_captcha();
-		     /* 250: wrong captcha */
-		     if(result.code == 250)
-			 focus_captcha_input()
-		 }
-	     }
-	 }, err);
-	 submit_btn.disabled = true;
-	 msg(_('Loading ...'));
-     }
-     function err(status, text) {
-	 submit_btn.disabled = false;
-	 if(status != 0)
-	     msg(printf(_('Error: %1 %2'), status, text), 'err');
-	 else
-	     msg(_('Connection Error or Timeout'), 'err');
-     }
-     function refresh_captcha() {
-	 query('input[name="captcha"]').value = '';
-	 captcha_image.src = (
-	     '/captcha/get?' + new Date().getTime()
-	 );
-     }
-     function focus_captcha_input() {
-	 query('input[name="captcha"]').focus()
-     }
+     var form_controller;
      function init() {
-	 form.addEventListener('submit', () => submit(SUBMIT_URL));
+	 form_controller = new AjaxForm(
+	     form,
+	     SUBMIT_URL,
+	     LOCK_FORM_AFTER_OK,
+	     REDIRECT_URL
+	 );
 	 init_validation(REALTIME_VALIDATION);
      }
      window.addEventListener('load', init);
@@ -88,7 +46,7 @@
       <form id="form" action="javascript:void(0)">
 	  {% block form %}
 	  {% endblock %}
-	  <p id="message">&nbsp;</p>
+	  <p class="message">&nbsp;</p>
 	  <div id="container-buttons">
 	      {% block buttons %}
 	      {% endblock %}
