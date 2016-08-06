@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import avatar, pager %}
+{% from 'macros.html' import avatar, pager, field %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="/static/global.css" />
     <style>
      li { list-style-type: none; }
-     .topic_list { padding: 0em; margin: 0em 0em 2em 0em; }
+     .bold { font-weight: bold; }
+     #topic_list { padding: 0em; margin: 0em 0em 2em 0em; }
      .topic {
 	 display: flex;
 	 justify-content: space-between;
@@ -37,7 +38,25 @@
 	 text-overflow: ellipsis;
 	 white-space: nowrap;
      }
+     #add_post_form {
+	 width: 45em;
+     }
+     #add_post_form > textarea {
+	 display: block;
+	 margin-bottom: 1em;
+     }
+     #add_post_form > [name="title"], #add_post_form > [name="content"] {
+	 box-sizing: border-box;
+	 width: 100%;
+     }
     </style>
+    <script type="text/javascript" src="/static/toolkit.js"></script>
+    <script type="text/javascript">
+     function init() {
+	 init_validation(true);
+     }
+     window.addEventListener('load', init);
+    </script>
   </head>
   <body class="box_horizontal_center">
     <div id="container">
@@ -45,7 +64,7 @@
 	<h1>{{ config['site_name'] }}</h1>
       </header>
       <hr/>
-      <ul class="topic_list">
+      <ul id="topic_list">
 	{% for topic in data['list'] %}
 	  <li class="topic" data-tid="{{ topic['tid'] }}">
 	    <div class="container_left">
@@ -77,6 +96,14 @@
 	{% endfor %}
       </ul>
       {{ pager(data['count'], items_per_page, pn) }}
+      {% if session.get('uid') %}
+	<p class="bold">Publish a new topic</p>
+	<form id="add_post_form">
+	  {{ field('title', 'Title', '', min=1, max=64, required=true, maxlength=64) }}
+	  <textarea name="content" rows="12"></textarea>
+	  <input type="submit" id="publish_btn" value="{{ _('Publish') }}" />
+	</form>
+      {% endif %}
     </div>
   </body>
 </html>
