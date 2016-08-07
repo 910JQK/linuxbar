@@ -6,7 +6,7 @@
     {% if index %}
       <title>{{ config['site_name'] }}</title>
     {% else %}
-      <title>{{ board ~ ' - ' ~ config['site_name'] }}</title>
+      <title>{{ data['board_name'] ~ ' - ' ~ config['site_name'] }}</title>
     {% endif %}
     <link rel="stylesheet" href="/static/global.css" />
     <style>
@@ -69,7 +69,11 @@
   <body class="box_horizontal_center">
     <div id="container">
       <header>
-	<h1>{{ config['site_name'] }}</h1>
+	{% if index %}
+	  <h1>{{ config['site_name'] }}</h1>
+	{% else %}
+	  <h1>{{ data['board_name'] }}</h1>
+	{% endif %}
       </header>
       <hr/>
       <ul id="topic_list">
