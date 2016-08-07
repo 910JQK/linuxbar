@@ -175,6 +175,8 @@ def format_date(timestamp):
 
 @app.route('/')
 def index():
+    return board('')
+    '''
     uid = session.get('uid')
     if(uid):
         # for debugging
@@ -186,6 +188,7 @@ def index():
         + '<h1>It just works, but very ugly.</h1>'
         + tip
     )
+    '''
 
 
 @app.route('/board/<name>')
@@ -204,7 +207,7 @@ def board(name):
     else:
         return render_template(
             'topic_list.html',
-            index = False,
+            index = (not name),
             board = name,
             data = result[2],
             pn = int(pn),
