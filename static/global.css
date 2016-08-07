@@ -59,7 +59,7 @@ body.box_horizontal_center {
 }
 
 .box_horizontal_center > #container {
-    margin-top: 3.6em;
+    margin: 3.6em 0em;
 }
 
 #container {
