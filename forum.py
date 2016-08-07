@@ -804,12 +804,14 @@ def topic_revert(tid):
 
 
 def topic_list(board, page, count_per_page, only_show_deleted=False):
+    board_name = ''
     try:
         if(board):
             query = Board.select().where(Board.short_name == board)
             if(not query):
                 return (2, _('No such board.'))
             board_rec = query.get()
+            board_name = board_rec.name
             count = Topic.select().where(
                 Topic.board == board_rec,
                 Topic.deleted == only_show_deleted
@@ -868,7 +870,11 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
                     'mail': md5(topic.delete_operator.mail)
                 }
             list.append(item)
-        return (0, OK_MSG, {'list': list, 'count': count})
+        return (0, OK_MSG, {
+            'list': list,
+            'count': count,
+            'board_name': board_name
+        })
     except Exception as err:
         return (1, db_err_msg(err))
 
