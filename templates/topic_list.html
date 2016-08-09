@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import avatar, pager, field, submit %}
+{% from 'macros.html' import avatar, user_info, pager, field, submit %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -32,7 +32,7 @@
      .container_right .avatar, .container_right .name { vertical-align: middle; }
      .info { display: flex; justify-content: space-between; }
      .author { flex-shrink: 1; }
-     .date { flex-shrink: 0; }
+     .date { flex-shrink: 0; margin-left: 1em; }
      .title, .summary, .author {
 	 overflow: hidden;
 	 text-overflow: ellipsis;
@@ -68,6 +68,7 @@
   </head>
   <body class="box_horizontal_center">
     <div id="container">
+      {{ user_info() }}
       <header>
 	{% if index %}
 	  <h1>{{ config['site_name'] }}</h1>

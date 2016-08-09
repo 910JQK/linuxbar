@@ -13,6 +13,21 @@
 <img class="avatar" src="https://www.gravatar.com/avatar/{{ email_md5 }}?d=mm&s={{ size }}" />
 {% endmacro %}
 
+{% macro user_info() %}
+  <div class="user_info" id="top_right">
+    {% if session.get('uid') %}
+      {{ avatar(session['mail']) }}
+      <span>{{ session['name'] }}</span>
+      <span class="separator">|</span>
+      <a href="/user/logout">{{ _('Logout') }}</a>
+    {% else %}
+      <a href="/user/register">{{ _('Register') }}</a>
+      <span class="separator">|</span>
+      <a href="/user/login">{{ _('Login') }}</a>
+    {% endif %}
+  </div>
+{% endmacro %}
+
 {% macro pager(count, items_per_page, pn) %}
   {# TODO: a lot of pages #}
   {% set pages = count // items_per_page %}
