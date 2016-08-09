@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+{% from 'macros.html' import avatar, user_info, pager, field, submit %}
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ topic_info['title'] ~ ' - ' ~ config['site_name'] }}</title>
+    <link rel="stylesheet" href="/static/global.css" />
+    <style>
+     ol { list-style-type: none; }
+     h1 { font-size: 1.5em; }
+     .post { display: flex; width: 55em; }
+     .container_left {
+	 flex-shrink: 0;
+	 width: 10em;
+	 display: flex;	 
+	 flex-direction: column;
+	 align-items: center;
+     }
+     .container_left > :first-child {
+	 margin-top: 1.5em;
+	 margin-bottom: 0.2em;
+     }
+     .container_right { flex-grow: 1; padding: 2.25em 1.5em; }
+     .post_body { min-height: 16em; }
+     .post_footer, .subpost_footer { display: flex; justify-content: flex-end; }
+     .subpost { display: flex; align-items: flex-start; }
+     .subpost > :first-child { flex-shrink: 0; margin-right: 0.5em; }
+     .subpost_right_container { flex-grow: 1; }
+    </style>
+  </head>
+  <body class="box_horizontal_center">
+    <div id="container">
+      {{ user_info() }}
+      <header>
+	<h1>{{ topic_info['title'] }}</h1>
+      </header>
+      <hr/>
+      <ol>
+	{% for post in data['list'] %}
+	  <li class="post">
+	    <div class="container_left">
+	      {{ avatar(post['author']['mail'], 6) }}
+	      <div class="name">{{ post['author']['name'] }}</div>
+	    </div>
+	    <div class="container_right">
+	      <div class="post_body">{{ post['content'] }}</div>
+	      <div class="post_footer">		
+		<div class="post_info">
+		  <span class="date">{{ post['date'] | date }}</span>
+		</div>
+	      </div>
+	      <ol class="post_subpost_list">
+		{% for subpost in post['subposts']['list'] %}
+		  <li class="subpost">
+		    {{ avatar(subpost['author']['mail'], 2) }}
+		    <div class="subpost_right_container">
+		      <div class="subpost_body">{{ subpost['content'] }}</div>
+		      <div class="subpost_footer">
+			<div class="subpost_info">
+			  <span class="date">{{ subpost['date'] | date }}</span>
+			</div>
+		      </div>
+		    </div>
+		  </li>
+		{% endfor %}
+	      </ol>
+	    </div>
+	  </li>
+	{% endfor %}
+      </ol>
+    </div>
+  </body>
+</html>
