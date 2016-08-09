@@ -19,13 +19,13 @@
   <div class="user_info" id="top_right">
     {% if session.get('uid') %}
       {{ avatar(session['mail']) }}
-      <span>{{ session['name'] }}</span>
+      <span class="name">{{ session['name'] }}</span>
       <span class="separator">|</span>
-      <a href="/user/logout">{{ _('Logout') }}</a>
+      <a class="link_logout" href="/user/logout">{{ _('Logout') }}</a>
     {% else %}
-      <a href="/user/register">{{ _('Register') }}</a>
+      <a class="link_register" href="/user/register">{{ _('Register') }}</a>
       <span class="separator">|</span>
-      <a href="/user/login">{{ _('Login') }}</a>
+      <a class="link_login" href="/user/login">{{ _('Login') }}</a>
     {% endif %}
   </div>
 {% endmacro %}
