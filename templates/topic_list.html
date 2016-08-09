@@ -108,7 +108,7 @@
 	{% endfor %}
       </ul>
       {{ pager(data['count'], items_per_page, pn) }}
-      {% if session.get('uid') %}
+      {% if session.get('uid') and not index %}
 	<p class="bold">Publish a new topic</p>
 	<form id="add_topic_form" action="javascript:void(0)">
 	  <input type="hidden" name="board" value="{{ board }}" />
