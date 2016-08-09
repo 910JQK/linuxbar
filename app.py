@@ -176,19 +176,6 @@ def format_date(timestamp):
 @app.route('/')
 def index():
     return board('')
-    '''
-    uid = session.get('uid')
-    if(uid):
-        # for debugging
-        tip = '<p>[Signed in] UID = %d</p>' % uid
-    else:
-        tip = ''
-    return (
-        '<script type="text/javascript" src="static/toolkit.js"></script>'
-        + '<h1>It just works, but very ugly.</h1>'
-        + tip
-    )
-    '''
 
 
 @app.route('/board/<name>')
@@ -390,6 +377,8 @@ def user_login():
     result = forum.user_login(login_name, password)
     if(result[0] == 0):
         session['uid'] = result[2]['uid']
+        session['name'] = result[2]['name']
+        session['mail'] = result[2]['mail']
         if(long_term):
             session.permanent = True
         else:
@@ -410,6 +399,8 @@ def user_login_form():
 @app.route('/user/logout')
 def user_logout():
     session.pop('uid', None)
+    session.pop('name', None)
+    session.pop('mail', None)
     return redirect(url_for('index'))
 
 
