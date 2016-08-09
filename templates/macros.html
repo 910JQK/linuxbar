@@ -1,3 +1,5 @@
+{% set FONT_SIZE = 16 %}
+
 {% macro field(name, label, desc, type='text', min=0, max=0, required=false, maxlength=0) %}
 {% if name == 'captcha' %}<img class="captcha_image" src="/captcha/get" onclick="refresh_captcha();focus_captcha_input();"/><br/>{% endif %}
 <input type="{{ type }}" name="{{ name }}" aria-label="{{ label }}" placeholder="{{ label }}" {% if min %}data-min="{{ min }}"{% endif %} {% if max %}data-max="{{ max }}"{% endif %} {% if required %}required="required"{% endif %} {% if maxlength %}maxlength="{{ maxlength }}"{% endif %} {% if name == 'captcha' %}autocomplete="off"{% endif %} />
@@ -9,8 +11,8 @@
 <input type="submit" class="submit_btn" value="{{ label }}" />
 {% endmacro %}
 
-{% macro avatar(email_md5, size=16) %}
-<img class="avatar" src="https://www.gravatar.com/avatar/{{ email_md5 }}?d=mm&s={{ size }}" />
+{% macro avatar(email_md5, size=1) %}
+<img class="avatar" src="https://www.gravatar.com/avatar/{{ email_md5 }}?d=mm&s={{ size*FONT_SIZE }}" />
 {% endmacro %}
 
 {% macro user_info() %}
