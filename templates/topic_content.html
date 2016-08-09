@@ -25,6 +25,7 @@
      .post_footer, .subpost_footer { display: flex; justify-content: flex-end; }
      .subpost { display: flex; align-items: flex-start; }
      .subpost > :first-child { flex-shrink: 0; margin-right: 0.5em; }
+     .subpost_author_name::after { content: ":"; }
      .subpost_right_container { flex-grow: 1; }
     </style>
   </head>
@@ -54,7 +55,10 @@
 		  <li class="subpost">
 		    {{ avatar(subpost['author']['mail'], 2) }}
 		    <div class="subpost_right_container">
-		      <div class="subpost_body">{{ subpost['content'] }}</div>
+		      <div class="subpost_body">
+			<span class="subpost_author_name">{{ subpost['author']['name'] }}</span>
+			<span class="subpost_content">{{ subpost['content'] }}</span>
+		      </div>
 		      <div class="subpost_footer">
 			<div class="subpost_info">
 			  <span class="date">{{ subpost['date'] | date }}</span>
