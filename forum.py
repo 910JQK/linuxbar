@@ -700,13 +700,23 @@ def ban_remove(uid, board=''):
         return (1, db_err_msg(err))
 
 
-def topic_get_board(tid):
+def topic_info(tid):
     try:
         query = Topic.select().where(Topic.id == tid)
         if(not query):
             return (2, _('No such topic.'))
         topic = query.get()
-        return (0, OK_MSG, {'board': topic.board.short_name})
+        return (0, OK_MSG, {
+            'board': topic.board.short_name,
+            'title': topic.title,
+            'author': {
+                'uid': topic.author.id,
+                'name': topic.author.name,
+                'mail': md5(topic.author.mail)
+            },
+            'date': topic.date.timestamp(),
+            'last_post_date': topic.last_post_date.timestamp()
+        })
     except Exception as err:
         return (1, db_err_msg(err))
 
