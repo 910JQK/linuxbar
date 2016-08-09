@@ -97,6 +97,15 @@ def json_response(result):
     return Response(json.dumps(formatted_result), mimetype='application/json')
 
 
+def err_response(result):
+    '''Generate responses for general errors (result[0] != 0)
+
+    @param tuple result (int, str[, dict])
+    @return Response
+    '''
+    return render_template('error.html', result=result)
+
+
 def validation_err_response(err, json=True):
     '''Generate responses for validation errors
 
@@ -188,9 +197,9 @@ def board(name):
         return validation_err_response(err, json=False)
     result = forum.topic_list(name, int(pn), items_per_page)
     if(result[0] != 0):
-        return render_template('error.html', result=result)
+        return err_response(result)
     elif(len(result[2]['list']) == 0):
-        return render_template('error.html', result=(248, _('No such page.')) )
+        return err_response((248, _('No such page.')) )
     else:
         return render_template(
             'topic_list.html',
@@ -199,6 +208,44 @@ def board(name):
             data = result[2],
             pn = int(pn),
             items_per_page = items_per_page
+        )
+
+
+@app.route('/topic/<int:tid>')
+def topic(tid):
+    pn = request.args.get('pn', '1')
+    count_post = int(config['count_post'])
+    count_subpost = int(config['count_subpost'])
+
+    try:
+        validate_id(_('Page Number'), pn)
+    except ValidationError as err:
+        return validation_err_response(err, json=False)
+
+    result_info = forum.topic_info(tid)
+    if(result_info[0] != 0):
+        return err_response(result_info)
+    topic_info = result_info[2]
+
+    result = forum.post_list(tid, int(pn), count_post)
+    if(result[0] != 0):
+        return err_response(result)
+    elif(len(result[2]['list']) == 0):
+        return err_response((248, _('No such page.')) )
+    else:
+        data = result[2]
+        for post in data['list']:
+            result_subpost = forum.post_list(post['pid'], 1, count_subpost)
+            if(result_subpost[0] != 0):
+                return err_response(result_subpost)
+            post['subposts'] = result_subpost[2]
+        return render_template(
+            'topic_content.html',
+            topic_info = topic_info,
+            data = result[2],
+            pn = int(pn),
+            count_post = count_post,
+            count_subpost = count_subpost
         )
 
 
@@ -301,7 +348,7 @@ def user_activate(uid, code):
         return validation_err_response(err, json=False)
     result = forum.user_activate(uid, code)
     if(result[0] != 0):
-        return render_template('error.html', result=result)
+        return err_response(result)
     else:
         return render_template('activated.html')
 
@@ -650,7 +697,7 @@ def topic_move(tid):
     if(not operator):
         return json_response((254, _('Permission denied.')) )
 
-    result_board = forum.topic_get_board(tid)
+    result_board = forum.topic_info(tid)
     if(result_board[0] != 0):
         return json_response(result_board)
     board = result_board[2]['board']
@@ -672,7 +719,7 @@ def topic_remove(tid):
     if(not operator):
         return json_response((254, _('Permission denied.')) )
 
-    result_board = forum.topic_get_board(tid)
+    result_board = forum.topic_info(tid)
     if(result_board[0] != 0):
         return json_response(result_board)
     board = result_board[2]['board']
