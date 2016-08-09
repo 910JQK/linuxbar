@@ -235,7 +235,9 @@ def topic(tid):
     else:
         data = result[2]
         for post in data['list']:
-            result_subpost = forum.post_list(post['pid'], 1, count_subpost)
+            result_subpost = forum.post_list(
+                post['pid'], 1, count_subpost, subpost=True
+            )
             if(result_subpost[0] != 0):
                 return err_response(result_subpost)
             post['subposts'] = result_subpost[2]
