@@ -8,7 +8,7 @@
     <style>
      ol { list-style-type: none; }
      h1 { font-size: 1.5em; }
-     .post { display: flex; width: 55em; }
+     .post { display: flex; width: 55em; word-wrap: break-word; }
      .container_left {
 	 flex-shrink: 0;
 	 width: 10em;
@@ -20,13 +20,13 @@
 	 margin-top: 1.5em;
 	 margin-bottom: 0.2em;
      }
-     .container_right { flex-grow: 1; padding: 2.25em 1.5em; }
-     .post_body { min-height: 16em; }
+     .container_right { flex-grow: 1; padding: 2.25em 1.5em; min-width: 0; }
+     .post_body { min-height: 16em; white-space: pre-wrap; }
      .post_footer, .subpost_footer { display: flex; justify-content: flex-end; }
      .subpost { display: flex; align-items: flex-start; }
      .subpost > :first-child { flex-shrink: 0; margin-right: 0.5em; }
      .subpost_author_name::after { content: ":"; }
-     .subpost_right_container { flex-grow: 1; }
+     .subpost_right_container { flex-grow: 1; min-width: 0; }
     </style>
   </head>
   <body class="box_horizontal_center">
