@@ -243,6 +243,7 @@ def topic(tid):
             post['subposts'] = result_subpost[2]
         return render_template(
             'topic_content.html',
+            tid = tid,
             topic_info = topic_info,
             data = result[2],
             pn = int(pn),
