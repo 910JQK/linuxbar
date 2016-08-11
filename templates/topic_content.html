@@ -15,8 +15,6 @@
 	 display: flex;
 	 width: 55em;
 	 word-wrap: break-word;
-     }
-     .post:not(:last-child) {
 	 border-bottom: 1px solid hsl(0, 0%, 75%);
      }
      .container_left {
@@ -34,7 +32,7 @@
      }
      .container_right {
 	 flex-grow: 1;
-	 padding: 2.25em 1.5em 0.55em 1.5em;
+	 padding: 1.85em 1.5em 0.55em 1.5em;
 	 min-width: 0;
      }
      .post_body { min-height: 16em; white-space: pre-wrap; }
@@ -55,7 +53,23 @@
      .subpost_author_name::after { content: ":"; }
      .subpost_left_container { flex-shrink: 0; margin-right: 0.8em; }
      .subpost_right_container { flex-grow: 1; min-width: 0; }
+     #add_post_form { width: 45em; }
+     #add_post_form > [name="content"] { box-sizing: border-box; width: 100%; }
     </style>
+    <script type="text/javascript" src="/static/toolkit.js"></script>
+    <script type="text/javascript" src="/static/form.js"></script>
+    <script type="text/javascript">
+     var add_post_form_controller;
+     function init() {
+	 add_post_form_controller = new AjaxForm(
+	     add_post_form,
+	     '{{ url_for('post_add') }}',
+	     false,
+	     location.pathname
+	 );
+     }
+     window.addEventListener('load', init);
+    </script>
   </head>
   <body class="box_horizontal_center">
     <div id="container">
@@ -102,6 +116,15 @@
 	  </li>
 	{% endfor %}
       </ol>
+      {% if session.get('uid') %}
+	<p class="bold">Reply this topic</p>
+	<form id="add_post_form" action="javascript:void(0)">
+	  <input type="hidden" name="parent" value="{{ tid }}" />
+	  <textarea name="content" rows="12" placeholder="[Input Content Here]" required="required"></textarea>
+          <p class="message"></p>
+          {{ submit(_('Reply')) }}
+	</form>
+      {% endif %}
     </div>
   </body>
 </html>
