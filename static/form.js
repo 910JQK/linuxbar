@@ -97,6 +97,7 @@ function init_validation(realtime) {
 
 
 function AjaxForm(form, url, lock_form_after_ok, redirect_url) {
+    var controller = this;
     this.form = form;
     this.message_box = form.querySelector('.message');
     this.submit_btn = form.querySelector('.submit_btn');
@@ -104,10 +105,16 @@ function AjaxForm(form, url, lock_form_after_ok, redirect_url) {
     this.lock_form_after_ok = Boolean(lock_form_after_ok);
     this.redirect_url = redirect_url;
     var captcha_input = form.querySelector('[name="captcha"]');
+    var captcha_image;
     if(captcha_input){
 	this.has_captcha = true;
 	this.captcha_image = form.querySelector('.captcha_image');
 	this.captcha_input = captcha_input;
+	captcha_image = form.querySelector('img.captcha_image');
+	captcha_image.addEventListener('click', function() {
+	    controller.refresh_captcha();
+	    controller.focus_captcha_input();
+	});
     } else {
 	this.has_captcha = false;
     }
