@@ -764,7 +764,10 @@ def post_add():
     subpost = request.args.get('subpost', '')
     try:
         validate_id(_('Parent Topic/Post ID'), parent)
-        validate(_('Content'), content, not_empty=True)
+        if(not subpost):
+            validate(_('Content'), content, not_empty=True)
+        else:
+            validate(_('Content'), content, min=1, max=200)
         if(reply != '0'):
             validate_id(_('Subpost to Reply'), reply)
     except ValidationError as err:
