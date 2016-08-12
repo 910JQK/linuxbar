@@ -36,16 +36,23 @@
 	 min-width: 0;
      }
      .post_body { min-height: 16em; white-space: pre-wrap; }
-     .post_footer, .subpost_footer { display: flex; justify-content: flex-end; }
-     .post_subpost_list:not(.empty) {
-	 margin-top: 0.5em;
+     .float_right_box { display: flex; justify-content: flex-end; }
+     .post_subpost_list {
+	 margin: 0.5em 0em;
 	 border: 1px solid hsl(0, 0%, 93%);
+	 background-color: hsl(0, 0%, 97%);
+     }
+     .post_subpost_list.empty:not(.expanded) {
+	 border: none;
+	 background-color: hsla(0, 0%, 0%, 0);
+     }
+     .post_subpost_list.empty:not(.expanded) > .subpost_list_footer {
+	 padding: 0;
      }
      .subpost {
 	 display: flex;
 	 align-items: flex-start;
 	 padding: 1em 1em 0.6em 1em;
-	 background-color: hsl(0, 0%, 97%);
      }
      .subpost:not(:last-child) {
 	 border-bottom: 1px dotted hsl(0, 0%, 85%);
@@ -53,6 +60,17 @@
      .subpost_author_name::after { content: ":"; }
      .subpost_left_container { flex-shrink: 0; margin-right: 0.8em; }
      .subpost_right_container { flex-grow: 1; min-width: 0; }
+     .subpost_list_footer { padding: 0.5em 1em; }
+     .reply_submit_btn_wrapper {
+	 display: flex;
+	 justify-content: space-between;
+     }
+     .reply_form { display: none; }
+     .reply_form > [name="content"] {
+	 box-sizing: border-box;
+	 width: 100%;
+	 margin: 0.5em 0em;
+     }
      #add_post_form { width: 45em; }
      #add_post_form > [name="content"] { box-sizing: border-box; width: 100%; }
     </style>
@@ -60,13 +78,32 @@
     <script type="text/javascript" src="/static/form.js"></script>
     <script type="text/javascript">
      var add_post_form_controller;
+     var reply_controllers = {};
      function init() {
+	 if(typeof add_post_form == 'undefined')
+	     return;
 	 add_post_form_controller = new AjaxForm(
 	     add_post_form,
 	     '{{ url_for('post_add') }}',
 	     false,
 	     location.pathname
 	 );
+	 for(let I of query_all('.post_subpost_list')) {
+	     let list = I;
+	     let reply_btn = list.querySelector('.reply_btn');
+	     let form = list.querySelector('.reply_form');
+	     let controller = new AjaxForm(
+		 form,
+		 '{{ url_for('post_add') ~ '?subpost=1' }}',
+		 false,
+		 ''
+	     );
+	     reply_controllers[form.dataset.pid] = controller;
+	     reply_btn.addEventListener('click', function() {
+		 form.style.display = "block";
+		 list.classList.add('expanded');
+	     });
+	 }
      }
      window.addEventListener('load', init);
     </script>
@@ -87,7 +124,7 @@
 	    </div>
 	    <div class="container_right">
 	      <div class="post_body">{{ post['content'] }}</div>
-	      <div class="post_footer">		
+	      <div class="post_footer float_right_box">
 		<div class="post_info">
 		  <span class="date">{{ post['date'] | date }}</span>
 		</div>
@@ -103,7 +140,7 @@
 			<span class="subpost_author_name">{{ subpost['author']['name'] }}</span>
 			<span class="subpost_content">{{ subpost['content'] }}</span>
 		      </div>
-		      <div class="subpost_footer">
+		      <div class="subpost_footer float_right_box">
 			<div class="subpost_info">
 			  <span class="date">{{ subpost['date'] | date }}</span>
 			</div>
@@ -111,6 +148,22 @@
 		    </div>
 		  </li>
 		{% endfor %}
+		{% if session.get('uid') %}
+		  <li class="subpost_list_footer">
+		    <div class="reply_btn_wrapper float_right_box">
+		      <a class="reply_btn" href="javascript:void(0)">{{ _('Reply') }}</a>
+		    </div>
+		    <form class="reply_form" data-pid="{{ post['pid'] }}" action="javascript:void(0)">
+		      <input type="hidden" name="parent" value="{{ post['pid'] }}" />
+		      <input type="hidden" name="reply" value="0" />
+		      <textarea name="content"></textarea>
+		      <div class="reply_submit_btn_wrapper">
+			<span class="message"></span>
+			{{ submit(_('Reply')) }}
+		      </div>
+		    </form>
+		  {% endif %}
+		</li>
 	      </ol>
 	    </div>
 	  </li>
