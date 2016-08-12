@@ -776,6 +776,8 @@ def post_add():
     uid = session.get('uid')
     if(not uid):
         return json_response((249, _('Not signed in.')) )
+    if(subpost):
+        content = content.replace('\n', ' ')
     return json_response(
         forum.post_add(parent, uid, content, bool(subpost), int(reply))
     )
