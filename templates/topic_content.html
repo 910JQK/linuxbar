@@ -100,8 +100,13 @@
 	     );
 	     reply_controllers[form.dataset.pid] = controller;
 	     reply_btn.addEventListener('click', function() {
-		 form.style.display = "block";
-		 list.classList.add('expanded');
+		 if(list.classList.contains('expanded')) {
+		     form.style.display = "none";
+		     list.classList.remove('expanded');
+		 } else {
+		     form.style.display = "block";
+		     list.classList.add('expanded');
+		 }
 	     });
 	 }
      }
