@@ -104,6 +104,9 @@ span.separator {
     background-color: hsl(0, 0%, 97%);
 }
 
+/* for Ajax pager */
+.page_link:not(.page_current) { cursor: pointer; }
+
 .bold { font-weight: bold; }
 
 p[data-color="ok"], span[data-color="ok"] { color: hsl(100, 80%, 45%); }
