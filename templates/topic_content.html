@@ -53,8 +53,6 @@
 	 display: flex;
 	 align-items: flex-start;
 	 padding: 1em 1em 0.6em 1em;
-     }
-     .subpost:not(:last-child) {
 	 border-bottom: 1px dotted hsl(0, 0%, 85%);
      }
      .subpost_author_name::after { content: ":"; }
@@ -74,11 +72,80 @@
      #add_post_form { width: 45em; }
      #add_post_form > [name="content"] { box-sizing: border-box; width: 100%; }
     </style>
+    <template id="template_subpost" style="display: none;">
+      {# This is front-end part. Don't forget back-end part. #}
+      <li class="subpost">
+        <div class="subpost_left_container">
+          {{ avatar('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 2) }}
+        </div>
+        <div class="subpost_right_container">
+          <div class="subpost_body">
+            <span class="subpost_author_name"></span>
+            <span class="subpost_content"></span>
+          </div>
+          <div class="subpost_footer float_right_box">
+            <div class="subpost_info">
+              <span class="date"></span>
+            </div>
+          </div>
+        </div>
+      </li>
+    </template>
     <script type="text/javascript" src="/static/toolkit.js"></script>
     <script type="text/javascript" src="/static/form.js"></script>
     <script type="text/javascript">
+     var COUNT_SUBPOST = '{{ config['count_subpost'] }}';
+    </script>
+    <script type="text/javascript">
      var add_post_form_controller;
      var reply_controllers = {};
+     function refresh_subpost_list(pid, pn) {
+	 var list = query(printf('.subpost_list[data-pid="%1"]', pid));
+	 GET(
+	     '{{ url_for('post_list') }}',
+	     {
+		 parent: pid,
+		 pn: pn,
+		 count: COUNT_SUBPOST,
+		 subpost: '1'
+	     },
+	     function(xhr) {
+		 var result = JSON.parse(xhr.responseText);
+		 if(result.code == 0) {
+		     while(list.firstChild)
+			 list.removeChild(list.firstChild);
+		     for(let subpost of result.data.list) {
+			 let item = document.importNode(
+			     template_subpost, true
+			 ).content;
+			 let avatar = item.querySelector('.avatar');
+			 avatar.src = avatar.src.replace(
+			     'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+			     subpost.author.mail
+			 )
+			 item.querySelector(
+			     '.subpost_author_name'
+			 ).textContent = subpost.author.name;
+			 item.querySelector(
+			     '.subpost_content'
+			 ).textContent = subpost.content;
+			 item.querySelector(
+			     '.subpost_info > .date'
+			 ).textContent = format_date(subpost.date);
+			 list.appendChild(item);
+		     }
+		 } else {
+		     alert(result.msg);
+		 }
+	     },
+	     function(status, text) {
+		 if(status != 0)
+		     alert(printf(_('Error: %1 %2'), status, text));
+		 else
+		     alert(_('Connection Error or Timeout'));
+	     }
+	 )
+     }
      function init() {
 	 if(typeof add_post_form == 'undefined')
 	     return;
@@ -134,42 +201,45 @@
 		  <span class="date">{{ post['date'] | date }}</span>
 		</div>
 	      </div>
-	      <ol class="post_subpost_list{% if not post['subposts']['list'] %} empty{% endif %}">
-		{% for subpost in post['subposts']['list'] %}
-		  <li class="subpost">
-		    <div class="subpost_left_container">
-		      {{ avatar(subpost['author']['mail'], 2) }}
-		    </div>
-		    <div class="subpost_right_container">
-		      <div class="subpost_body">
-			<span class="subpost_author_name">{{ subpost['author']['name'] }}</span>
-			<span class="subpost_content">{{ subpost['content'] }}</span>
+	      <div class="post_subpost_list{% if not post['subposts']['list'] %} empty{% endif %}">
+		<ol class="subpost_list" data-pid="{{ post['pid'] }}">
+		  {% for subpost in post['subposts']['list'] %}
+		    {# This is back-end part. Don't forget front-end part. #}
+		    <li class="subpost">
+		      <div class="subpost_left_container">
+			{{ avatar(subpost['author']['mail'], 2) }}
 		      </div>
-		      <div class="subpost_footer float_right_box">
-			<div class="subpost_info">
-			  <span class="date">{{ subpost['date'] | date }}</span>
+		      <div class="subpost_right_container">
+			<div class="subpost_body">
+			  <span class="subpost_author_name">{{ subpost['author']['name'] }}</span>
+			  <span class="subpost_content">{{ subpost['content'] }}</span>
+			</div>
+			<div class="subpost_footer float_right_box">
+			  <div class="subpost_info">
+			    <span class="date">{{ subpost['date'] | date }}</span>
+			  </div>
 			</div>
 		      </div>
-		    </div>
-		  </li>
-		{% endfor %}
+		    </li>
+		  {% endfor %}
+		</ol>
 		{% if session.get('uid') %}
-		  <li class="subpost_list_footer">
+		  <div class="subpost_list_footer">
 		    <div class="reply_btn_wrapper float_right_box">
 		      <a class="reply_btn" href="javascript:void(0)">{{ _('Reply') }}</a>
 		    </div>
 		    <form class="reply_form" data-pid="{{ post['pid'] }}" action="javascript:void(0)">
 		      <input type="hidden" name="parent" value="{{ post['pid'] }}" />
 		      <input type="hidden" name="reply" value="0" />
-		      <textarea name="content"></textarea>
+		      <textarea name="content" autocomplete="off"></textarea>
 		      <div class="reply_submit_btn_wrapper">
 			<span class="message"></span>
 			{{ submit(_('Reply')) }}
 		      </div>
 		    </form>
-		  {% endif %}
-		</li>
-	      </ol>
+		  </div>
+		{% endif %}
+	      </div>
 	    </div>
 	  </li>
 	{% endfor %}
