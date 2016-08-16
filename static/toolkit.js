@@ -119,3 +119,57 @@ function utf8sizeof(string) {
     /* JavaScript uses UCS-2, not supporting 4-byte UTF-16 characters. */
     return unescape(encodeURIComponent(string)).length;
 }
+
+
+/**
+ * Format date
+ *
+ * @param Number timestamp
+ * @return String
+ */
+function format_date(timestamp) {
+    var now = Math.floor(Date.now() / 1000);
+    var delta = now - timestamp;
+    if(delta < 60){
+        return _('just now');
+    } else if(delta < 3600) {
+        let minutes = Math.floor(delta / 60);
+	if(minutes == 1)
+            return _('a minute ago');
+        else
+            return printf(_('%1 minutes ago'), minutes);
+    } else if(delta < 86400) {
+        let hours = Math.floor(delta / 3600);
+        if(hours == 1)
+            return _('an hour ago');
+        else
+            return printf(_('%1 hours ago'), hours);
+    /*  604800 = 86400*7  */
+    } else if(delta < 604800) {
+        let days = Math.floor(delta / 86400);
+        if(days == 1)
+            return _('a day ago');
+        else
+            return printf(_('%1 days ago'), days);
+    /* 2629746 = 86400*(31+28+97/400+31+30+31+30+31+31+30+31+30+31)/12 */
+    } else if(delta < 2629746) {
+        let weeks = Math.floor(delta / 604800);
+        if(weeks == 1)
+            return _('a week ago');
+        else
+            return printf(_('%1 weeks ago'), weeks);
+    /* 31556952 = 86400*(365+97/400) */
+    } else if(delta < 31556952) {
+        let months = Math.floor(delta / 2629746);
+        if(months == 1)
+            return _('a month ago');
+        else
+            return printf(_('%1 months ago'), months);
+    } else {
+        let years = Math.floor(delta / 31556952);
+        if(years == 1)
+            return _('a year ago');
+        else
+            return printf(_('%1 years ago'), years);
+    }
+}
