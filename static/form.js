@@ -106,7 +106,7 @@ function AjaxForm(form, url, lock_form_after_ok, redirect_url) {
     this.redirect_url = redirect_url;
     var captcha_input = form.querySelector('[name="captcha"]');
     var captcha_image;
-    if(captcha_input){
+    if(captcha_input) {
 	this.has_captcha = true;
 	this.captcha_image = form.querySelector('.captcha_image');
 	this.captcha_input = captcha_input;
@@ -149,7 +149,7 @@ AjaxForm.prototype.submit = function() {
 AjaxForm.prototype.ok = function(xhr) {
     this.submit_btn.disabled = false;
     var result = JSON.parse(xhr.responseText);
-    if(result.code == 0){
+    if(result.code == 0) {
 	this.msg(result.msg, 'ok');
 	if(this.lock_form_after_ok)
 	    for(let input of this.form.querySelectorAll('input'))
