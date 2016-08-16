@@ -30,14 +30,32 @@
   </div>
 {% endmacro %}
 
-{% macro pager(count, items_per_page, pn) %}
-  {# TODO: a lot of pages #}
-  {% set pages = count // items_per_page %}
+{% macro pager(count, items_per_page, pn, ajax=False) %}
+  {% set pages = (count / items_per_page) | round(0, 'ceil') | int %}
+  {% if pn <= 4 %}
+    {% set lower_limit = 1 %}
+    {% if pages >= 10 %}
+      {% set upper_limit = 10 %}
+    {% else %}
+      {% set upper_limit = pages %}
+    {% endif %}
+  {% else %}
+    {% set lower_limit = pn - 4 %}
+    {% if pn + 5 <= pages %}
+      {% set uppper_limit = pn + 5 %}
+    {% else %}
+      {% set upper_limit = pages %}
+    {% endif %}
+  {% endif %}
   {% if pages > 1 %}
     <div class="pager box_horizontal_center">
-      {% for i in range(1, pages+1) %}
+      {% for i in range(lower_limit, upper_limit+1) %}
 	{% if i != pn %}
-	  <a class="page_label page_link" href="?pn={{ i }}">{{ i }}</a>
+	  {% if not ajax %}
+	    <a class="page_label page_link" href="?pn={{ i }}">{{ i }}</a>
+	  {% else %}
+	    <a class="page_label page_link" data-pn="{{ i }}">{{ i }}</a>
+	  {% endif %}
 	{% else %}
 	  <span class="page_label page_current">{{ i }}</span>
 	{% endif %}
