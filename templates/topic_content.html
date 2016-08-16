@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% from 'macros.html' import avatar, user_info, pager, field, submit %}
+{% set COUNT_SUBPOST = config['count_subpost'] | int %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -35,8 +36,8 @@
 	 padding: 1.85em 1.5em 0.55em 1.5em;
 	 min-width: 0;
      }
-     .post_body { min-height: 16em; white-space: pre-wrap; }
      .float_right_box { display: flex; justify-content: flex-end; }
+     .post_body { min-height: 16em; white-space: pre-wrap; }
      .post_subpost_list {
 	 margin: 0.5em 0em;
 	 border: 1px solid hsl(0, 0%, 93%);
@@ -61,6 +62,16 @@
      .subpost_left_container { flex-shrink: 0; margin-right: 0.8em; }
      .subpost_right_container { flex-grow: 1; min-width: 0; }
      .subpost_list_footer { padding: 0.5em 1em; }
+     .subpost_list_footer .pager > .page_label {
+	 font-size: 100%;
+	 border: none;
+	 padding: 0;
+	 margin: 0em 0.25em;
+     }
+     .pager_and_reply_btn_wrapper {
+	 display: flex;
+	 justify-content: space-between;
+     }
      .reply_submit_btn_wrapper {
 	 display: flex;
 	 justify-content: space-between;
@@ -96,7 +107,7 @@
     <script type="text/javascript" src="/static/toolkit.js"></script>
     <script type="text/javascript" src="/static/form.js"></script>
     <script type="text/javascript">
-     var COUNT_SUBPOST = '{{ config['count_subpost'] }}';
+     var COUNT_SUBPOST = '{{ COUNT_SUBPOST }}';
     </script>
     <script type="text/javascript">
      var add_post_form_controller;
@@ -178,6 +189,21 @@
 		 }
 	     });
 	 }
+	 /* TODO: implement pager in front-end */
+	 /*
+	 for(let I of query_all('.subpost_list_footer .pager')) {
+	     for(let J of I.querySelectorAll('.page_link')) {
+		 let link = J;
+		 link.addEventListener('click', function() {
+		     if(this.classList.contains('.page_current')) {
+			 return;
+		     } else {
+
+		     }
+		 });
+	     }
+	 }
+	 */
      }
      window.addEventListener('load', init);
     </script>
@@ -225,9 +251,12 @@
 		    </li>
 		  {% endfor %}
 		</ol>
-		{% if session.get('uid') %}
-		  <div class="subpost_list_footer">
-		    <div class="reply_btn_wrapper float_right_box">
+		<div class="subpost_list_footer">
+		  {% if session.get('uid') %}
+		    <div class="pager_and_reply_btn_wrapper">
+		      <div class="subpost_list_pager">
+			{{ pager(post['subposts']['count'], COUNT_SUBPOST, 1, ajax=True) }}
+		      </div>
 		      <a class="reply_btn" href="javascript:void(0)">{{ _('Reply') }}</a>
 		    </div>
 		    <form class="reply_form" data-pid="{{ post['pid'] }}" action="javascript:void(0)">
@@ -239,8 +268,8 @@
 			{{ submit(_('Reply')) }}
 		      </div>
 		    </form>
-		  </div>
-		{% endif %}
+		  {% endif %}
+		</div>
 	      </div>
 	    </div>
 	  </li>
