@@ -53,6 +53,8 @@
 	 display: flex;
 	 align-items: flex-start;
 	 padding: 1em 1em 0.6em 1em;
+     }
+     .subpost{% if not session.get('uid') %}:not(:last-child){% endif %} {
 	 border-bottom: 1px dotted hsl(0, 0%, 85%);
      }
      .subpost_author_name::after { content: ":"; }
