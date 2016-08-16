@@ -55,13 +55,16 @@
 	 align-items: flex-start;
 	 padding: 1em 1em 0.6em 1em;
      }
-     .subpost{% if not session.get('uid') %}:not(:last-child){% endif %} {
+     .subpost:not(:last-child) {
 	 border-bottom: 1px dotted hsl(0, 0%, 85%);
      }
      .subpost_author_name::after { content: ":"; }
      .subpost_left_container { flex-shrink: 0; margin-right: 0.8em; }
      .subpost_right_container { flex-grow: 1; min-width: 0; }
-     .subpost_list_footer { padding: 0.5em 1em; }
+     .subpost_list_footer:not(.empty) {
+	 padding: 0.5em 1em;
+	 border-top: 1px dotted hsl(0, 0%, 85%);
+     }
      .subpost_list_footer .pager > .page_label {
 	 font-size: 100%;
 	 border: none;
@@ -251,14 +254,16 @@
 		    </li>
 		  {% endfor %}
 		</ol>
-		<div class="subpost_list_footer">
-		  {% if session.get('uid') %}
+		<div class="subpost_list_footer{% if not session.get('uid') and post['subposts']['count'] <= COUNT_SUBPOST %} empty{% endif %}">
 		    <div class="pager_and_reply_btn_wrapper">
 		      <div class="subpost_list_pager">
 			{{ pager(post['subposts']['count'], COUNT_SUBPOST, 1, ajax=True) }}
 		      </div>
-		      <a class="reply_btn" href="javascript:void(0)">{{ _('Reply') }}</a>
+		      {% if session.get('uid') %}
+			<a class="reply_btn" href="javascript:void(0)">{{ _('Reply') }}</a>
+		      {% endif %}
 		    </div>
+		  {% if session.get('uid') %}
 		    <form class="reply_form" data-pid="{{ post['pid'] }}" action="javascript:void(0)">
 		      <input type="hidden" name="parent" value="{{ post['pid'] }}" />
 		      <input type="hidden" name="reply" value="0" />
