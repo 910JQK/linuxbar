@@ -11,7 +11,7 @@
      h1 { font-size: 1.5em; }
      header + hr { margin-bottom: 0; }
      #post_list { margin-top: 0; }
-     .date { color: hsl(0, 0%, 57%); }
+     .date { font-size: 85%; color: hsl(0, 0%, 57%); }
      .post {
 	 display: flex;
 	 width: 55em;
@@ -53,7 +53,7 @@
      .subpost {
 	 display: flex;
 	 align-items: flex-start;
-	 padding: 1em 1em 0.6em 1em;
+	 padding: 0.8em 1em 0.6em 1em;
      }
      .subpost:not(:last-child) {
 	 border-bottom: 1px dotted hsl(0, 0%, 85%);
@@ -91,7 +91,7 @@
     </style>
     <template id="template_subpost" style="display: none;">
       {# This is front-end part. Don't forget back-end part. #}
-      <li class="subpost">
+      <li class="subpost" id="s0">
         <div class="subpost_left_container">
           {{ avatar('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 2) }}
         </div>
@@ -147,10 +147,14 @@
 		 if(result.code == 0) {
 		     while(list.firstChild)
 			 list.removeChild(list.firstChild);
+		     let first_subpost_id = result.data.list[0].sid;
 		     for(let subpost of result.data.list) {
 			 let item = document.importNode(
 			     template_subpost, true
 			 ).content;
+			 item.querySelector('.subpost').id = (
+			     's' + subpost.sid
+			 );
 			 let avatar = item.querySelector('.avatar');
 			 avatar.src = avatar.src.replace(
 			     'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
@@ -173,6 +177,7 @@
 			 if(link.textContent == pn)
 			     link.classList.add('page_current');
 		     }
+		     location.hash = 's' + first_subpost_id;
 		 } else {
 		     alert(result.msg);
 		 }
@@ -241,7 +246,7 @@
       <hr/>
       <ol id="post_list">
 	{% for post in data['list'] %}
-	  <li class="post">
+	  <li class="post" id="p{{ post['pid'] }}">
 	    <div class="container_left">
 	      {{ avatar(post['author']['mail'], 6) }}
 	      <div class="name">{{ post['author']['name'] }}</div>
@@ -257,7 +262,7 @@
 		<ol class="subpost_list" data-pid="{{ post['pid'] }}">
 		  {% for subpost in post['subposts']['list'] %}
 		    {# This is back-end part. Don't forget front-end part. #}
-		    <li class="subpost">
+		    <li class="subpost" id="s{{ subpost['sid'] }}">
 		      <div class="subpost_left_container">
 			{{ avatar(subpost['author']['mail'], 2) }}
 		      </div>
