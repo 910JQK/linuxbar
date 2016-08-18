@@ -52,12 +52,12 @@
       {% for i in range(lower_limit, upper_limit+1) %}
 	{% if i != pn %}
 	  {% if not ajax %}
-	    <a class="page_label page_link" href="?pn={{ i }}">{{ i }}</a>
+	    <a class="page_link" href="?pn={{ i }}">{{ i }}</a>
 	  {% else %}
-	    <a class="page_label page_link" data-pn="{{ i }}">{{ i }}</a>
+	    <a class="page_link" data-pn="{{ i }}">{{ i }}</a>
 	  {% endif %}
 	{% else %}
-	  <span class="page_label page_current">{{ i }}</span>
+	  <a class="page_link page_current">{{ i }}</a>
 	{% endif %}
       {% endfor %}
     </div>
