@@ -96,13 +96,15 @@ span.separator {
     margin: 0em 0.1em;
 }
 
-.page_label {
+.page_link {
     font-size: 120%;
     padding: 0.1em 0.5em;
     margin: 0em 0.1em;
     border: 1px solid hsl(0, 0%, 80%);
     background-color: hsl(0, 0%, 97%);
 }
+
+.page_current { color: inherit; }
 
 /* for Ajax pager */
 .page_link:not(.page_current) { cursor: pointer; }
