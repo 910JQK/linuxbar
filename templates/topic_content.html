@@ -66,7 +66,7 @@
 	 padding: 0.5em 1em;
 	 border-top: 1px dotted hsl(0, 0%, 85%);
      }
-     .subpost_list_footer .pager > .page_label {
+     .subpost_list_footer .pager > .page_link {
 	 font-size: 100%;
 	 border: none;
 	 padding: 0;
@@ -116,8 +116,23 @@
     <script type="text/javascript">
      var add_post_form_controller;
      var reply_controllers = {};
+     /**
+      * Event handler for click event of subpost pager
+      *
+      * @param String pid
+      * @param String pn
+      * @return void
+      */
      function refresh_subpost_list(pid, pn) {
 	 var list = query(printf('.subpost_list[data-pid="%1"]', pid));
+	 var pager = query(
+	     printf('.subpost_list_pager[data-pid="%1"] > .pager', pid)
+	 );
+	 if(pager.querySelector('.page_current').textContent == pn)
+	     return;
+	 if(pager.classList.contains('lock'))
+	     return;
+	 pager.classList.add('lock');
 	 GET(
 	     '{{ url_for('post_list') }}',
 	     {
@@ -127,6 +142,7 @@
 		 subpost: '1'
 	     },
 	     function(xhr) {
+		 pager.classList.remove('lock');
 		 var result = JSON.parse(xhr.responseText);
 		 if(result.code == 0) {
 		     while(list.firstChild)
@@ -151,11 +167,18 @@
 			 ).textContent = format_date(subpost.date);
 			 list.appendChild(item);
 		     }
+		     for(let link of pager.querySelectorAll('.page_link')) {
+			 if(link.classList.contains('page_current'))
+			     link.classList.remove('page_current');
+			 if(link.textContent == pn)
+			     link.classList.add('page_current');
+		     }
 		 } else {
 		     alert(result.msg);
 		 }
 	     },
 	     function(status, text) {
+		 pager.classList.remove('lock');
 		 if(status != 0)
 		     alert(printf(_('Error: %1 %2'), status, text));
 		 else
@@ -163,7 +186,7 @@
 	     }
 	 )
      }
-     function init() {
+     function init_form() {
 	 if(typeof add_post_form == 'undefined')
 	     return;
 	 add_post_form_controller = new AjaxForm(
@@ -193,21 +216,18 @@
 		 }
 	     });
 	 }
-	 /* TODO: implement pager in front-end */
-	 /*
-	 for(let I of query_all('.subpost_list_footer .pager')) {
+     }
+     function init() {
+	 init_form();
+	 for(let I of query_all('.subpost_list_pager > .pager')) {
+	     let pid = I.parentElement.dataset.pid;
 	     for(let J of I.querySelectorAll('.page_link')) {
 		 let link = J;
 		 link.addEventListener('click', function() {
-		     if(this.classList.contains('.page_current')) {
-			 return;
-		     } else {
-
-		     }
+		     refresh_subpost_list(pid, link.textContent);
 		 });
 	     }
 	 }
-	 */
      }
      window.addEventListener('load', init);
     </script>
@@ -257,7 +277,7 @@
 		</ol>
 		<div class="subpost_list_footer{% if not session.get('uid') and post['subposts']['count'] <= COUNT_SUBPOST %} empty{% endif %}">
 		    <div class="pager_and_reply_btn_wrapper">
-		      <div class="subpost_list_pager">
+		      <div class="subpost_list_pager" data-pid="{{ post['pid'] }}">
 			{{ pager(post['subposts']['count'], COUNT_SUBPOST, 1, ajax=True) }}
 		      </div>
 		      {% if session.get('uid') %}
