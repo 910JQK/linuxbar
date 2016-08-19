@@ -271,6 +271,7 @@ def html_subpost_list():
         return render_template(
             'subpost_list.html',
             data = result[2],
+            pid = pid,
             pn = int(pn),
             count_subpost = COUNT_SUBPOST
         )
