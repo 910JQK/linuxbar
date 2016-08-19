@@ -1,0 +1,33 @@
+{% from 'macros.html' import avatar, pager %}
+{% macro subpost_list(list) %}
+  {% for subpost in list %}
+    <li class="subpost" id="s{{ subpost['sid'] }}">
+      <div class="subpost_left_container">
+	{{ avatar(subpost['author']['mail'], 2) }}
+      </div>
+      <div class="subpost_right_container">
+	<div class="subpost_body">
+	  <span class="subpost_author_name">{{ subpost['author']['name'] }}</span>
+	  <span class="subpost_content">{{ subpost['content'] }}</span>
+	</div>
+	<div class="subpost_footer float_right_box">
+	  <div class="subpost_info">
+	    <span class="date">{{ subpost['date'] | date }}</span>
+	  </div>
+	</div>
+      </div>
+    </li>
+  {% endfor %}
+{% endmacro %}
+
+{% macro subpost_list_pager(total, count, pn) %}
+{{ pager(total, count, pn, ajax=True) }}
+{% endmacro %}
+
+{% if data %}
+  <div id="ok_tag"></div>
+  <ol id="list">
+    {{ subpost_list(data['list']) }}
+  </ol>
+  {{ subpost_list_pager(data['count'], count_subpost, pn) }}
+{% endif %}
