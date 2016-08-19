@@ -26,6 +26,8 @@ DEBUG = True
 EMAIL_ADDRESS = 'no_reply@foo.bar'
 # Codepoints, must be greater than 3
 SUMMARY_LENGTH = 60
+# Fixed for positioning
+COUNT_SUBPOST = 10
 
 
 # Configurations for the site
@@ -215,7 +217,6 @@ def board(name):
 def topic(tid):
     pn = request.args.get('pn', '1')
     count_post = int(config['count_post'])
-    count_subpost = int(config['count_subpost'])
 
     try:
         validate_id(_('Page Number'), pn)
@@ -236,7 +237,7 @@ def topic(tid):
         data = result[2]
         for post in data['list']:
             result_subpost = forum.post_list(
-                post['pid'], 1, count_subpost, subpost=True
+                post['pid'], 1, COUNT_SUBPOST, subpost=True
             )
             if(result_subpost[0] != 0):
                 return err_response(result_subpost)
@@ -248,7 +249,30 @@ def topic(tid):
             data = result[2],
             pn = int(pn),
             count_post = count_post,
-            count_subpost = count_subpost
+            count_subpost = COUNT_SUBPOST
+        )
+
+
+@app.route('/api/html/subpost-list')
+def html_subpost_list():
+    pid = request.args.get('pid', '')
+    pn = request.args.get('pn', '1')
+
+    try:
+        validate_id(_('Post ID'), pid)
+        validate_id(_('Page Number'), pn)
+    except ValidationError as err:
+        return validation_err_response(err, json=False)
+
+    result = forum.post_list(pid, int(pn), COUNT_SUBPOST, subpost=True)
+    if(result[0] != 0):
+        return err_response(result)
+    else:
+        return render_template(
+            'subpost_list.html',
+            data = result[2],
+            pn = int(pn),
+            count_subpost = COUNT_SUBPOST
         )
 
 
