@@ -59,6 +59,9 @@
      .subpost:not(:last-child) {
 	 border-bottom: 1px dotted hsl(0, 0%, 85%);
      }
+     .subpost.highlight {
+	 background-color: hsl(60, 60%, 90%);
+     }
      .subpost_author_name::after { content: ":"; }
      .subpost_content { white-space: pre-wrap; }
      .subpost_left_container { flex-shrink: 0; margin-right: 0.8em; }
@@ -103,15 +106,16 @@
       *
       * @param String pid
       * @param String pn
+      * @opt Boolean no_err_alert
+      * @opt String anchor (to scroll page to)
+      * @opt String highlight (sid)
       * @return void
       */
-     function refresh_subpost_list(pid, pn) {
+     function refresh_subpost_list(pid, pn, no_err_alert, anchor, highlight) {
 	 var list = query(printf('.subpost_list[data-pid="%1"]', pid));
 	 var pager = query(
 	     printf('.subpost_list_pager[data-pid="%1"] > .pager', pid)
 	 );
-	 if(pager.querySelector('.page_current').textContent == pn)
-	     return;
 	 if(pager.classList.contains('lock'))
 	     return;
 	 pager.classList.add('lock');
@@ -128,27 +132,33 @@
 		     while(list.firstChild)
 			 list.removeChild(list.firstChild);
 		     let items = fragment.querySelectorAll('.subpost');
-		     let first_subpost_id = items[0].id;
-		     for(let item of items)
+		     for(let item of items) {
+			 if(item.dataset.sid == highlight)
+			     item.classList.add('highlight');
 			 list.appendChild(item)
+		     }
 		     let wrapper = pager.parentElement;
 		     let new_pager = fragment.querySelector('.pager');
 		     wrapper.removeChild(pager);
 		     wrapper.appendChild(new_pager)
 		     init_pager(new_pager);
-		     location.hash = '';
-		     location.hash = first_subpost_id;
+		     scroll_to(anchor? anchor: ('#f' + pid));
 		 } else {
 		     pager.classList.remove('lock');
-		     alert(fragment.querySelector('#error_msg').textContent);
+		     if(!no_err_alert)
+			 alert(
+			     fragment.querySelector('#error_msg').textContent
+			 );
 		 }
 	     },
 	     function(status, text) {
 		 pager.classList.remove('lock');
-		 if(status != 0)
-		     alert(printf(_('Error: %1 %2'), status, text));
-		 else
-		     alert(_('Connection Error or Timeout'));
+		 if(!no_err_alert) {
+		     if(status != 0)
+			 alert(printf(_('Error: %1 %2'), status, text));
+		     else
+			 alert(_('Connection Error or Timeout'));
+		 }
 	     }
 	 )
      }
@@ -192,9 +202,27 @@
 	 }
      }
      function init() {
+	 var anchor = location.hash;
 	 init_form();
-	 for(let pager of query_all('.subpost_list_pager > .pager')) {
+	 for(let pager of query_all('.subpost_list_pager > .pager'))
 	     init_pager(pager);
+	 if(anchor) {
+	     let arr = anchor.split('_');
+	     if(arr[0] == '#goto'){
+		 /* #goto_sid_pid_pn */
+		 if(arr[3] == '1') {
+		     /* the first page */
+		     document.getElementById('s' + arr[1]).classList.add(
+			 'highlight'
+		     );
+		     scroll_to('#f' + arr[2]);
+		 } else {
+		     /* other pages */
+		     refresh_subpost_list(
+			 arr[2], arr[3], true, ('#f' + arr[2]), arr[1]
+		     );
+		 }
+	     }
 	 }
      }
      window.addEventListener('load', init);
@@ -216,14 +244,14 @@
 	    </div>
 	    <div class="container_right">
 	      <div class="post_body">{{ post['content'] }}</div>
-	      <div class="post_footer float_right_box">
+	      <div class="post_footer float_right_box" id="f{{ post['pid'] }}">
 		<div class="post_info">
 		  <span class="date">{{ post['date'] | date }}</span>
 		</div>
 	      </div>
 	      <div class="post_subpost_list{% if not post['subposts']['list'] %} empty{% endif %}">
 		<ol class="subpost_list" data-pid="{{ post['pid'] }}">
-		  {{ subpost_list(post['subposts']['list']) }}
+		  {{ subpost_list(post['subposts']['list'], post['pid'], 1) }}
 		</ol>
 		<div class="subpost_list_footer{% if not session.get('uid') and post['subposts']['count'] <= COUNT_SUBPOST %} empty{% endif %}">
 		    <div class="pager_and_reply_btn_wrapper">

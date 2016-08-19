@@ -1,7 +1,7 @@
 {% from 'macros.html' import avatar, pager %}
-{% macro subpost_list(list) %}
+{% macro subpost_list(list, pid, pn) %}
   {% for subpost in list %}
-    <li class="subpost" id="s{{ subpost['sid'] }}">
+    <li class="subpost" id="s{{ subpost['sid'] }}" data-sid="{{ subpost['sid'] }}">
       <div class="subpost_left_container">
 	{{ avatar(subpost['author']['mail'], 2) }}
       </div>
@@ -27,7 +27,7 @@
 {% if data %}
   <div id="ok_tag"></div>
   <ol id="list">
-    {{ subpost_list(data['list']) }}
+    {{ subpost_list(data['list'], pid, pn) }}
   </ol>
   {{ subpost_list_pager(data['count'], count_subpost, pn) }}
 {% endif %}
