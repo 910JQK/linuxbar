@@ -2,8 +2,9 @@
 
 
 import datetime
-import random
 import hashlib
+import random
+import math
 from db import *
 
 
@@ -1085,6 +1086,9 @@ def post_list(parent, page, count_per_page, subpost=False):
         if(parent_rec.deleted):
             return (3, _('Parent topic/post has been deleted.'))
         count = Table.select().where(parent_field == parent_rec).count()
+        # last page: calculate the exact page number
+        if(page == -1):
+            page = int(math.ceil(count / count_per_page))
         query = (
             Table
             .select(Table, User)
@@ -1122,7 +1126,7 @@ def post_list(parent, page, count_per_page, subpost=False):
                 if(subpost and post.reply2):
                     item['reply'] = post.reply2.id
             list.append(item)
-        return (0, OK_MSG, {'list': list, 'count': count})
+        return (0, OK_MSG, {'list': list, 'count': count, 'page': page})
     except Exception as err:
         return (1, db_err_msg(err))
 
