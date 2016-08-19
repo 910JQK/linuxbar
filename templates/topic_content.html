@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {% from 'macros.html' import avatar, user_info, pager, field, submit %}
-{% set COUNT_SUBPOST = config['count_subpost'] | int %}
+{% from 'subpost_list.html' import subpost_list, subpost_list_pager %}
+{% set COUNT_SUBPOST = count_subpost %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -89,25 +90,6 @@
      #add_post_form { width: 45em; }
      #add_post_form > [name="content"] { box-sizing: border-box; width: 100%; }
     </style>
-    <template id="template_subpost" style="display: none;">
-      {# This is front-end part. Don't forget back-end part. #}
-      <li class="subpost" id="s0">
-        <div class="subpost_left_container">
-          {{ avatar('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 2) }}
-        </div>
-        <div class="subpost_right_container">
-          <div class="subpost_body">
-            <span class="subpost_author_name"></span>
-            <span class="subpost_content"></span>
-          </div>
-          <div class="subpost_footer float_right_box">
-            <div class="subpost_info">
-              <span class="date"></span>
-            </div>
-          </div>
-        </div>
-      </li>
-    </template>
     <script type="text/javascript" src="/static/toolkit.js"></script>
     <script type="text/javascript" src="/static/form.js"></script>
     <script type="text/javascript">
@@ -134,52 +116,31 @@
 	     return;
 	 pager.classList.add('lock');
 	 GET(
-	     '{{ url_for('post_list') }}',
+	     '{{ url_for('html_subpost_list') }}',
 	     {
-		 parent: pid,
+		 pid: pid,
 		 pn: pn,
-		 count: COUNT_SUBPOST,
-		 subpost: '1'
 	     },
 	     function(xhr) {
-		 pager.classList.remove('lock');
-		 var result = JSON.parse(xhr.responseText);
-		 if(result.code == 0) {
+		 var fragment = document.createElement('div');
+		 fragment.innerHTML = xhr.responseText;
+		 if(fragment.querySelector('#ok_tag')) {
 		     while(list.firstChild)
 			 list.removeChild(list.firstChild);
-		     let first_subpost_id = result.data.list[0].sid;
-		     for(let subpost of result.data.list) {
-			 let item = document.importNode(
-			     template_subpost, true
-			 ).content;
-			 item.querySelector('.subpost').id = (
-			     's' + subpost.sid
-			 );
-			 let avatar = item.querySelector('.avatar');
-			 avatar.src = avatar.src.replace(
-			     'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-			     subpost.author.mail
-			 )
-			 item.querySelector(
-			     '.subpost_author_name'
-			 ).textContent = subpost.author.name;
-			 item.querySelector(
-			     '.subpost_content'
-			 ).textContent = subpost.content;
-			 item.querySelector(
-			     '.subpost_info > .date'
-			 ).textContent = format_date(subpost.date);
-			 list.appendChild(item);
-		     }
-		     for(let link of pager.querySelectorAll('.page_link')) {
-			 if(link.classList.contains('page_current'))
-			     link.classList.remove('page_current');
-			 if(link.textContent == pn)
-			     link.classList.add('page_current');
-		     }
-		     location.hash = 's' + first_subpost_id;
+		     let items = fragment.querySelectorAll('.subpost');
+		     let first_subpost_id = items[0].id;
+		     for(let item of items)
+			 list.appendChild(item)
+		     let wrapper = pager.parentElement;
+		     let new_pager = fragment.querySelector('.pager');
+		     wrapper.removeChild(pager);
+		     wrapper.appendChild(new_pager)
+		     init_pager(new_pager);
+		     location.hash = '';
+		     location.hash = first_subpost_id;
 		 } else {
-		     alert(result.msg);
+		     pager.classList.remove('lock');
+		     alert(fragment.querySelector('#error_msg').textContent);
 		 }
 	     },
 	     function(status, text) {
@@ -222,16 +183,18 @@
 	     });
 	 }
      }
+     function init_pager(pager) {
+	 let pid = pager.parentElement.dataset.pid;
+	 for(let link of pager.querySelectorAll('.page_link:not(.page_current)')) {
+	     link.addEventListener('click', function() {
+		 refresh_subpost_list(pid, link.textContent);
+	     });
+	 }
+     }
      function init() {
 	 init_form();
-	 for(let I of query_all('.subpost_list_pager > .pager')) {
-	     let pid = I.parentElement.dataset.pid;
-	     for(let J of I.querySelectorAll('.page_link')) {
-		 let link = J;
-		 link.addEventListener('click', function() {
-		     refresh_subpost_list(pid, link.textContent);
-		 });
-	     }
+	 for(let pager of query_all('.subpost_list_pager > .pager')) {
+	     init_pager(pager);
 	 }
      }
      window.addEventListener('load', init);
@@ -260,30 +223,12 @@
 	      </div>
 	      <div class="post_subpost_list{% if not post['subposts']['list'] %} empty{% endif %}">
 		<ol class="subpost_list" data-pid="{{ post['pid'] }}">
-		  {% for subpost in post['subposts']['list'] %}
-		    {# This is back-end part. Don't forget front-end part. #}
-		    <li class="subpost" id="s{{ subpost['sid'] }}">
-		      <div class="subpost_left_container">
-			{{ avatar(subpost['author']['mail'], 2) }}
-		      </div>
-		      <div class="subpost_right_container">
-			<div class="subpost_body">
-			  <span class="subpost_author_name">{{ subpost['author']['name'] }}</span>
-			  <span class="subpost_content">{{ subpost['content'] }}</span>
-			</div>
-			<div class="subpost_footer float_right_box">
-			  <div class="subpost_info">
-			    <span class="date">{{ subpost['date'] | date }}</span>
-			  </div>
-			</div>
-		      </div>
-		    </li>
-		  {% endfor %}
+		  {{ subpost_list(post['subposts']['list']) }}
 		</ol>
 		<div class="subpost_list_footer{% if not session.get('uid') and post['subposts']['count'] <= COUNT_SUBPOST %} empty{% endif %}">
 		    <div class="pager_and_reply_btn_wrapper">
 		      <div class="subpost_list_pager" data-pid="{{ post['pid'] }}">
-			{{ pager(post['subposts']['count'], COUNT_SUBPOST, 1, ajax=True) }}
+			{{ subpost_list_pager(post['subposts']['count'], COUNT_SUBPOST, 1) }}
 		      </div>
 		      {% if session.get('uid') %}
 			<a class="reply_btn" href="javascript:void(0)">{{ _('Reply') }}</a>
