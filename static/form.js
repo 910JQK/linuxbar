@@ -96,7 +96,7 @@ function init_validation(realtime) {
 }
 
 
-function AjaxForm(form, url, lock_form_after_ok, redirect_url) {
+function AjaxForm(form, url, lock_form_after_ok, redirect_url, success_callback) {
     var controller = this;
     this.form = form;
     this.message_box = form.querySelector('.message');
@@ -118,6 +118,7 @@ function AjaxForm(form, url, lock_form_after_ok, redirect_url) {
     } else {
 	this.has_captcha = false;
     }
+    this.success_callback = success_callback;
     this.submit_btn.addEventListener('click', this.submit.bind(this));
 }
 
@@ -156,6 +157,8 @@ AjaxForm.prototype.ok = function(xhr) {
 		input.disabled = true;
 	if(this.redirect_url)
 	    setTimeout(() => location.replace(this.redirect_url), 800);
+	if(this.success_callback)
+	    this.success_callback();
     } else {
 	this.msg(result.msg, 'err');
 	if(this.has_captcha) {
