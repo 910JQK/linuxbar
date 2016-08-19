@@ -260,7 +260,8 @@ def html_subpost_list():
 
     try:
         validate_id(_('Post ID'), pid)
-        validate_id(_('Page Number'), pn)
+        if(pn != '-1'):
+            validate_id(_('Page Number'), pn)
     except ValidationError as err:
         return validation_err_response(err, json=False)
 
@@ -268,11 +269,13 @@ def html_subpost_list():
     if(result[0] != 0):
         return err_response(result)
     else:
+        # get the exact page number when last page (pn == -1) is specified
+        page_final = result[2]['page']
         return render_template(
             'subpost_list.html',
             data = result[2],
             pid = pid,
-            pn = int(pn),
+            pn = page_final,
             count_subpost = COUNT_SUBPOST
         )
 
@@ -871,7 +874,8 @@ def post_list():
     subpost = request.args.get('subpost', '')
     try:
         validate_id(_('Parent Topic/Post ID'), parent)
-        validate_id(_('Page Number'), pn)
+        if(pn != '-1'):
+            validate_id(_('Page Number'), pn)
         validate_id(_('Count per Page'), count)
     except ValidationError as err:
         return validation_err_response(err)
