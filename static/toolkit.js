@@ -173,3 +173,20 @@ function format_date(timestamp) {
             return printf(_('%1 years ago'), years);
     }
 }
+
+
+/**
+ * Scroll to anchor without changing the hash in the URL
+ *
+ * @param String anchor
+ * @return void
+ */
+function scroll_to(anchor) {
+    var node = query(anchor);
+    var top = 0;
+    while(node) {
+	top += node.offsetTop;
+	node = node.offsetParent;
+    }
+    document.documentElement.scrollTop = top;
+}
