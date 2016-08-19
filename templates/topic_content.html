@@ -105,7 +105,7 @@
       * Event handler for click event of subpost pager
       *
       * @param String pid
-      * @param String pn
+      * @param String pn (-1 means last page)
       * @opt Boolean no_err_alert
       * @opt String anchor (to scroll page to)
       * @opt String highlight (sid)
@@ -123,7 +123,7 @@
 	     '{{ url_for('html_subpost_list') }}',
 	     {
 		 pid: pid,
-		 pn: pn,
+		 pn: pn
 	     },
 	     function(xhr) {
 		 var fragment = document.createElement('div');
@@ -172,22 +172,29 @@
 	     location.pathname
 	 );
 	 for(let I of query_all('.post_subpost_list')) {
-	     let list = I;
+	     let list = I; // fix scope issue
 	     let reply_btn = list.querySelector('.reply_btn');
 	     let form = list.querySelector('.reply_form');
+	     let pid = list.dataset.pid;
 	     let controller = new AjaxForm(
 		 form,
 		 '{{ url_for('post_add') ~ '?subpost=1' }}',
 		 false,
-		 ''
+		 '',
+		 function() {
+		     /* show the last page (-1) */
+		     refresh_subpost_list(pid, '-1');
+		     form.style.display = 'none';
+		     list.classList.remove('expanded');
+		 }
 	     );
 	     reply_controllers[form.dataset.pid] = controller;
 	     reply_btn.addEventListener('click', function() {
 		 if(list.classList.contains('expanded')) {
-		     form.style.display = "none";
+		     form.style.display = 'none';
 		     list.classList.remove('expanded');
 		 } else {
-		     form.style.display = "block";
+		     form.style.display = 'block';
 		     list.classList.add('expanded');
 		 }
 	     });
@@ -249,7 +256,7 @@
 		  <span class="date">{{ post['date'] | date }}</span>
 		</div>
 	      </div>
-	      <div class="post_subpost_list{% if not post['subposts']['list'] %} empty{% endif %}">
+	      <div class="post_subpost_list{% if not post['subposts']['list'] %} empty{% endif %}" data-pid="{{ post['pid'] }}">
 		<ol class="subpost_list" data-pid="{{ post['pid'] }}">
 		  {{ subpost_list(post['subposts']['list'], post['pid'], 1) }}
 		</ol>
