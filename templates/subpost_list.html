@@ -12,7 +12,7 @@
 	</div>
 	<div class="subpost_footer float_right_box">
 	  <div class="subpost_info">
-	    <span class="date">{{ subpost['date'] | date }}</span>
+	    <span class="date" title="{{ subpost['date'] | date(detailed=true) }}" data-ts="{{ subpost['date'] }}">{{ subpost['date'] | date }}</span>
 	  </div>
 	</div>
       </div>
