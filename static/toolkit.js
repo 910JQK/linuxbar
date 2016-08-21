@@ -157,6 +157,7 @@ function iso_date(timestamp) {
  * @return String
  */
 function format_date(timestamp, detailed) {
+    /* behaviour of this function must be consistent with the back-end */
     if(detailed)
 	return iso_date(timestamp);
     var now = (Date.now() / 1000);

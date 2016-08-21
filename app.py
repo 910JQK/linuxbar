@@ -139,6 +139,7 @@ def inject_config():
 
 @app.template_filter('date')
 def format_date(timestamp, detailed=False):
+    # behaviour of this function must be consistent with the front-end
     if(detailed):
         return datetime.datetime.fromtimestamp(int(timestamp)).isoformat(' ');
     date = datetime.datetime.fromtimestamp(timestamp)
