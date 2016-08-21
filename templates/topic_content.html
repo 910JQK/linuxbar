@@ -49,6 +49,10 @@
      .post_subpost_list.empty > .subpost_list_footer {
 	 border-top: none;
      }
+     .post_subpost_list.cut > .subpost_list_footer {
+	 border-top: none;
+     }
+     /* .expanded: reply form is visible */
      .post_subpost_list.empty:not(.expanded) {
 	 border: none;
 	 background-color: hsla(0, 0%, 0%, 0);
@@ -230,14 +234,16 @@
 	 var list_wrapper = query(
 	     printf('.post_subpost_list[data-pid="%1"]', pid)
 	 );
+	 if(!list_wrapper.classList.contains('cut'))
+	     return;
 	 for(let hidden_element of list_wrapper.querySelectorAll(
 	     '.subpost.hidden, .pager_and_reply_btn_wrapper.hidden'
 	 )) {
 	     hidden_element.classList.remove('hidden');
 	 }
 	 var button = list_wrapper.querySelector('.expand_all_btn');
-	 if(button)
-	     button.style.display = 'none';
+	 button.style.display = 'none';
+	 list_wrapper.classList.remove('cut');
      }
      function init() {
 	 var anchor = location.hash;
@@ -301,7 +307,7 @@
 		  <span class="date" title="{{ post['date'] | date(detailed=true) }}" data-ts="{{ post['date'] }}">{{ post['date'] | date }}</span>
 		</div>
 	      </div>
-	      <div class="post_subpost_list{% if not post['subposts']['list'] %} empty{% endif %}" data-pid="{{ post['pid'] }}">
+	      <div class="post_subpost_list{% if not post['subposts']['list'] %} empty{% endif %}{% if cut %} cut{% endif %}" data-pid="{{ post['pid'] }}">
 		<ol class="subpost_list" data-pid="{{ post['pid'] }}">
 		  {{ subpost_list(post['subposts']['list'], post['pid'], 1, SUBPOST_LIST_CUT) }}
 		</ol>
