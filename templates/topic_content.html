@@ -150,6 +150,15 @@
 		     wrapper.appendChild(new_pager)
 		     init_pager(new_pager);
 		     scroll_to(anchor? anchor: ('#f' + pid));
+		     var controller = reply_controllers[pid];
+		     var list_wrapper = query(
+			 printf('.post_subpost_list[data-pid="%1"]', pid)
+		     );
+		     if(list_wrapper.classList.contains('empty'))
+			 list_wrapper.classList.remove('empty')
+		     controller.form.style.display = 'none';
+		     list_wrapper.classList.remove('expanded');
+		     controller.empty();
 		 } else {
 		     pager.classList.remove('lock');
 		     if(!no_err_alert)
@@ -157,11 +166,6 @@
 			     fragment.querySelector('#error_msg').textContent
 			 );
 		 }
-		 var list_wrapper = query(
-		     printf('.post_subpost_list[data-pid="%1"]', pid)
-		 );
-		 if(list_wrapper.classList.contains('empty'))
-		     list_wrapper.classList.remove('empty')
 	     },
 	     function(status, text) {
 		 pager.classList.remove('lock');
@@ -196,8 +200,6 @@
 		 function() {
 		     /* show the last page (-1) */
 		     refresh_subpost_list(pid, '-1');
-		     form.style.display = 'none';
-		     list.classList.remove('expanded');
 		 }
 	     );
 	     reply_controllers[form.dataset.pid] = controller;
