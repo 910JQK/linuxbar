@@ -2,6 +2,8 @@
 {% from 'macros.html' import avatar, user_info, pager, field, submit %}
 {% from 'subpost_list.html' import subpost_list, subpost_list_pager %}
 {% set COUNT_SUBPOST = count_subpost %}
+{# cut off the subpost list when the following count limit is exceeded #}
+{% set SUBPOST_LIST_CUT = 4 %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -97,6 +99,7 @@
 	 width: 100%;
 	 margin: 0.5em 0em;
      }
+     .expand_all_btn { text-align: center; cursor: pointer; color: gray; }
      #add_post_form { width: 45em; }
      #add_post_form > [name="content"] { box-sizing: border-box; width: 100%; }
     </style>
@@ -227,6 +230,19 @@
 	 init_form();
 	 for(let pager of query_all('.subpost_list_pager > .pager'))
 	     init_pager(pager);
+	 for(let expand_btn of query_all('.expand_all_btn'))
+	     expand_btn.addEventListener('click', function() {
+		 var pid = this.dataset.pid;
+		 var list_wrapper = query(
+		     printf('.post_subpost_list[data-pid="%1"]', pid)
+		 );
+		 for(let hidden_element of list_wrapper.querySelectorAll(
+		     '.subpost.hidden, .pager_and_reply_btn_wrapper.hidden'
+		 )) {
+		     hidden_element.classList.remove('hidden');
+		 }
+		 this.style.display = 'none';
+	     })
 	 if(anchor) {
 	     let arr = anchor.split('_');
 	     if(arr[0] == '#goto'){
@@ -259,6 +275,11 @@
       <hr/>
       <ol id="post_list">
 	{% for post in data['list'] %}
+	  {% if post['subposts']['count'] > SUBPOST_LIST_CUT %}
+	    {% set cut = true %}
+	  {% else %}
+	    {% set cut = false %}
+	  {% endif %}
 	  <li class="post" id="p{{ post['pid'] }}">
 	    <div class="container_left">
 	      {{ avatar(post['author']['mail'], 6) }}
@@ -273,17 +294,20 @@
 	      </div>
 	      <div class="post_subpost_list{% if not post['subposts']['list'] %} empty{% endif %}" data-pid="{{ post['pid'] }}">
 		<ol class="subpost_list" data-pid="{{ post['pid'] }}">
-		  {{ subpost_list(post['subposts']['list'], post['pid'], 1) }}
+		  {{ subpost_list(post['subposts']['list'], post['pid'], 1, SUBPOST_LIST_CUT) }}
 		</ol>
 		<div class="subpost_list_footer{% if not session.get('uid') and post['subposts']['count'] <= COUNT_SUBPOST %} empty{% endif %}">
-		    <div class="pager_and_reply_btn_wrapper">
-		      <div class="subpost_list_pager" data-pid="{{ post['pid'] }}">
-			{{ subpost_list_pager(post['subposts']['count'], COUNT_SUBPOST, 1) }}
-		      </div>
-		      {% if session.get('uid') %}
-			<a class="reply_btn" href="javascript:void(0)">{{ _('Reply') }}</a>
-		      {% endif %}
+		  {% if cut %}
+		    <div class="expand_all_btn" data-pid="{{ post['pid'] }}">{{ _('click to expand remaining posts') }}</div>
+		  {% endif %}
+		  <div class="pager_and_reply_btn_wrapper{% if cut %} hidden{% endif %}">
+		    <div class="subpost_list_pager" data-pid="{{ post['pid'] }}">
+		      {{ subpost_list_pager(post['subposts']['count'], COUNT_SUBPOST, 1) }}
 		    </div>
+		    {% if session.get('uid') %}
+		      <a class="reply_btn" href="javascript:void(0)">{{ _('Reply') }}</a>
+		    {% endif %}
+		  </div>
 		  {% if session.get('uid') %}
 		    <form class="reply_form" data-pid="{{ post['pid'] }}" action="javascript:void(0)">
 		      <input type="hidden" name="parent" value="{{ post['pid'] }}" />
