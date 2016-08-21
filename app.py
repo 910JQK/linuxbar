@@ -138,7 +138,9 @@ def inject_config():
 
 
 @app.template_filter('date')
-def format_date(timestamp):
+def format_date(timestamp, detailed=False):
+    if(detailed):
+        return datetime.datetime.fromtimestamp(int(timestamp)).isoformat(' ');
     date = datetime.datetime.fromtimestamp(timestamp)
     delta = round((datetime.datetime.now() - date).total_seconds())
     if(delta < 60):
