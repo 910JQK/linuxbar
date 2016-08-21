@@ -61,6 +61,7 @@
 	     '{% if index  %}/{% else %}{{ url_for('board', name=board) }}{% endif %}'
 	 );
 	 init_validation(true);
+	 init_timer();
      }
      window.addEventListener('load', init);
     </script>
@@ -94,14 +95,14 @@
 		  {{ avatar(topic['author']['mail']) }}
 		  <span class="name">{{ topic['author']['name'] }}</span>
 		</span>
-		<span class="date">{{ topic['date'] | date }}</span>
+		<span class="date" title="{{ topic['date'] | date(detailed=true) }}" data-ts="{{ topic['date'] }}">{{ topic['date'] | date }}</span>
 	      </div>
 	      <div class="info info_last_post">
 		<span class="author" data-uid="{{ topic['last_post_author']['uid'] }}">
 		  {{ avatar(topic['last_post_author']['mail']) }}
 		  <span class="name">{{ topic['last_post_author']['name'] }}</span>
 		</span>
-		<span class="date">{{ topic['last_post_date'] | date }}</span>
+		<span class="date" title="{{ topic['last_post_date'] | date(detailed=true) }}" data-ts="{{ topic['last_post_date'] }}">{{ topic['last_post_date'] | date }}</span>
 	      </div>
 	    </div>
 	  </li>
