@@ -225,7 +225,7 @@
 	 let pid = pager.parentElement.dataset.pid;
 	 for(let link of pager.querySelectorAll('.page_link:not(.page_current)')) {
 	     link.addEventListener('click', function() {
-		 refresh_subpost_list(pid, link.textContent);
+		 refresh_subpost_list(pid, this.dataset.pn);
 	     });
 	 }
      }
