@@ -225,6 +225,20 @@
 	     });
 	 }
      }
+     function show_remaining_subposts(pid) {
+	 /* disposable usage */
+	 var list_wrapper = query(
+	     printf('.post_subpost_list[data-pid="%1"]', pid)
+	 );
+	 for(let hidden_element of list_wrapper.querySelectorAll(
+	     '.subpost.hidden, .pager_and_reply_btn_wrapper.hidden'
+	 )) {
+	     hidden_element.classList.remove('hidden');
+	 }
+	 var button = list_wrapper.querySelector('.expand_all_btn');
+	 if(button)
+	     button.style.display = 'none';
+     }
      function init() {
 	 var anchor = location.hash;
 	 init_form();
@@ -232,31 +246,26 @@
 	     init_pager(pager);
 	 for(let expand_btn of query_all('.expand_all_btn'))
 	     expand_btn.addEventListener('click', function() {
-		 var pid = this.dataset.pid;
-		 var list_wrapper = query(
-		     printf('.post_subpost_list[data-pid="%1"]', pid)
-		 );
-		 for(let hidden_element of list_wrapper.querySelectorAll(
-		     '.subpost.hidden, .pager_and_reply_btn_wrapper.hidden'
-		 )) {
-		     hidden_element.classList.remove('hidden');
-		 }
-		 this.style.display = 'none';
+		 show_remaining_subposts(this.dataset.pid);
 	     })
 	 if(anchor) {
 	     let arr = anchor.split('_');
 	     if(arr[0] == '#goto'){
 		 /* #goto_sid_pid_pn */
-		 if(arr[3] == '1') {
+		 let sid = arr[1];
+		 let pid = arr[2];
+		 let pn = arr[3]
+		 show_remaining_subposts(pid);
+		 if(pn == '1') {
 		     /* the first page */
-		     document.getElementById('s' + arr[1]).classList.add(
+		     document.getElementById('s' + sid).classList.add(
 			 'highlight'
 		     );
-		     scroll_to('#f' + arr[2]);
+		     scroll_to('#f' + pid);
 		 } else {
 		     /* other pages */
 		     refresh_subpost_list(
-			 arr[2], arr[3], true, ('#f' + arr[2]), arr[1]
+			 pid, pn, true, ('#f' + pid), sid
 		     );
 		 }
 	     }
