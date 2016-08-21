@@ -135,6 +135,16 @@ AjaxForm.prototype.msg = function(text, type){
 };
 
 
+AjaxForm.prototype.empty = function() {
+    this.message_box.textContent = '';
+    for(let input of this.form.querySelectorAll(
+	'input[type="text"], input[type="password"], textarea'
+    )) {
+	input.value = '';
+    }
+};
+
+
 AjaxForm.prototype.submit = function() {
     POST(
 	this.url,
