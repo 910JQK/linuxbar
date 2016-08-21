@@ -2,6 +2,9 @@ var query = selector => document.querySelector(selector);
 var query_all = selector => document.querySelectorAll(selector);
 
 
+var timer;
+
+
 /* Reserved for l10n */
 function _(string) {
     return string;
@@ -122,14 +125,42 @@ function utf8sizeof(string) {
 
 
 /**
- * Format date
+ * Simplified version of Date.prototype.toISOString()
  *
  * @param Number timestamp
  * @return String
  */
-function format_date(timestamp) {
-    var now = Math.floor(Date.now() / 1000);
-    var delta = now - timestamp;
+function iso_date(timestamp) {
+    var date = new Date(timestamp*1000);
+    function pad(num) {
+	if (num < 10) {
+	    return '0' + num;
+	}
+	return String(num);
+    }
+    return (
+	date.getFullYear() +
+	    '-' + pad(date.getMonth() + 1) +
+	    '-' + pad(date.getDate()) +
+	    ' ' + pad(date.getHours()) +
+	    ':' + pad(date.getMinutes()) +
+	    ':' + pad(date.getSeconds())
+    );
+}
+
+
+/**
+ * Format date
+ *
+ * @param Number timestamp
+ * @param Boolean detailed = False
+ * @return String
+ */
+function format_date(timestamp, detailed) {
+    if(detailed)
+	return iso_date(timestamp);
+    var now = (Date.now() / 1000);
+    var delta = Math.round(now - timestamp);
     if(delta < 60){
         return _('just now');
     } else if(delta < 3600) {
@@ -172,6 +203,31 @@ function format_date(timestamp) {
         else
             return printf(_('%1 years ago'), years);
     }
+}
+
+
+/**
+ * Update all the date strings on the page
+ *
+ * @return void
+ */
+function update_date() {
+    for(let element of query_all('.date'))
+	element.textContent = format_date(element.dataset.ts);
+}
+
+
+/**
+ * Load timer in another thread
+ *
+ * @return void
+ */
+function init_timer() {
+    timer = new Worker('/static/timer.js');
+    timer.addEventListener('message', function(ev) {
+	if(ev.data == 'update_date')
+	    update_date();
+    });
 }
 
 
