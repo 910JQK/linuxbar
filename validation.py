@@ -27,9 +27,12 @@ def validate(field, string, min=0, max=0, not_empty=False, in_list=None, regex=N
         string = ''
     size = len(string.encode('utf8'))
     if(min and size < min):
-        raise ValidationError(
-            _('%s should be at least %d bytes.') % (field, min)
-        )
+        if(min == 1):
+            raise ValidationError(_('%s should not be empty.') % field)
+        else:
+            raise ValidationError(
+                _('%s should be at least %d bytes.') % (field, min)
+            )
     if(max and size > max):
         raise ValidationError(
             _('%s should be at most %d bytes.') % (field, max)
