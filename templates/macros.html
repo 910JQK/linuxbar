@@ -47,8 +47,8 @@
       {% set upper_limit = pages %}
     {% endif %}
   {% endif %}
-  {% if pages > 1 %}
-    <div class="pager box_horizontal_center">
+  <div class="pager box_horizontal_center">
+    {% if pages > 1 %}
       {% for i in range(lower_limit, upper_limit+1) %}
 	{% if i != pn %}
 	  {% if not ajax %}
@@ -60,6 +60,6 @@
 	  <a class="page_link page_current">{{ i }}</a>
 	{% endif %}
       {% endfor %}
-    </div>
-  {% endif %}
+    {% endif %}
+  </div>
 {% endmacro %}
