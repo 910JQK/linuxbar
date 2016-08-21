@@ -1,7 +1,8 @@
 {% from 'macros.html' import avatar, pager %}
-{% macro subpost_list(list, pid, pn) %}
+{% macro subpost_list(list, pid, pn, cut=0) %}
+  {# tip: cut feature must be used with pn == 1 #}
   {% for subpost in list %}
-    <li class="subpost" id="s{{ subpost['sid'] }}" data-sid="{{ subpost['sid'] }}">
+    <li class="subpost{% if cut != 0 and loop.index > cut %} hidden{% endif %}" id="s{{ subpost['sid'] }}" data-sid="{{ subpost['sid'] }}">
       <div class="subpost_left_container">
 	{{ avatar(subpost['author']['mail'], 2) }}
       </div>
