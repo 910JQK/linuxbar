@@ -203,7 +203,7 @@ def board(name):
     result = forum.topic_list(name, int(pn), items_per_page)
     if(result[0] != 0):
         return err_response(result)
-    elif(len(result[2]['list']) == 0):
+    elif(len(result[2]['list']) == 0 and pn != '1'):
         return err_response((248, _('No such page.')) )
     else:
         return render_template(
