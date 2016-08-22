@@ -48,6 +48,14 @@
 	 box-sizing: border-box;
 	 width: 100%;
      }
+     #empty_notice {
+	 min-width: 45em;
+	 min-height: 20em;
+     }
+     #empty_notice > span {
+	 font-weight: bold;
+	 font-size: 150%;
+     }
     </style>
     <script type="text/javascript" src="/static/toolkit.js"></script>
     <script type="text/javascript" src="/static/form.js"></script>
@@ -78,6 +86,11 @@
       </header>
       <hr/>
       <ul id="topic_list">
+	{% if data['count'] == 0 %}
+	  <div id="empty_notice" class="box_center">
+	    <span>{{ _('Empty') }}</span>
+	  </div>
+	{% endif %}
 	{% for topic in data['list'] %}
 	  <li class="topic" data-tid="{{ topic['tid'] }}">
 	    <div class="container_left">
