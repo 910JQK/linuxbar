@@ -96,6 +96,7 @@ class Topic(BaseModel):
 
 
 class Post(BaseModel):
+    ordinal = IntegerField()
     content = TextField()
     topic = ForeignKeyField(Topic, related_name='posts')
     topic_author = ForeignKeyField(User) # a post emits a reply to its topic
@@ -109,6 +110,7 @@ class Post(BaseModel):
 
 
 class Subpost(BaseModel):
+    ordinal = IntegerField()
     content = TextField()
     author = ForeignKeyField(User, related_name='subposts')
     # a sub-post emits replies both to the post and the topic
