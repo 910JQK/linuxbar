@@ -14,7 +14,8 @@
      h1 { font-size: 1.5em; }
      header + hr { margin-bottom: 0; }
      #post_list { margin-top: 0; }
-     .date { font-size: 85%; color: hsl(0, 0%, 57%); }
+     .date, .ordinal { font-size: 85%; color: hsl(0, 0%, 57%); }
+     .info > * { margin-left: 0.25em; }
      .post {
 	 display: flex;
 	 width: 55em;
@@ -97,6 +98,11 @@
      .reply_submit_btn_wrapper {
 	 display: flex;
 	 justify-content: space-between;
+     }
+     .reply_submit_btn_wrapper > .message {
+	 white-space: nowrap;
+	 overflow: hidden;
+	 text-overflow: ellipsis;
      }
      .reply_form { display: none; }
      .reply_form > [name="content"] {
@@ -309,8 +315,9 @@
 	    <div class="container_right">
 	      <div class="post_body">{{ post['content'] }}</div>
 	      <div class="post_footer float_right_box" id="f{{ post['pid'] }}">
-		<div class="post_info">
+		<div class="info post_info">
 		  <span class="date" title="{{ post['date'] | date(detailed=true) }}" data-ts="{{ post['date'] }}">{{ post['date'] | date }}</span>
+		  <span class="ordinal">#{{ post['ordinal'] }}</span>
 		</div>
 	      </div>
 	      <div class="post_subpost_list{% if not post['subposts']['list'] %} empty{% endif %}{% if cut %} cut{% endif %}" data-pid="{{ post['pid'] }}">
