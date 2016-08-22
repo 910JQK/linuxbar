@@ -744,6 +744,7 @@ def topic_add(board, title, author, summary, post_body):
             last_post_author_id = author
         )
         Post.create(
+            ordinal = 1,
             content = post_body,
             author = author,
             topic = topic,
@@ -922,6 +923,7 @@ def post_get_author(id, subpost=False):
         return (1, db_err_msg(err))
 
 
+@db.atomic()
 def post_add(parent, author, content, subpost=False, reply=0):
     # Parameter "author" is the UID of the author, which must be valid.
     date = now()
@@ -937,8 +939,10 @@ def post_add(parent, author, content, subpost=False, reply=0):
             if(not query):
                 return (2, _('Topic does not exist or has been deleted.'))
             topic = query.get()
+            count = Post.select().where(Post.topic == topic).count()
             new_post = Post.create(
                 topic = topic,
+                ordinal = (count + 1),
                 author_id = author,
                 content = content,
                 date = date,
@@ -952,6 +956,7 @@ def post_add(parent, author, content, subpost=False, reply=0):
             if(not query):
                 return (2, _('Post does not exist or has been deleted.'))
             post = query.get()
+            count = Subpost.select().where(Subpost.reply1 == post).count()
             topic = post.topic
             if(topic.deleted):
                 return (3, _('The topic has been deleted'))
@@ -968,6 +973,7 @@ def post_add(parent, author, content, subpost=False, reply=0):
                 reply_rec = query.get()
                 reply_rec_author = reply_rec.author
             new_subpost = Subpost.create(
+                ordinal = (count + 1),
                 content = content,
                 author_id = author,
                 date = date,
@@ -1093,38 +1099,32 @@ def post_list(parent, page, count_per_page, subpost=False):
             Table
             .select(Table, User)
             .join(User)
-            .where(parent_field == parent_rec)
+            .where((parent_field == parent_rec) & (Table.deleted == False))
             .order_by(Table.id)
             .paginate(page, count_per_page)
         )
         list = []
         for post in query:
-            item = None
-            if(post.deleted):
-                item = {
-                    id_name: post.id,
-                    'delete_date': post.delete_date.timestamp(),
-                    'delete_operator': {
-                        'uid': post.delete_operator.id,
-                        'name': post.delete_operator.name,
-                        'mail': md5(post.delete_operator.mail)
-                    }
+            item = {
+                'ordinal': post.ordinal,
+                'content': post.content,
+                'author': {
+                    'uid': post.author.id,
+                    'name': post.author.name,
+                    'mail': md5(post.author.mail)
+                },
+                'date': post.date.timestamp()
+            }
+            item[id_name] = post.id
+            if(post.edited):
+                item['edit_date'] = post.edit_date.timestamp()
+            if(subpost and post.reply2):
+                item['reply'] = post.reply2.id
+                item['reply_author'] = {
+                    'uid': post.reply2.author.id,
+                    'name': post.reply2.author.name,
+                    'mail': post.reply2.author.mail
                 }
-            else:
-                item = {
-                    'content': post.content,
-                    'author': {
-                        'uid': post.author.id,
-                        'name': post.author.name,
-                        'mail': md5(post.author.mail)
-                    },
-                    'date': post.date.timestamp()
-                }
-                item[id_name] = post.id
-                if(post.edited):
-                    item['edit_date'] = post.edit_date.timestamp()
-                if(subpost and post.reply2):
-                    item['reply'] = post.reply2.id
             list.append(item)
         return (0, OK_MSG, {'list': list, 'count': count, 'page': page})
     except Exception as err:
