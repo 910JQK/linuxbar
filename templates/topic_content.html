@@ -14,8 +14,18 @@
      h1 { font-size: 1.5em; }
      header + hr { margin-bottom: 0; }
      #post_list { margin-top: 0; }
-     .date, .ordinal { font-size: 85%; color: hsl(0, 0%, 57%); }
-     .info > * { margin-left: 0.25em; }
+     .float_right_box { display: flex; justify-content: flex-end; }
+     .btn { cursor: pointer; }
+     .info > span {
+	 margin-left: 0.25em;
+	 font-size: 85%;
+	 color: hsl(0, 0%, 57%);
+     }
+     .icon {
+	 width: 0.75em;
+	 height: 0.75em;
+	 vertical-align: sub;
+     }
      .post {
 	 display: flex;
 	 width: 55em;
@@ -40,7 +50,6 @@
 	 padding: 1.85em 1.5em 0.55em 1.5em;
 	 min-width: 0;
      }
-     .float_right_box { display: flex; justify-content: flex-end; }
      .post_body { min-height: 16em; white-space: pre-wrap; }
      .post_subpost_list {
 	 margin: 0.5em 0em;
@@ -104,16 +113,25 @@
 	 overflow: hidden;
 	 text-overflow: ellipsis;
      }
-     .reply_form { display: none; }
      .reply_form > [name="content"] {
 	 box-sizing: border-box;
 	 width: 100%;
 	 margin: 0.5em 0em;
      }
+     .reply_form_header {
+	 display: flex;
+	 justify-content: space-between;
+	 align-items: center;
+	 color: gray;
+	 font-size: 85%;
+     }
+     .reply_cancel_btn {
+	 width: 0.85em;
+	 height: 0.85em
+     }
      .expand_all_btn {
 	 text-align: center;
 	 padding: 0.5em 0em;
-	 cursor: pointer;
 	 color: gray;
      }
      #add_post_form { width: 45em; }
@@ -127,6 +145,7 @@
     <script type="text/javascript">
      var add_post_form_controller;
      var reply_controllers = {};
+     var signed_in = {% if session.get('uid') %}true{% else %}false{% endif %};
      /**
       * Indirect event handler for click event of subpost pager
       *
@@ -198,7 +217,7 @@
 	 )
      }
      function init_form() {
-	 if(typeof add_post_form == 'undefined')
+	 if(!signed_in)
 	     return;
 	 add_post_form_controller = new AjaxForm(
 	     add_post_form,
@@ -210,6 +229,10 @@
 	     let list = I; // fix scope issue
 	     let reply_btn = list.querySelector('.reply_btn');
 	     let form = list.querySelector('.reply_form');
+	     let reply = form.querySelector('input[name="reply"]');
+	     let form_header = form.querySelector('.reply_form_header');
+	     let reply_indicator = form.querySelector('.reply_indicator')
+	     let reply_cancel_btn = form.querySelector('.reply_cancel_btn');
 	     let pid = list.dataset.pid;
 	     let controller = new AjaxForm(
 		 form,
@@ -227,10 +250,28 @@
 		     form.style.display = 'none';
 		     list.classList.remove('expanded');
 		 } else {
-		     form.style.display = 'block';
+		     form.style.display = '';
 		     list.classList.add('expanded');
 		 }
 	     });
+	     reply_cancel_btn.addEventListener('click', function() {
+		 reply.value = '0';
+		 reply_indicator.textContent = '';
+		 form_header.style.display = 'none';
+	     });
+	     for(let btn of list.querySelectorAll('.subpost_reply_btn')) {
+		 btn.addEventListener('click', function() {
+		     reply.value = this.dataset.sid;
+		     reply_indicator.textContent = printf(
+			 _('Reply to %1:'), this.dataset.name
+		     );
+		     form_header.style.display = '';
+		     if(!list.classList.contains('expanded')) {
+			 form.style.display = 'block';
+			 list.classList.add('expanded');
+		     }
+		 });
+	     }
 	 }
      }
      function init_pager(pager) {
@@ -326,7 +367,7 @@
 		</ol>
 		<div class="subpost_list_footer{% if not session.get('uid') and post['subposts']['count'] <= COUNT_SUBPOST %} empty{% endif %}">
 		  {% if cut %}
-		    <div class="expand_all_btn" data-pid="{{ post['pid'] }}">{{ _('click to expand remaining posts') }}</div>
+		    <div class="btn expand_all_btn" data-pid="{{ post['pid'] }}">{{ _('click to expand remaining posts') }}</div>
 		  {% endif %}
 		  <div class="pager_and_reply_btn_wrapper{% if cut %} hidden{% endif %}">
 		    <div class="subpost_list_pager" data-pid="{{ post['pid'] }}">
@@ -337,7 +378,11 @@
 		    {% endif %}
 		  </div>
 		  {% if session.get('uid') %}
-		    <form class="reply_form" data-pid="{{ post['pid'] }}" action="javascript:void(0)">
+		    <form class="reply_form" data-pid="{{ post['pid'] }}" action="javascript:void(0)" style="display: none;">
+		      <div class="reply_form_header" style="display: none;">
+			<div class="reply_indicator"></div>
+			<img class="icon btn reply_cancel_btn" src="/static/icons/x.svg"></img>
+		      </div>
 		      <input type="hidden" name="parent" value="{{ post['pid'] }}" />
 		      <input type="hidden" name="reply" value="0" />
 		      <textarea name="content" autocomplete="off"></textarea>
