@@ -13,6 +13,9 @@
 	</div>
 	<div class="subpost_footer float_right_box">
 	  <div class="info subpost_info">
+	    {% if session.get('uid') %}
+	      <img class="icon btn subpost_reply_btn" src="/static/icons/share.svg" aria-label="reply" alt="reply" data-sid="{{ subpost['sid'] }}" data-name="{{ subpost['author']['name'] }}"></img>
+	    {% endif %}
 	    <span class="date" title="{{ subpost['date'] | date(detailed=true) }}" data-ts="{{ subpost['date'] }}">{{ subpost['date'] | date }}</span>
 	    <span class="ordinal">#{{ subpost['ordinal'] }}</span>
 	  </div>
