@@ -21,11 +21,15 @@
       {{ avatar(session['mail']) }}
       <span class="name">{{ session['name'] }}</span>
       <span class="separator">|</span>
-      <a class="link_logout" href="/user/logout">{{ _('Logout') }}</a>
+      <a class="link_logout" href="/user/logout?ret={{ request.url | urlencode }}">
+	{{ _('Logout') }}
+      </a>
     {% else %}
-      <a class="link_register" href="/user/register">{{ _('Register') }}</a>
+      <a class="link_register" href="/user/register?ret={{ request.url | urlencode }}">
+	{{ _('Register') }}
+      </a>
       <span class="separator">|</span>
-      <a class="link_login" href="/user/login">{{ _('Login') }}</a>
+      <a class="link_login" href="/user/login?ret={{ request.url | urlencode }}">{{ _('Login') }}</a>
     {% endif %}
   </div>
 {% endmacro %}
