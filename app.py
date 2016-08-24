@@ -482,7 +482,10 @@ def user_logout():
     session.pop('uid', None)
     session.pop('name', None)
     session.pop('mail', None)
-    return redirect(url_for('index'))
+    if(request.args.get('ret')):
+        return redirect(request.args['ret'])
+    else:
+        return redirect(url_for('index'))
 
 
 @app.route('/user/password-reset')
