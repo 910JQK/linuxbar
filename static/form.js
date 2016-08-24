@@ -103,7 +103,15 @@ function AjaxForm(form, url, lock_form_after_ok, redirect_url, success_callback)
     this.submit_btn = form.querySelector('.submit_btn');
     this.url = url;
     this.lock_form_after_ok = Boolean(lock_form_after_ok);
-    this.redirect_url = redirect_url;
+    if(redirect_url) {
+	this.redirect_url = redirect_url;
+    } else {
+	let match = location.search.match(/ret=([^&]*)/);
+	if(match && match[1])
+	    this.redirect_url = decodeURIComponent(match[1]);
+	else
+	    this.redirect_url = '';
+    }
     var captcha_input = form.querySelector('[name="captcha"]');
     var captcha_image;
     if(captcha_input) {
