@@ -10,7 +10,7 @@ from PIL import ImageOps
 from PIL import ImageFilter
 
 
-CAPTCHA_CHARS = '345ACEFGHKLMNPRSTUVWXZacdefhkmnpsuwx'
+CAPTCHA_CHARS = '345ACEFGHKLMNPRSTWXZacdefhkmnpswx'
 CAPTCHA_REGEX = re.compile('[0-9A-z]{4}')
 
 
@@ -36,7 +36,7 @@ def gen_image(content):
     '''
 
     # ======================================================================
-    # Code piece modified from https://github.com/lepture/captcha
+    # Snippet modified from https://github.com/lepture/captcha
     # LICENSE: New BSD License
 
     image = Image.new('RGB', (WIDTH, HEIGHT))
