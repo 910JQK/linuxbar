@@ -96,22 +96,17 @@ function init_validation(realtime) {
 }
 
 
-function AjaxForm(form, url, lock_form_after_ok, redirect_url, success_callback) {
+function AjaxForm(form, url, lock_form_after_ok, redirect_url, success_callback, options) {
     var controller = this;
     this.form = form;
     this.message_box = form.querySelector('.message');
     this.submit_btn = form.querySelector('.submit_btn');
     this.url = url;
     this.lock_form_after_ok = Boolean(lock_form_after_ok);
-    if(redirect_url) {
-	this.redirect_url = redirect_url;
-    } else {
-	let match = location.search.match(/ret=([^&]*)/);
-	if(match && match[1])
-	    this.redirect_url = decodeURIComponent(match[1]);
-	else
-	    this.redirect_url = '';
-    }
+    this.redirect_url = redirect_url;
+    var match = location.search.match(/ret=([^&]*)/);
+    if(match && match[1])
+	this.redirect_url = decodeURIComponent(match[1]);
     var captcha_input = form.querySelector('[name="captcha"]');
     var captcha_image;
     if(captcha_input) {
@@ -127,6 +122,10 @@ function AjaxForm(form, url, lock_form_after_ok, redirect_url, success_callback)
 	this.has_captcha = false;
     }
     this.success_callback = success_callback;
+    if(options)
+	this.options = options;
+    else
+	this.options = {};
     this.submit_btn.addEventListener('click', this.submit.bind(this));
 }
 
@@ -176,7 +175,10 @@ AjaxForm.prototype.ok = function(xhr) {
 	if(this.success_callback)
 	    this.success_callback();
 	if(this.redirect_url)
-	    setTimeout(() => location.replace(this.redirect_url), 800);
+	    setTimeout(
+		() => location.replace(this.redirect_url),
+		(this.options.redirect_delay || 800)
+	    );
     } else {
 	this.msg(result.msg, 'err');
 	if(this.has_captcha) {
