@@ -173,10 +173,10 @@ AjaxForm.prototype.ok = function(xhr) {
 	if(this.lock_form_after_ok)
 	    for(let input of this.form.querySelectorAll('input'))
 		input.disabled = true;
-	if(this.redirect_url)
-	    setTimeout(() => location.replace(this.redirect_url), 800);
 	if(this.success_callback)
 	    this.success_callback();
+	if(this.redirect_url)
+	    setTimeout(() => location.replace(this.redirect_url), 800);
     } else {
 	this.msg(result.msg, 'err');
 	if(this.has_captcha) {
