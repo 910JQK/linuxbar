@@ -35,7 +35,7 @@ function printf(){
  * @param Object data
  * @param Function ok(XMLHttpRequest xhr)
  * @param Function err(Number status, String statusText)
- * @param Number timeout = 2000
+ * @param Number timeout = 6000
  * @return XMLHttpRequest
  */
 function GET(url, data, ok, err, timeout) {
@@ -46,7 +46,7 @@ function GET(url, data, ok, err, timeout) {
     if(params)
 	url = url + '?' + params;
     xhr.open('GET', url);
-    xhr.timeout = timeout? timeout: 2000;
+    xhr.timeout = timeout? timeout: 6000;
     xhr.onreadystatechange = function() {
 	if(xhr.readyState == 4) {
 	    if(xhr.status == 200)
@@ -68,7 +68,7 @@ function GET(url, data, ok, err, timeout) {
  * @param Object data
  * @param Function ok(XMLHttpRequest xhr)
  * @param Function err(Number status, String statusText)
- * @param Number timeout = 2000
+ * @param Number timeout = 6000
  * @return XMLHttpRequest
  */
 function POST(url, data, ok, err, timeout) {
@@ -82,7 +82,7 @@ function POST(url, data, ok, err, timeout) {
     }
     var xhr = new XMLHttpRequest();
     xhr.open('POST', url);
-    xhr.timeout = timeout? timeout: 2000;
+    xhr.timeout = timeout? timeout: 6000;
     xhr.onreadystatechange = function() {
 	if(xhr.readyState == 4) {
 	    if(xhr.status == 200)
