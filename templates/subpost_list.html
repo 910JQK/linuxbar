@@ -19,8 +19,18 @@
 	    {% endif %}
 	  </div>
 	  <div class="info subpost_info">
+	    {% if subpost['author']['uid'] == session.get('uid') %}
+	      {# argument `tid` is added by javascript in topic_content.html #}
+	      {# detail can be found at init_subpost_edit_btn() #}
+	      <a class="subpost_edit_link" data-url="{{ url_for('edit_form', id=subpost['sid']) ~ '?subpost=subpost&bookmark=goto_' ~ subpost['sid'] ~ '_' ~ pid ~ '_' ~ pn }}">
+		<img class="icon btn subpost_edit_btn" src="/static/icons/pencil.svg" aria-label="edit" alt="edit" title="{{ _('edit this subpost') }}" />
+	      </a>
+	    {% endif %}
 	    {% if session.get('uid') %}
 	      <img class="icon btn subpost_reply_btn" src="/static/icons/share.svg" aria-label="reply" alt="reply" data-sid="{{ subpost['sid'] }}" data-name="{{ subpost['author']['name'] }}" />
+	    {% endif %}
+	    {% if subpost.get('edit_date') %}
+	      <span class="edited_mark" title="{{ subpost['edit_date'] | date(detailed=true) }}">{{ _('[Edited]') }}</span>
 	    {% endif %}
 	    <span class="date" title="{{ subpost['date'] | date(detailed=true) }}" data-ts="{{ subpost['date'] }}">{{ subpost['date'] | date }}</span>
 	    <span class="ordinal">#{{ subpost['ordinal'] }}</span>
