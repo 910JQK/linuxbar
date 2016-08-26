@@ -283,6 +283,32 @@ def html_subpost_list():
         )
 
 
+@app.route('/edit/<int:id>')
+def edit_form(id):
+    tid = request.args.get('tid')
+    subpost = request.args.get('subpost')
+    # bookmark: anchor string without `#`
+    bookmark = request.args.get('bookmark')
+
+    try:
+        validate_id(_('Topic ID'), tid)
+    except ValidationError as err:
+        return validation_err_response(err, json=False)
+
+    result = forum.post_get_content(id, bool(subpost))
+    if(result[0] != 0):
+        return err_response(result)
+    else:
+        return render_template(
+            'form_edit.html',
+            id = id,
+            tid = tid,
+            is_subpost = bool(subpost),
+            bookmark = bookmark,
+            current_content = result[2]['content']
+        )
+
+
 @app.route('/captcha/get')
 def captcha_get():
     code = captcha.gen_captcha()
