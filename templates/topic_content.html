@@ -16,8 +16,13 @@
      #post_list { margin-top: 0; }
      .float_right_box { display: flex; justify-content: flex-end; }
      .btn { cursor: pointer; }
-     .info > span {
+     .info > * {
 	 margin-left: 0.25em;
+     }
+     .info > img, .info > a {
+	 margin-left: 0.5em;
+     }
+     .info > span {
 	 font-size: 85%;
 	 color: hsl(0, 0%, 57%);
      }
@@ -148,6 +153,7 @@
     <script type="text/javascript" src="/static/form.js"></script>
     <script type="text/javascript">
      var COUNT_SUBPOST = '{{ COUNT_SUBPOST }}';
+     var TID = '{{ tid }}';
     </script>
     <script type="text/javascript">
      var add_post_form_controller;
@@ -204,6 +210,7 @@
 		     controller.form.style.display = 'none';
 		     list_wrapper.classList.remove('expanded');
 		     controller.empty();
+		     init_subpost_edit_btn();
 		 } else {
 		     pager.classList.remove('lock');
 		     if(!no_err_alert)
@@ -289,6 +296,17 @@
 	     });
 	 }
      }
+     function init_subpost_edit_btn() {
+	 /**
+	  * I don't think adding a parameter for the interface of back-end
+	  * is wise because tid info is irrelevant to the operation
+	  * "getting a subpost list" itself.
+	  *
+	  * Sorry for such an ugly hack.
+	  */
+	 for(let btn of query_all('.subpost_edit_link'))
+	     btn.href = btn.dataset.url + '&tid=' + TID;
+     }
      function show_remaining_subposts(pid) {
 	 /* disposable usage */
 	 var list_wrapper = query(
@@ -336,6 +354,7 @@
 		 }
 	     }
 	 }
+	 init_subpost_edit_btn();
 	 init_timer();
      }
      window.addEventListener('load', init);
@@ -370,7 +389,7 @@
 		    </a>
 		  {% endif %}
 		  {% if post.get('edit_date') %}
-		    <span title="{{ post['edit_date'] | date(detailed=true) }}">{{ _('[Edited]') }}</span>
+		    <span class="edited_mark" title="{{ post['edit_date'] | date(detailed=true) }}">{{ _('[Edited]') }}</span>
 		  {% endif %}
 		  <span class="date" title="{{ post['date'] | date(detailed=true) }}" data-ts="{{ post['date'] }}">{{ post['date'] | date }}</span>
 		  <span class="ordinal">#{{ post['ordinal'] }}</span>
