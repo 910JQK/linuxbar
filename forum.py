@@ -996,6 +996,25 @@ def post_add(parent, author, content, subpost=False, reply=0):
         return (0, _('Subpost published successfully.'), {'sid': new_subpost.id})
 
 
+def post_get_content(id, subpost=False):
+    Table = None
+    post_type = ''
+    if(not subpost):
+        Table = Post
+        post_type = 'post'
+    else:
+        Table = Subpost
+        post_type = 'subpost'
+    try:
+        query = Table.select().where(Table.id == id)
+        if(not query):
+            return (2, _('No such %s.') % post_type)
+        post = query.get()
+        return (0, OK_MSG, {'content': post.content})
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
 def post_edit(id, new_content, subpost=False):
     Table = None
     post_type = ''
