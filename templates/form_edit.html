@@ -1,0 +1,37 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import field, submit %}
+
+{% block title %}{{ _('Edit post - %(site)s', site=config['site_name']) }}{% endblock %}
+{% block body_class %}box_horizontal_center{% endblock %}
+{% block form_title %}{{ _('Edit Post') }}{% endblock %}
+
+{% block style %}
+  {% if not is_subpost %}
+    textarea[name="new_content"] { height: 20em; }
+  {% endif %}
+{% endblock %}
+
+{% block script %}
+var SUBMIT_URL = '{{ url_for('post_edit', id=id) }}';
+var LOCK_FORM_AFTER_OK = false;
+var REDIRECT_URL = '{{ url_for('topic', tid=tid) ~ '#' ~ bookmark }}';
+var SUCCESS_CALLBACK = null;
+var OPTIONS = {};
+var REALTIME_VALIDATION = false;
+window.addEventListener('load', function() {
+    cancel_button.addEventListener('click', function(ev) {
+        ev.preventDefault();
+        history.go(-1);
+    });
+});
+{% endblock %}
+
+{% block form %}
+<input type="hidden" name="subpost" value="{% if is_subpost %}subpost{% endif %}" />
+<textarea name="new_content" placeholder="New Content" aria-label="New Content" text="">{{ current_content }}</textarea>
+{% endblock %}
+
+{% block buttons %}
+{{ submit(_('Submit')) }}
+<button id="cancel_button">{{ _('Cancel') }}</button>
+{% endblock %}
