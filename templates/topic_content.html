@@ -51,6 +51,7 @@
 	 min-width: 0;
      }
      .post_body { min-height: 16em; white-space: pre-wrap; }
+     .post_footer .icon { vertical-align: middle;  }
      .post_subpost_list {
 	 margin: 0.5em 0em;
 	 border: 1px solid hsl(0, 0%, 93%);
@@ -242,7 +243,7 @@
 	     let pid = list.dataset.pid;
 	     let controller = new AjaxForm(
 		 form,
-		 '{{ url_for('post_add') ~ '?subpost=1' }}',
+		 '{{ url_for('post_add') ~ '?subpost=subpost' }}',
 		 false,
 		 '',
 		 function() {
@@ -363,6 +364,14 @@
 	      <div class="post_body">{{ post['content'] }}</div>
 	      <div class="post_footer float_right_box" id="f{{ post['pid'] }}">
 		<div class="info post_info">
+		  {% if post['author']['uid'] == session.get('uid') %}
+		    <a href="{{ url_for('edit_form', id=post['pid']) ~ '?tid=' ~ tid ~ '&bookmark=p' ~ post['pid'] }}">
+		       <img class="icon btn post_edit_btn" src="/static/icons/pencil.svg" aria-label="edit" alt="edit" title="{{ _('edit this post') }}" />
+		    </a>
+		  {% endif %}
+		  {% if post.get('edit_date') %}
+		    <span title="{{ post['edit_date'] | date(detailed=true) }}">{{ _('[Edited]') }}</span>
+		  {% endif %}
 		  <span class="date" title="{{ post['date'] | date(detailed=true) }}" data-ts="{{ post['date'] }}">{{ post['date'] | date }}</span>
 		  <span class="ordinal">#{{ post['ordinal'] }}</span>
 		</div>
@@ -387,7 +396,7 @@
 		    <form class="reply_form" data-pid="{{ post['pid'] }}" action="javascript:void(0)" style="display: none;">
 		      <div class="reply_form_header" style="display: none;">
 			<div class="reply_indicator"></div>
-			<img class="icon btn reply_cancel_btn" src="/static/icons/x.svg" aria-label="cancel reply" alt="cancel reply" />
+			<img class="icon btn reply_cancel_btn" src="/static/icons/x.svg" aria-label="cancel reply" alt="cancel reply" title="cancel reply" />
 		      </div>
 		      <input type="hidden" name="parent" value="{{ post['pid'] }}" />
 		      <input type="hidden" name="reply" value="0" />
