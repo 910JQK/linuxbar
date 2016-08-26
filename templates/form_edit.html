@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block script %}
-var SUBMIT_URL = '{{ url_for('post_edit', id=id) }}';
+var SUBMIT_URL = '{{ url_for('post_edit', id=id) }}{% if is_subpost %}?subpost=subpost{% endif %}';
 var LOCK_FORM_AFTER_OK = false;
 var REDIRECT_URL = '{{ url_for('topic', tid=tid) ~ '#' ~ bookmark }}';
 var SUCCESS_CALLBACK = null;
@@ -27,7 +27,6 @@ window.addEventListener('load', function() {
 {% endblock %}
 
 {% block form %}
-<input type="hidden" name="subpost" value="{% if is_subpost %}subpost{% endif %}" />
 <textarea name="new_content" placeholder="New Content" aria-label="New Content" text="">{{ current_content }}</textarea>
 {% endblock %}
 
