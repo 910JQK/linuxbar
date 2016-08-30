@@ -126,6 +126,20 @@ function AjaxForm(form, url, lock_form_after_ok, redirect_url, success_callback,
 	this.options = options;
     else
 	this.options = {};
+    var content = form.querySelector('[name="content"]');
+    if(content)
+	content.addEventListener('keydown', function(ev) {
+	    if(ev.key == 'Enter' && ev.ctrlKey) {
+		ev.preventDefault();
+		if(form.reportValidity){
+		    /* not implemented in Firefox now */
+		    if(form.reportValidity())
+			controller.submit();
+		} else {
+		    controller.submit();
+		}
+	    }
+	});
     this.submit_btn.addEventListener('click', this.submit.bind(this));
 }
 
