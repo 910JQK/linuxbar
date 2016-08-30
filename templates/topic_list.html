@@ -60,17 +60,22 @@
      }
     </style>
     <script type="text/javascript" src="/static/toolkit.js"></script>
-    <script type="text/javascript" src="/static/form.js"></script>
+    {% if not index and session.get('uid') %}
+      <script type="text/javascript" src="/static/form.js"></script>
+    {% endif %}
     <script type="text/javascript">
      var form_controller;
+     var has_form = {% if not index and session.get('uid') %}true{% else %}false{% endif %};
      function init() {
-	 form_controller = new AjaxForm(
-	     add_topic_form,
-	     '{{ url_for('topic_add') }}',
-	     false,
-	     '{% if index  %}/{% else %}{{ url_for('board', name=board) }}{% endif %}'
-	 );
-	 init_validation(true);
+	 if(has_form) {
+	     form_controller = new AjaxForm(
+		 add_topic_form,
+		 '{{ url_for('topic_add') }}',
+		 false,
+		 '{% if not index %}{{ url_for('board', name=board) }}{% endif %}'
+	     );
+	     init_validation(true);
+	 }
 	 init_timer();
      }
      window.addEventListener('load', init);
