@@ -3,7 +3,7 @@
 
 from flask import Flask, Response, request, session, redirect, url_for, \
                   render_template
-from flask.ext.babel import Babel
+from flask_babel import Babel
 app = Flask(__name__)
 babel = Babel(app)
 
