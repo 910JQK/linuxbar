@@ -12,6 +12,10 @@ a {
     color: hsl(233, 80%, 48%);
 }
 
+input[type="text"], input[type="password"] {
+    width: 20em;
+}
+
 button::-moz-focus-inner, input[type="submit"]::-moz-focus-inner {
     border: 0px;
 }
