@@ -37,6 +37,9 @@
 	 word-wrap: break-word;
 	 border-bottom: 1px solid hsl(0, 0%, 75%);
      }
+     .content.deleted {
+	 color: hsl(0, 90%, 45%);
+     }
      .container_left {
 	 flex-shrink: 0;
 	 width: 10em;
@@ -158,6 +161,7 @@
     <script type="text/javascript">
      var add_post_form_controller;
      var reply_controllers = {};
+     var del_post_lock = false;
      var signed_in = {% if session.get('uid') %}true{% else %}false{% endif %};
      /**
       * Indirect event handler for click event of subpost pager
@@ -230,6 +234,37 @@
 	     }
 	 )
      }
+     function delete_post(id, is_subpost) {
+	 if(del_post_lock)
+	     return;
+	 del_post_lock = true;
+	 GET(
+	     /* note: bad impl */
+	     '{{ url_for('post_remove', id=0) }}'.replace(/0$/, id) + '?' + (is_subpost? 'subpost=1': ''),
+	     {},
+	     function (xhr) {
+		 var result = JSON.parse(xhr.responseText);
+		 if(result.code == 0) {
+		     var prefix = is_subpost? 's': 'p';
+		     var post = query(printf('#%1%2', prefix, id));
+		     var content = post.querySelector('.content');
+		     content.innerText = _('(deleted)');
+		     content.classList.add('deleted');
+		     alert(_('Post deleted successfully!'));
+		 } else {
+		     alert(result.msg);
+		 }
+		 del_post_lock = false;
+	     },
+	     function (status, text) {
+		 if(status != 0)
+		     alert(printf(_('Error: %1 %2'), status, text));
+		 else
+		     alert(_('Connection Error or Timeout'));
+		 del_post_lock = false;
+	     }
+	 )
+     }
      function init_form() {
 	 if(!signed_in)
 	     return;
@@ -285,6 +320,12 @@
 			 list.classList.add('expanded');
 		     }
 		 });
+	     }
+	     for(let I of query_all('.post_del_btn')) {
+		 let btn = I;
+		 btn.addEventListener('click', function() {
+		     delete_post(btn.dataset.pid, false);
+		 })
 	     }
 	 }
      }
@@ -380,9 +421,12 @@
 	      <div class="name">{{ post['author']['name'] }}</div>
 	    </div>
 	    <div class="container_right">
-	      <div class="post_body">{{ post['content'] }}</div>
+	      <div class="post_body content">{{ post['content'] }}</div>
 	      <div class="post_footer float_right_box" id="f{{ post['pid'] }}">
 		<div class="info post_info">
+		  {% if is_admin %}
+		    <img class="icon btn post_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" data-pid="{{ post['pid'] }}" />
+		  {% endif %}
 		  {% if post['author']['uid'] == session.get('uid') %}
 		    <a href="{{ url_for('edit_form', id=post['pid']) ~ '?tid=' ~ tid ~ '&bookmark=p' ~ post['pid'] }}">
 		       <img class="icon btn post_edit_btn" src="/static/icons/pencil.svg" aria-label="edit" alt="edit" title="{{ _('edit this post') }}" />
