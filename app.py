@@ -231,6 +231,17 @@ def topic(tid):
         return err_response(result_info)
     topic_info = result_info[2]
 
+    is_admin = False
+    uid = session.get('uid')
+    if(uid):
+        result_admin_site = forum.admin_check(uid)
+        if(result_admin_site[0] != 0):
+            return err_response(result_admin_site)
+        result_admin = forum.admin_check(uid, topic_info['board'])
+        if(result_admin[0] != 0):
+            return err_response(result_admin)
+        is_admin = (result_admin_site[2]['admin'] or result_admin[2]['admin'])
+
     result = forum.post_list(tid, int(pn), count_post)
     if(result[0] != 0):
         return err_response(result)
@@ -252,7 +263,8 @@ def topic(tid):
             data = result[2],
             pn = int(pn),
             count_post = count_post,
-            count_subpost = COUNT_SUBPOST
+            count_subpost = COUNT_SUBPOST,
+            is_admin = is_admin
         )
 
 
