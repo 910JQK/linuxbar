@@ -245,6 +245,8 @@
      function delete_post(id, is_subpost) {
 	 if(del_post_lock)
 	     return;
+	 if(!confirm(_('Do you really want to delete this post?')) )
+	     return;
 	 del_post_lock = true;
 	 GET(
 	     /* note: bad impl */
@@ -258,10 +260,7 @@
 		     var content = post.querySelector('.content');
 		     content.innerText = _('(deleted)');
 		     content.classList.add('deleted');
-		     if(!is_subpost)
-			 alert(_('Post deleted successfully!'));
-		     else
-			 alert(_('Subpost deleted successfully!'));
+		     alert(_('Post deleted successfully!'));
 		 } else {
 		     alert(result.msg);
 		 }
