@@ -452,7 +452,7 @@
 	      <div class="name">{{ post['author']['name'] }}</div>
 	    </div>
 	    <div class="container_right">
-	      <div class="post_body content">{{ post['content'] }}</div>
+	      <div class="post_body content">{{ post['content'] | safe }}</div>
 	      <div class="post_footer float_right_box" id="f{{ post['pid'] }}">
 		<div class="info post_info">
 		  {% if is_admin %}
