@@ -60,12 +60,18 @@ def content_filter(text, entry_callback, line_callback = lambda x: x):
     first_row = True
     callback_on = True
     for I in text.replace('\r', '').split('\n'):
-        if(I == '/***'):
-            callback_on = False
         if(not first_row):
             new_text += '\n'
         else:
             first_row = False
+        if(I == '/***'):
+            callback_on = False
+            new_text += '<pre>'
+            continue
+        elif(I == '***/'):
+            callback_on = True
+            new_text += '</pre>'
+            continue
         line = ''
         first_col = True
         for J in I.split(' '):
@@ -81,8 +87,6 @@ def content_filter(text, entry_callback, line_callback = lambda x: x):
             new_text += line_callback(line)
         else:
             new_text += line
-        if(I == '***/'):
-            callback_on = True
     return new_text
 
 
@@ -1161,6 +1165,8 @@ def post_list(parent, page, count_per_page, subpost=False):
             if(text.startswith('@@')):
                 at_name = text[1:]
                 return make_link(at_name, '/user/info/%s' % url_quote(at_name))
+            elif(text.startswith('`') and text.endswith('`')):
+                return '<code>%s</code>' % escape(text[1:-1])
             elif(text.startswith('**') and text[2] != '*'):
                 return '<b>%s</b>' % escape(text[2:])
             elif(text.startswith('``') and text[2] != '`'):
