@@ -117,6 +117,8 @@ span.separator {
 
 .hidden { display: none !important; }
 
+.red_text { color: hsl(0, 90%, 50%); }
+
 p[data-color="ok"], span[data-color="ok"] { color: hsl(100, 80%, 45%); }
 p[data-color="err"], span[data-color="err"] { color: hsl(0, 90%, 45%); }
 p[data-color="loading"], span[data-color="loading"] { color: hsl(0, 0%, 20%); }
