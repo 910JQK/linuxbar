@@ -68,7 +68,7 @@ def content_filter(text, entry_callback, line_callback = lambda x: x):
             first_row = False
         if(I == '/***#'):
             callback_on = False
-            new_text += '<pre>'
+            new_text += '<pre class="code_block">'
             continue
         elif(I == '#***/'):
             callback_on = True
