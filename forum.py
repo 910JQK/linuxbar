@@ -5,6 +5,8 @@ import datetime
 import hashlib
 import random
 import math
+from html import escape
+from urllib.parse import quote
 from db import *
 
 
@@ -47,6 +49,10 @@ def gen_token():
 
 def encrypt_password(password, salt):
     return sha256(salt[0:4] + sha256(password) + salt[4:8])
+
+
+def url_quote(text):
+    return quote(text, encoding='utf8')
 
 
 def content_filter(text, entry_callback, line_callback = lambda x: x):
@@ -1144,6 +1150,39 @@ def post_revert(id, subpost=False):
 
 
 def post_list(parent, page, count_per_page, subpost=False):
+    def make_link(text, href, blank=True):
+        if(blank):
+            arg = ' target="_blank"'
+        else:
+            arg = ''
+        return '<a href="%s"%s>%s</a>' % (href, arg, escape(text))
+    def process_segment(text):
+        if(len(text) > 2):
+            if(text.startswith('@@')):
+                at_name = text[1:]
+                return make_link(at_name, '/user/info/%s' % url_quote(at_name))
+            elif(text.startswith('**') and text[2] != '*'):
+                return '<b>%s</b>' % escape(text[2:])
+            elif(text.startswith('``') and text[2] != '`'):
+                return '<i>%s</i>' % escape(text[2:])
+            elif(text.startswith('!!') and text[2] != '!'):
+                return '<span class="red_text">%s</span>' % escape(text[2:])
+            else:
+                return escape(text)
+        else:
+            return escape(text)
+    def process_line(line):
+        if(not subpost and len(line) > 3):
+            if(line.startswith('***')):
+                return '<b>%s</b>' % line[3:]
+            elif(line.startswith('```')):
+                return '<i>%s</i>' % line[3:]
+            elif(line.startswith('!!!')):
+                return '<span class="red_text">%s</span>' % line[3:]
+            else:
+                return line;
+        else:
+            return line
     if(not subpost):
         Parent = Topic
         Table = Post
@@ -1181,7 +1220,9 @@ def post_list(parent, page, count_per_page, subpost=False):
         for post in query:
             item = {
                 'ordinal': post.ordinal,
-                'content': post.content,
+                'content': content_filter(
+                    post.content, process_segment, process_line
+                ),
                 'author': {
                     'uid': post.author.id,
                     'name': post.author.name,
