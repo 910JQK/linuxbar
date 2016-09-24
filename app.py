@@ -849,7 +849,7 @@ def post_add():
     if(not uid):
         return json_response((249, _('Not signed in.')) )
     if(subpost):
-        content = content.replace('\n', ' ')
+        content = content.replace('\n', ' ').replace('\r', '')
     return json_response(
         forum.post_add(parent, uid, content, bool(subpost), int(reply))
     )
@@ -868,6 +868,8 @@ def post_edit(id):
     if(get_author[0] != 0):
         return json_response(get_author)
     author = get_author[2]['author']
+    if(subpost):
+        new_content = new_content.replace('\n', ' ').replace('\r', '')
     if(author == session.get('uid')):
         return json_response(forum.post_edit(id, new_content, bool(subpost)) )
     else:
