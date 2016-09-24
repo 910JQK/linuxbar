@@ -90,8 +90,8 @@ def content_filter(text, entry_callback, line_callback = lambda x: x):
                     code_block = True
                     continue
                 if(code_block and J.endswith('`')):
-                    line += J[:-1]
-                    line += escape('</code>')
+                    line += escape(J[:-1])
+                    line += '</code>'
                     code_block = False
                     continue
             if(callback_on and not code_block):
@@ -104,6 +104,8 @@ def content_filter(text, entry_callback, line_callback = lambda x: x):
             new_text += line_callback(line)
         else:
             new_text += line
+    if(not callback_on):
+        new_text += '</pre>'
     return new_text
 
 
@@ -1001,7 +1003,23 @@ def post_add(parent, author, content, subpost=False, reply=0):
                 return text
         else:
             return text
-    content = content_filter(content, at_filter)
+    content_modified = ''
+    first_row = True
+    for I in content.replace('\r', '').split('\n'):
+        if(not first_row):
+            content_modified += '\n'
+        else:
+            first_row = False
+        line = ''
+        first_col = True
+        for J in I.split(' '):
+            if(not first_col):
+                line += ' '
+            else:
+                first_col = False
+            line += at_filter(J)
+        content_modified += line
+    content = content_modified
     try:
         if(not subpost):
             query = Topic.select().where(
