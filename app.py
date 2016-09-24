@@ -526,6 +526,12 @@ def user_logout():
         return redirect(url_for('index'))
 
 
+@app.route('/user/info/<name>')
+def user_info(name):
+    # waiting for impl
+    return 'Info of user %s' % name
+
+
 @app.route('/user/password-reset')
 def user_password_reset_form():
     return render_template('form_password_reset.html')
