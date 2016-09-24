@@ -5,6 +5,7 @@ import datetime
 import hashlib
 import random
 import math
+import re
 from html import escape
 from urllib.parse import quote
 from db import *
@@ -17,6 +18,7 @@ def _(string):
 HEX_DIGITS = '0123456789abcdef'
 TOKEN_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 OK_MSG = _('Data retrieved successfully.')
+URL_REGEX = re.compile('(http|ftp)s?://.+')
 
 
 def db_err_msg(err):
@@ -1196,7 +1198,9 @@ def post_list(parent, page, count_per_page, subpost=False):
             arg = ''
         return '<a href="%s"%s>%s</a>' % (href, arg, escape(text))
     def process_segment(text):
-        if(len(text) > 2):
+        if(URL_REGEX.fullmatch(text)):
+            return make_link(escape(text), text)
+        elif(len(text) > 2):
             if(text.startswith('@@')):
                 at_name = text[1:]
                 return make_link(at_name, '/user/info/%s' % url_quote(at_name))
