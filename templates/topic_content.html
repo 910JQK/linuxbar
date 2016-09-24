@@ -216,12 +216,14 @@
 		     list_wrapper.classList.remove('expanded');
 		     controller.empty();
 		     init_subpost_edit_btn();
-		     for(let I of list.querySelectorAll('.subpost_del_btn')) {
-			 let btn = I;
-			 btn.addEventListener('click', function(){
-			     delete_post(btn.dataset.sid, true);
-			 });
-			 btn.style.display = '';
+		     if(is_admin) {
+			 for(let I of list.querySelectorAll('.subpost_del_btn')) {
+			     let btn = I;
+			     btn.addEventListener('click', function(){
+				 delete_post(btn.dataset.sid, true);
+			     });
+			     btn.style.display = '';
+			 }
 		     }
 		 } else {
 		     pager.classList.remove('lock');
@@ -366,12 +368,14 @@
 	  *
 	  * Sorry for such an ugly hack.
 	  */
-	 for(let I of query_all('.subpost_del_btn')) {
-	     let btn = I;
-	     btn.addEventListener('click', function(){
-		 delete_post(btn.dataset.sid, true);
-	     });
-	     btn.style.display = '';
+	 if(is_admin) {
+	     for(let I of query_all('.subpost_del_btn')) {
+		 let btn = I;
+		 btn.addEventListener('click', function(){
+		     delete_post(btn.dataset.sid, true);
+		 });
+		 btn.style.display = '';
+	     }
 	 }
      }
      function show_remaining_subposts(pid) {
