@@ -100,6 +100,20 @@ span.separator {
     margin: 0em 0.1em;
 }
 
+code, .code_block {
+    background-color: hsl(0, 0%, 93%);
+    border-radius: 0.4em;
+}
+
+code {
+    padding: 0.2em;
+}
+
+.code_block {
+    margin: 0.2em 0em;
+    padding: 0.2em;
+}
+
 .page_link {
     font-size: 120%;
     padding: 0.1em 0.5em;
