@@ -74,15 +74,32 @@ def content_filter(text, entry_callback, line_callback = lambda x: x):
             continue
         line = ''
         first_col = True
+        code_block = False
         for J in I.split(' '):
             if(not first_col):
                 line += ' '
             else:
                 first_col = False
             if(callback_on):
+                if(J.startswith('`') and J.endswith('`')):
+                    line += '<code>%s</code>' % escape(J[1:-1])
+                    continue
+                if(not code_block and J.startswith('`')):
+                    line += '<code>'
+                    line += escape(J[1:])
+                    code_block = True
+                    continue
+                if(code_block and J.endswith('`')):
+                    line += J[:-1]
+                    line += escape('</code>')
+                    code_block = False
+                    continue
+            if(callback_on and not code_block):
                 line += entry_callback(J)
             else:
-                line += J
+                line += escape(J)
+        if(code_block):
+            line += '</code>'
         if(callback_on):
             new_text += line_callback(line)
         else:
@@ -1165,11 +1182,9 @@ def post_list(parent, page, count_per_page, subpost=False):
             if(text.startswith('@@')):
                 at_name = text[1:]
                 return make_link(at_name, '/user/info/%s' % url_quote(at_name))
-            elif(text.startswith('`') and text.endswith('`')):
-                return '<code>%s</code>' % escape(text[1:-1])
             elif(text.startswith('**') and text[2] != '*'):
                 return '<b>%s</b>' % escape(text[2:])
-            elif(text.startswith('``') and text[2] != '`'):
+            elif(text.startswith("''") and text[2] != "'"):
                 return '<i>%s</i>' % escape(text[2:])
             elif(text.startswith('!!') and text[2] != '!'):
                 return '<span class="red_text">%s</span>' % escape(text[2:])
@@ -1181,7 +1196,7 @@ def post_list(parent, page, count_per_page, subpost=False):
         if(not subpost and len(line) > 3):
             if(line.startswith('***')):
                 return '<b>%s</b>' % line[3:]
-            elif(line.startswith('```')):
+            elif(line.startswith("'''")):
                 return '<i>%s</i>' % line[3:]
             elif(line.startswith('!!!')):
                 return '<span class="red_text">%s</span>' % line[3:]
