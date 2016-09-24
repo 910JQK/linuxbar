@@ -19,6 +19,8 @@
 	    {% endif %}
 	  </div>
 	  <div class="info subpost_info">
+	    {# determine whether to display in front-end #}
+	    <img class="icon btn subpost_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this subpost') }}" data-sid="{{ subpost['sid'] }}" style="display: none;"/>
 	    {% if subpost['author']['uid'] == session.get('uid') %}
 	      {# argument `tid` is added by javascript in topic_content.html #}
 	      {# detail can be found at init_subpost_edit_btn() #}
