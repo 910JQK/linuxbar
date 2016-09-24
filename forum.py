@@ -1110,7 +1110,9 @@ def post_list(parent, page, count_per_page, subpost=False):
         parent_rec = query.get()
         if(parent_rec.deleted):
             return (3, _('Parent topic/post has been deleted.'))
-        count = Table.select().where(parent_field == parent_rec).count()
+        count = Table.select().where(
+            (parent_field == parent_rec) & (Table.deleted == False)
+        ).count()
         # last page: calculate the exact page number
         if(page == -1):
             page = int(math.ceil(count / count_per_page))
