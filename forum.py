@@ -49,6 +49,37 @@ def encrypt_password(password, salt):
     return sha256(salt[0:4] + sha256(password) + salt[4:8])
 
 
+def content_filter(text, entry_callback, line_callback = lambda x: x):
+    new_text = ''
+    first_row = True
+    callback_on = True
+    for I in text.replace('\r', '').split('\n'):
+        if(I == '/***'):
+            callback_on = False
+        if(not first_row):
+            new_text += '\n'
+        else:
+            first_row = False
+        line = ''
+        first_col = True
+        for J in I.split(' '):
+            if(not first_col):
+                line += ' '
+            else:
+                first_col = False
+            if(callback_on):
+                line += entry_callback(J)
+            else:
+                line += J
+        if(callback_on):
+            new_text += line_callback(line)
+        else:
+            new_text += line
+        if(I == '***/'):
+            callback_on = True
+    return new_text
+
+
 def config_get():
     try:
         query = Config.select()
@@ -930,6 +961,20 @@ def post_add(parent, author, content, subpost=False, reply=0):
     topic = None
     new_post = None
     new_subpost = None
+    at_list = []
+    def at_filter(text):
+        if(len(text) > 1 and text[0] == '@'):
+            at_name = text[1:]
+            query_user = User.select().where(User.name == at_name)
+            if(query_user):
+                at_user = query_user.get()
+                at_list.append(at_user.id)
+                return '@' + text
+            else:
+                return text
+        else:
+            return text
+    content = content_filter(content, at_filter)
     try:
         if(not subpost):
             query = Topic.select().where(
@@ -988,6 +1033,14 @@ def post_add(parent, author, content, subpost=False, reply=0):
         topic.last_post_author_id = author
         topic.reply_count = topic.reply_count + 1
         topic.save()
+        for callee in at_list:
+            if(not subpost):
+                at_id = new_post.id
+            else:
+                at_id = new_subpost.id
+            at_caller = author
+            at_callee = callee
+            at_add(at_id, at_caller, at_callee, bool(subpost))
     except Exception as err:
         return (1, db_err_msg(err))
     if(not subpost):
