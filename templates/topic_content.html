@@ -163,6 +163,7 @@
      var reply_controllers = {};
      var del_post_lock = false;
      var signed_in = {% if session.get('uid') %}true{% else %}false{% endif %};
+     var is_admin = {% if is_admin %}true{% else %}false{% endif %};
      /**
       * Indirect event handler for click event of subpost pager
       *
@@ -215,6 +216,13 @@
 		     list_wrapper.classList.remove('expanded');
 		     controller.empty();
 		     init_subpost_edit_btn();
+		     for(let I of list.querySelectorAll('.subpost_del_btn')) {
+			 let btn = I;
+			 btn.addEventListener('click', function(){
+			     delete_post(btn.dataset.sid, true);
+			 });
+			 btn.style.display = '';
+		     }
 		 } else {
 		     pager.classList.remove('lock');
 		     if(!no_err_alert)
@@ -250,7 +258,10 @@
 		     var content = post.querySelector('.content');
 		     content.innerText = _('(deleted)');
 		     content.classList.add('deleted');
-		     alert(_('Post deleted successfully!'));
+		     if(!is_subpost)
+			 alert(_('Post deleted successfully!'));
+		     else
+			 alert(_('Subpost deleted successfully!'));
 		 } else {
 		     alert(result.msg);
 		 }
@@ -348,6 +359,22 @@
 	 for(let btn of query_all('.subpost_edit_link'))
 	     btn.href = btn.dataset.url + '&tid=' + TID;
      }
+     function init_subpost_del_btn() {
+	 /**
+	  * To avoid adding redundant event listeners, this function won't
+	  * be called in `refresh_post_list()`, which contains a similar impl
+	  * to add event handlers for newly refreshed lists.
+	  *
+	  * Sorry for such an ugly hack.
+	  */
+	 for(let I of query_all('.subpost_del_btn')) {
+	     let btn = I;
+	     btn.addEventListener('click', function(){
+		 delete_post(btn.dataset.sid, true);
+	     });
+	     btn.style.display = '';
+	 }
+     }
      function show_remaining_subposts(pid) {
 	 /* disposable usage */
 	 var list_wrapper = query(
@@ -396,6 +423,7 @@
 	     }
 	 }
 	 init_subpost_edit_btn();
+	 init_subpost_del_btn();
 	 init_timer();
      }
      window.addEventListener('load', init);
