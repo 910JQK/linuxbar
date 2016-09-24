@@ -6,6 +6,7 @@
 {% block form_title %}{{ _('Edit Post') }}{% endblock %}
 
 {% block style %}
+  textarea[name="new_content"] { width: 30em; }
   {% if not is_subpost %}
     textarea[name="new_content"] { height: 20em; }
   {% endif %}
