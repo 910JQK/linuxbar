@@ -932,7 +932,9 @@ def post_list():
     except ValidationError as err:
         return validation_err_response(err)
     return json_response(
-        forum.post_list(int(parent), int(pn), int(count), bool(subpost))
+        forum.post_list(
+            int(parent), int(pn), int(count), bool(subpost), no_html=True
+        )
     )
 
 
