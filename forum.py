@@ -111,6 +111,39 @@ def content_filter(text, entry_callback, line_callback = lambda x: x):
     return new_text
 
 
+def at_filter(content):
+    at_list = []
+    def process_at(text):
+        if(len(text) > 1 and text[0] == '@'):
+            at_name = text[1:]
+            query_user = User.select().where(User.name == at_name)
+            if(query_user):
+                at_user = query_user.get()
+                at_list.append(at_user.id)
+                return '@' + text
+            else:
+                return text
+        else:
+            return text
+    content_modified = ''
+    first_row = True
+    for I in content.replace('\r', '').split('\n'):
+        if(not first_row):
+            content_modified += '\n'
+        else:
+            first_row = False
+        line = ''
+        first_col = True
+        for J in I.split(' '):
+            if(not first_col):
+                line += ' '
+            else:
+                first_col = False
+            line += process_at(J)
+        content_modified += line
+    return (content_modified, at_list)
+
+
 def config_get():
     try:
         query = Config.select()
@@ -792,6 +825,7 @@ def topic_add(board, title, author, summary, post_body):
     if(check_empty(post_body)):
         return (4, _('Post content cannot be empty.'))
     try:
+        post_body, at_list = at_filter(post_body)
         query = Board.select().where(Board.short_name == board)
         if(not query):
             return (2, _('No such board'))
@@ -805,7 +839,7 @@ def topic_add(board, title, author, summary, post_body):
             last_post_date = date,
             last_post_author_id = author
         )
-        Post.create(
+        post = Post.create(
             ordinal = 1,
             content = post_body,
             author = author,
@@ -813,6 +847,8 @@ def topic_add(board, title, author, summary, post_body):
             topic_author_id = author,
             date = date
         )
+        for callee in at_list:
+            at_add(post.id, author, callee, subpost=False)
         return (0, _('Topic published successfully.'), {'tid': topic.id})
     except Exception as err:
         return (1, db_err_msg(err))
@@ -992,37 +1028,8 @@ def post_add(parent, author, content, subpost=False, reply=0):
     topic = None
     new_post = None
     new_subpost = None
-    at_list = []
-    def at_filter(text):
-        if(len(text) > 1 and text[0] == '@'):
-            at_name = text[1:]
-            query_user = User.select().where(User.name == at_name)
-            if(query_user):
-                at_user = query_user.get()
-                at_list.append(at_user.id)
-                return '@' + text
-            else:
-                return text
-        else:
-            return text
-    content_modified = ''
-    first_row = True
-    for I in content.replace('\r', '').split('\n'):
-        if(not first_row):
-            content_modified += '\n'
-        else:
-            first_row = False
-        line = ''
-        first_col = True
-        for J in I.split(' '):
-            if(not first_col):
-                line += ' '
-            else:
-                first_col = False
-            line += at_filter(J)
-        content_modified += line
-    content = content_modified
     try:
+        content, at_list = at_filter(content)
         if(not subpost):
             query = Topic.select().where(
                 Topic.id == parent,
@@ -1190,7 +1197,7 @@ def post_revert(id, subpost=False):
         return (1, db_err_msg(err))
 
 
-def post_list(parent, page, count_per_page, subpost=False):
+def post_list(parent, page, count_per_page, subpost=False, no_html=False):
     def make_link(text, href, blank=True):
         if(blank):
             arg = ' target="_blank"'
@@ -1263,9 +1270,6 @@ def post_list(parent, page, count_per_page, subpost=False):
         for post in query:
             item = {
                 'ordinal': post.ordinal,
-                'content': content_filter(
-                    post.content, process_segment, process_line
-                ),
                 'author': {
                     'uid': post.author.id,
                     'name': post.author.name,
@@ -1274,6 +1278,12 @@ def post_list(parent, page, count_per_page, subpost=False):
                 'date': post.date.timestamp()
             }
             item[id_name] = post.id
+            if(no_html):
+                item['content'] = post.content
+            else:
+                item['content'] = content_filter(
+                    post.content, process_segment, process_line
+                )
             if(post.edited):
                 item['edit_date'] = post.edit_date.timestamp()
             if(subpost and post.reply2):
