@@ -3,6 +3,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <title>{% if n_type == 'replyme' %}{{ _('Reply me - ') ~ config['site_name'] }}{% else %}{{ _('At me - ') ~ config['site_name'] }}{% endif %}</title>
     <link rel="stylesheet" href="/static/global.css" />
     <script type="text/javascript" src="/static/toolkit.js"></script>
     <script type="text/javascript">
@@ -12,20 +13,35 @@
       window.addEventListener('load', init);
     </script>
     <style>
+     ol {
+	 list-style-type: none; padding: 0;
+     }
      #notification_list {
 	 width: 50em;
+     }
+     .entry {
+	 padding: 1em 0em;
+	 border-bottom: 1px solid hsl(0, 0%, 93%);
+     }
+     .entry.deleted a {
+	 color: gray;
      }
      .container_top {
 	 display: flex;
 	 justify-content: flex-start;
 	 align-items: flex-start;
+	 font-size: 115%;
+	 margin: 0.25em 0em;
      }
      .container_bottom {
 	 display: flex;
 	 justify-content: space-between;
+	 font-size: 85%;
+	 margin: 0.25em 0em;
      }
      .user_label {
 	 flex-shrink: 0;
+	 margin-right: 0.35em;
      }
      .user_label::after {
 	 content: ":";
@@ -57,13 +73,15 @@
 	  <li class="entry{% if deleted %} deleted{% endif %}"{% if deleted %} title="{{ del_info }}"{% endif %}>
 	      <div class="container_top">
 		<a class="user_label" target="_blank" href="{{ url_for('user_info', name=entry['author']['name']) }}">{{ entry['author']['name'] }}</a>
-		<a class="content" target="_blank" href="{{ url_for('topic', tid=entry['tid']) ~ '#p' ~ entry['pid'] }}">
-		  {{ entry['content'] }}
-		</a>
+		<div class="content_wrapper">
+		  <a class="content" target="_blank" href="{{ url_for('topic', tid=entry['tid']) ~ '#p' ~ entry['pid'] }}">
+		    {{ entry['content'] }}
+		  </a>
+		</div>
 	      </div>
 	      <div class="container_bottom">
 		<a class="topic_label" target="_blank" href="{{ url_for('topic', tid=entry['tid']) }}">{{ entry['topic_title'] }}</a>
-		<div class="date">
+		<div class="date" data-ts="{{ entry['date'] }}">
 		  {{ entry['date'] | date }}
 		</div>
 	      </div>
