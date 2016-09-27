@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+{% from 'macros.html' import pager, user_info %}
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/static/global.css" />
+    <script type="text/javascript" src="/static/toolkit.js"></script>
+    <script type="text/javascript">
+      function init() {
+	  init_timer();
+      }
+      window.addEventListener('load', init);
+    </script>
+    <style>
+     #notification_list {
+	 width: 50em;
+     }
+     .container_top {
+	 display: flex;
+	 justify-content: flex-start;
+	 align-items: flex-start;
+     }
+     .container_bottom {
+	 display: flex;
+	 justify-content: space-between;
+     }
+     .user_label {
+	 flex-shrink: 0;
+     }
+     .user_label::after {
+	 content: ":";
+     }
+     .content {
+	 flex-grow: 1;
+     }
+    </style>
+  </head>
+  <body class="box_horizontal_center">
+    <div id="container">
+      {{ user_info() }}
+      <ol id="notification_list">
+	{% for entry in data['list'] %}
+	  {% if entry.get('deleted') %}
+	    {% set deleted = true %}
+	  {% else %}
+	    {% set deleted = false %}
+	  {% endif %}
+	  {% if deleted %}
+	    {% if entry['deleted'] == 'topic' %}
+	      {% set del_info = _('Parent topic has been deleted.') %}
+	    {% elif entry['deleted'] == 'post' %}
+	      {% set del_info = _('Parent post has been deleted.') %}
+	    {% else %}
+	      {% set del_info = _('This post has been deleted.') %}
+	    {% endif %}
+	  {% endif %}
+	  <li class="entry{% if deleted %} deleted{% endif %}"{% if deleted %} title="{{ del_info }}"{% endif %}>
+	      <div class="container_top">
+		<a class="user_label" target="_blank" href="{{ url_for('user_info', name=entry['author']['name']) }}">{{ entry['author']['name'] }}</a>
+		<a class="content" target="_blank" href="{{ url_for('topic', tid=entry['tid']) ~ '#p' ~ entry['pid'] }}">
+		  {{ entry['content'] }}
+		</a>
+	      </div>
+	      <div class="container_bottom">
+		<a class="topic_label" target="_blank" href="{{ url_for('topic', tid=entry['tid']) }}">{{ entry['topic_title'] }}</a>
+		<div class="date">
+		  {{ entry['date'] | date }}
+		</div>
+	      </div>
+	    </li>
+	{% endfor %}	
+      </ol>
+      {# count = items per page #}
+      {{ pager(data['count'], count, pn) }}
+    </div>
+  </body>
+</html>
