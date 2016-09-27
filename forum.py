@@ -1463,6 +1463,7 @@ def reply_get(uid, page, count_per_page):
                     item['deleted'] = 'self'
             else:
                 item['sid'] = reply.id
+                item['pid'] = reply.reply1.id
                 # Tip: Don't change the priority!
                 if(topic.deleted):
                     item['deleted'] = 'topic'
