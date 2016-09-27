@@ -1380,8 +1380,8 @@ def reply_get(uid, page, count_per_page):
                 Topic
             )
             .where(
-                Post.topic_author == user,
-                Post.author != user
+                (Post.topic_author == user)
+                & (Post.author != user)
             )
         )
         query_subpost = (
@@ -1443,13 +1443,25 @@ def reply_get(uid, page, count_per_page):
         list = []
         for reply in query:
             topic = reply.reply0
+            if(not reply.subpost):
+                # strangely, author of post is wrong
+                # ugly fix:
+                query_fix = (
+                    Post
+                    .select(Post.author)
+                    .where(Post.id == reply.id)
+                    .join(User)
+                )
+                reply_author = query_fix.get().author
+            else:
+                reply_author = reply.author
             item = {
                 'content': reply.content,
                 'date': reply.date.timestamp(),
                 'author': {
-                    'uid': reply.author.id,
-                    'name': reply.author.name,
-                    'mail': md5(reply.author.mail)
+                    'uid': reply_author.id,
+                    'name': reply_author.name,
+                    'mail': md5(reply_author.mail)
                 }
             }
             if(reply.edit_date):
