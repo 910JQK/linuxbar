@@ -321,6 +321,35 @@ def edit_form(id):
         )
 
 
+@app.route('/notification/<n_type>')
+def notification(n_type):
+    pn = request.args.get('pn', '1')
+    COUNT = 15 # TODO: user settings
+    try:
+        validate(_('Notification Type'), n_type, in_list=['replyme', 'atme'])
+        validate_id(_('Page Number'), pn)
+    except ValidationError as err:
+        return validation_err_response(err)
+    uid = session.get('uid')
+    if(uid):
+        if(n_type == 'replyme'):
+            result = forum.reply_get(uid, int(pn), COUNT)
+        elif(n_type == 'atme'):
+            result = forum.at_get(uid, int(pn), COUNT)
+        if(result[0] != 0):
+            return err_response(result)
+        else:
+            return render_template(
+                'notification.html',
+                n_type = n_type,
+                pn = int(pn),
+                count = COUNT,
+                data = result[2]
+            )
+    else:
+        return err_response((249, _('Not signed in.')) )
+
+
 @app.route('/captcha/get')
 def captcha_get():
     code = captcha.gen_captcha()
@@ -938,21 +967,21 @@ def post_list():
     )
 
 
-@app.route('/api/notification/<type>')
-def api_notification(type):
+@app.route('/api/notification/<n_type>')
+def api_notification(n_type):
     pn = request.args.get('pn', '1')
     count = request.args.get('count', '10')
     try:
-        validate(_('Notification Type'), type, in_list=['replyme', 'atme'])
+        validate(_('Notification Type'), n_type, in_list=['replyme', 'atme'])
         validate_id(_('Page Number'), pn)
         validate_id(_('Count per Page'), count)
     except ValidationError as err:
         return validation_err_response(err)
     uid = session.get('uid')
     if(uid):
-        if(type == 'replyme'):
+        if(n_type == 'replyme'):
             return json_response(forum.reply_get(uid, int(pn), int(count)) )
-        elif(type == 'atme'):
+        elif(n_type == 'atme'):
             return json_response(forum.at_get(uid, int(pn), int(count)) )
     else:
         return json_response((249, _('Not signed in.')) )
