@@ -1598,12 +1598,14 @@ def at_get(uid, page, count_per_page):
             else:
                 item['sid'] = at.post.id
                 # The same as above.
-                if(at.post.topic.deleted):
-                    item['deleted'] = 'topic'
+                # ---------------------------------------------------------
                 # The following code causes an extra query.
                 # If you know how to fix it, feel free to contribute.
+                subpost_rec = Subpost.get(Subpost.id == at.post.id)
+                item['pid'] = subpost_rec.reply1.id
+                if(at.post.topic.deleted):
+                    item['deleted'] = 'topic'
                 else:
-                    subpost_rec = Subpost.get(Subpost.id == at.post.id)
                     if(subpost_rec.reply1.deleted):
                         item['deleted'] = 'post'
                     elif(at.post.deleted):
