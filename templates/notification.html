@@ -13,8 +13,20 @@
       window.addEventListener('load', init);
     </script>
     <style>
-     ol {
-	 list-style-type: none; padding: 0;
+     ol, ul {
+	 list-style-type: none; padding: 0; margin: 0px;
+     }
+     nav + hr {
+	 margin-bottom: 0;
+     }
+     #nav_list {
+	 display: flex;	 
+     }
+     #nav_list > li {
+	 box-sizing: border-box;
+	 width: 50%;
+	 text-align: center;
+	 font-weight: bold;	
      }
      #notification_list {
 	 width: 50em;
@@ -46,14 +58,43 @@
      .user_label::after {
 	 content: ":";
      }
+     .topic_label {
+	 color: black;
+     }
      .content {
 	 flex-grow: 1;
+     }
+     .info > * {	 
+	 margin-left: 0.25em;
+	 color: gray;
+     }
+     .pager {
+	 margin-top: 0.25em;
      }
     </style>
   </head>
   <body class="box_horizontal_center">
     <div id="container">
       {{ user_info() }}
+      <nav>
+	<ul id="nav_list">
+	  <li>
+	    {% if n_type == 'replyme' %}
+	      <span>{{ _('Reply me') }}</span>
+	    {% else %}
+	      <a href="{{ url_for('notification', n_type='replyme') }}">{{ _('Reply me') }}</a>
+	    {% endif %}
+	  </li>
+	  <li>
+	    {% if n_type == 'atme' %}
+	      <span>{{ _('At me') }}</span>
+	    {% else %}
+	      <a href="{{ url_for('notification', n_type='atme') }}">{{ _('At me') }}</a>
+	    {% endif %}
+	  </li>
+	</ul>
+      </nav>
+      <hr/>
       <ol id="notification_list">
 	{% for entry in data['list'] %}
 	  {% if entry.get('deleted') %}
@@ -75,14 +116,25 @@
 		<a class="user_label" target="_blank" href="{{ url_for('user_info', name=entry['author']['name']) }}">{{ entry['author']['name'] }}</a>
 		<div class="content_wrapper">
 		  <a class="content" target="_blank" href="{{ url_for('topic', tid=entry['tid']) ~ '#p' ~ entry['pid'] }}">
+		    {# The problem is that the positioning won't work when #}
+		    {# the post isn't in the first page. #}
+		    {# TODO: truncate content when too loooong #}
 		    {{ entry['content'] }}
 		  </a>
 		</div>
 	      </div>
 	      <div class="container_bottom">
-		<a class="topic_label" target="_blank" href="{{ url_for('topic', tid=entry['tid']) }}">{{ entry['topic_title'] }}</a>
-		<div class="date" data-ts="{{ entry['date'] }}">
-		  {{ entry['date'] | date }}
+		<div class="topic_info_wrapper">
+		  <img class="topic_icon" src="/static/icons/share.svg" />
+		  <a class="topic_label" target="_blank" href="{{ url_for('topic', tid=entry['tid']) }}">{{ entry['topic_title'] }}</a>
+		</div>
+		<div class="additional_info_wrapper info">
+		  {% if entry.get('edit_date') %}
+		    <span class="edited_mark" title="{{ entry['edit_date'] | date(detailed=true) }}">{{ _('[Edited]') }}</span>
+		  {% endif %}
+		  <span class="date" data-ts="{{ entry['date'] }}">
+		    {{ entry['date'] | date }}
+		  </span>
 		</div>
 	      </div>
 	    </li>
