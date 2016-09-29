@@ -111,13 +111,13 @@ def content_filter(text, entry_callback, line_callback = lambda x: x):
     return new_text
 
 
-def at_filter(content):
+def at_filter(content, caller):
     at_list = []
     def process_at(text):
         if(len(text) > 1 and text[0] == '@'):
             at_name = text[1:]
             query_user = User.select().where(User.name == at_name)
-            if(query_user):
+            if(query_user and query_user.get().id != caller):
                 at_user = query_user.get()
                 at_list.append(at_user.id)
                 return '@' + text
@@ -200,6 +200,7 @@ def user_register(mail, name, password):
             reg_date = now()
         )
         salt_rec = Salt.create(user=user_rec, salt=salt)
+        info_rec = UserInfo.create(user=user_rec)
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -314,14 +315,19 @@ def user_login(login_name, password):
         user = query.get()
 
         salt = user.salt[0].salt
+        info = user.info[0]
 
         encrypted_pw = encrypt_password(password, salt)
         if(encrypted_pw != user.password):
+            info.last_login_failed_date = now()
+            info.save()
             return (3, _('Wrong password.'))
 
         if(not user.activated):
             return (4, _('User %s has NOT been activated.') % user.name)
 
+        info.last_login_date = now()
+        info.save()
         data = {'uid': user.id, 'name': user.name, 'mail': md5(user.mail)}
         return (0, _('Signed in successfully.'), data)
     except Exception as err:
@@ -825,7 +831,7 @@ def topic_add(board, title, author, summary, post_body):
     if(check_empty(post_body)):
         return (4, _('Post content cannot be empty.'))
     try:
-        post_body, at_list = at_filter(post_body)
+        post_body, at_list = at_filter(post_body, author)
         query = Board.select().where(Board.short_name == board)
         if(not query):
             return (2, _('No such board'))
@@ -1029,7 +1035,7 @@ def post_add(parent, author, content, subpost=False, reply=0):
     new_post = None
     new_subpost = None
     try:
-        content, at_list = at_filter(content)
+        content, at_list = at_filter(content, author)
         if(not subpost):
             query = Topic.select().where(
                 Topic.id == parent,
@@ -1083,10 +1089,22 @@ def post_add(parent, author, content, subpost=False, reply=0):
                 reply2 = reply_rec,
                 reply2_author = reply_rec_author
             )
+            if(post.author.id != author):
+                (UserInfo.update(
+                    unread_reply = (UserInfo.unread_reply + 1)
+                ).where(UserInfo.user == post.author)).execute()
+                if(reply and reply_rec_author.id != author):
+                    (UserInfo.update(
+                        unread_reply = (UserInfo.unread_reply + 1)
+                    ).where(UserInfo.user == reply_rec_author)).execute()
         topic.last_post_date = date
         topic.last_post_author_id = author
         topic.reply_count = topic.reply_count + 1
         topic.save()
+        if(topic.author.id != author):
+            (UserInfo.update(
+                unread_reply = (UserInfo.unread_reply + 1)
+            ).where(UserInfo.user == topic.author)).execute()
         for callee in at_list:
             if(not subpost):
                 at_id = new_post.id
@@ -1486,6 +1504,9 @@ def reply_get(uid, page, count_per_page):
             item['tid'] = topic.id
             item['topic_title'] = topic.title
             list.append(item)
+        (
+            UserInfo.update(unread_reply = 0).where(UserInfo.user == user)
+        ).execute()
         return (0, OK_MSG, {'list': list, 'count': count})
     except Exception as err:
         return (1, db_err_msg(err))
@@ -1494,6 +1515,7 @@ def reply_get(uid, page, count_per_page):
 def at_add(id, caller, callee, subpost=False):
     # The three parameters must be valid.
     try:
+        callee_rec = User.select().where(User.id == callee).get()
         if(not subpost):
             AtFromPost.create(
                 post_id = id,
@@ -1506,6 +1528,9 @@ def at_add(id, caller, callee, subpost=False):
                 caller_id = caller,
                 callee_id = callee
             )
+        UserInfo.update(
+            unread_at = UserInfo.unread_at + 1
+        ).where(UserInfo.user == callee_rec)
         return (0, _('Data stored successfully.'))
     except Exception as err:
         return (1, db_err_msg(err))
@@ -1613,7 +1638,18 @@ def at_get(uid, page, count_per_page):
             item['tid'] = at.post.topic.id
             item['topic_title'] = at.post.topic.title
             list.append(item)
+        UserInfo.update(unread_at = 0).where(UserInfo.user == user)
         return (0, OK_MSG, {'list': list, 'count': count})
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def user_get_unread_count(uid):
+    # "uid" must be valid
+    try:
+        user = User.select().where(User.id == uid).get()
+        info = UserInfo.select().where(UserInfo.user == user).get()
+        return (0, OK_MSG, {'reply': info.unread_reply, 'at': info.unread_at})
     except Exception as err:
         return (1, db_err_msg(err))
 
