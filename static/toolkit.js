@@ -219,15 +219,57 @@ function update_date() {
 
 
 /**
- * Load timer in another thread
+ * Update unread notification count
  *
  * @return void
  */
-function init_timer() {
+function update_unread_count() {
+    GET(
+	'/api/user/info/unread',
+	{},
+	function(xhr) {
+	    var result = JSON.parse(xhr.responseText)
+	    if(result.code == 0) {
+		replyme_link.textContent = printf(
+		    '%1(%2)',
+		    replyme_link.dataset.content,
+		    result.data['reply']
+		);
+		atme_link.textContent = printf(
+		    '%1(%2)',
+		    atme_link.dataset.content,
+		    result.data['at']
+		);
+	    } else {
+		console.error(
+		    printf('Failed to get unread count: %1', result.msg)
+		);
+	    }
+	},
+	function(status, text) {
+	    console.error(
+		printf('Failed to get unread count: %1 %2', status, text)
+	    );
+	}
+    )
+}
+
+
+/**
+ * Load timer in another thread
+ * @param Object items
+ *
+ * @return void
+ */
+function init_timer(items) {
+    if(!items)
+	items = {date: true, unread_count: false};
     timer = new Worker('/static/timer.js');
     timer.addEventListener('message', function(ev) {
-	if(ev.data == 'update_date')
+	if(ev.data == 'update_date' && items['date'])
 	    update_date();
+	if(ev.data == 'update_unread_count' && items['unread_count'])
+	    update_unread_count();
     });
 }
 
