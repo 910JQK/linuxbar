@@ -67,6 +67,7 @@
     {% endif %}
     <script type="text/javascript">
      var form_controller;
+     var signed_in = {% if session.get('uid') %}true{% else %}false{% endif %};
      var has_form = {% if not index and session.get('uid') %}true{% else %}false{% endif %};
      function init() {
 	 if(has_form) {
@@ -78,7 +79,9 @@
 	     );
 	     init_validation(true);
 	 }
-	 init_timer();
+	 init_timer({date: true, unread_count: signed_in});
+	 if(signed_in)
+	     update_unread_count();
      }
      window.addEventListener('load', init);
     </script>

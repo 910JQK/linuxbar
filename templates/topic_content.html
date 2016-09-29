@@ -427,7 +427,9 @@
 	 }
 	 init_subpost_edit_btn();
 	 init_subpost_del_btn();
-	 init_timer();
+	 init_timer({date: true, unread_count: signed_in});
+	 if(signed_in)
+	     update_unread_count();
      }
      window.addEventListener('load', init);
     </script>
