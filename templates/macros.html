@@ -21,6 +21,10 @@
       {{ avatar(session['mail']) }}
       <span class="name">{{ session['name'] }}</span>
       <span class="separator">|</span>
+      <a id="replyme_link" class="link_replyme" href="{{ url_for('notification', n_type='replyme') }}" target="_blank" data-content="{{ _('Reply') }}">{{ _('Reply') }}</a>
+      <span class="separator">|</span>
+      <a id="atme_link" class="link_atme" href="{{ url_for('notification', n_type='atme') }}" target="_blank" data-content="{{ _('At') }}">{{ _('At') }}</a>
+      <span class="separator">|</span>
       <a class="link_logout" href="/user/logout?ret={{ request.url | urlencode }}">
 	{{ _('Logout') }}
       </a>
