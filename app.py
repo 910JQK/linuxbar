@@ -133,7 +133,7 @@ def permission_err_response(err):
 
 
 @app.context_processor
-def inject_config():
+def inject_data():
     return dict(config=config)
 
 
@@ -532,6 +532,15 @@ def user_login():
         else:
             session.permanent = False
     return json_response(result)
+
+
+@app.route('/api/user/info/unread')
+def user_get_unread_count():
+    uid = session.get('uid')
+    if(not uid):
+        return json_response((249, _('Not signed in.')) )
+    else:
+        return json_response(forum.user_get_unread_count(uid))
 
 
 @app.route('/user/register')
