@@ -48,6 +48,16 @@ class PasswordReset(BaseModel):
     expire_date = DateTimeField()
 
 
+class UserInfo(BaseModel):
+    user = ForeignKeyField(User, related_name='info', primary_key=True,
+                           index=True)
+    last_login_date = DateTimeField(null=True)
+    last_login_failed_date = DateTimeField(null=True)
+    bio = TextField(default='')
+    unread_reply = IntegerField(default=0)
+    unread_at = IntegerField(default=0)
+
+
 class SiteAdmin(BaseModel):
     user = ForeignKeyField(User, related_name='site_managing', primary_key=True)
 
