@@ -356,6 +356,28 @@ def user_get_name(uid):
         return (1, db_err_msg(err))
 
 
+def user_info(name):
+    try:
+        query = User.select().where(User.name == name)
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
+        info = user.info[0]
+        if(info.last_login_date):
+            last_login_date = info.last_login_date.timestamp()
+        else:
+            last_login_date = None
+        return (0, OK_MSG, {
+            'uid': user.id,
+            'mail': user.mail,
+            'reg_date': user.reg_date.timestamp(),
+            'bio': info.bio,
+            'last_login_date': last_login_date,
+        })
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
 def admin_check(uid, board=''):
     try:
         query = User.select().where(User.id == uid)
