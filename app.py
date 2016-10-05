@@ -826,6 +826,17 @@ def topic_add():
     uid = session.get('uid')
     if(not uid):
         return json_response((249, _('Not signed in.')) )
+
+    result_ban_global = forum.ban_check(uid)
+    if(result_ban_global[0] != 0):
+        return json_response(result_ban_global)
+    result_ban_local = forum.ban_check(uid, board)
+    if(result_ban_local[0] != 0):
+        return json_response(result_ban_local)
+
+    if(result_ban_global[2]['banned'] or result_ban_local[2]['banned']):
+        return json_response((252, _('You are being banned.')) )
+
     return json_response(forum.topic_add(board, title, uid, summary, content))
 
 
@@ -918,6 +929,24 @@ def post_add():
     uid = session.get('uid')
     if(not uid):
         return json_response((249, _('Not signed in.')) )
+
+    if(subpost):
+        result_board = forum.post_get_board(parent)
+    else:
+        result_board = forum.topic_info(parent)
+    if(result_board[0] != 0):
+        return json_response(result_board)
+    board = result_board[2]['board']
+    result_ban_global = forum.ban_check(uid)
+    if(result_ban_global[0] != 0):
+        return json_response(result_ban_global)
+    result_ban_local = forum.ban_check(uid, board)
+    if(result_ban_local[0] != 0):
+        return json_response(result_ban_local)
+
+    if(result_ban_global[2]['banned'] or result_ban_local[2]['banned']):
+        return json_response((252, _('You are being banned.')) )
+
     if(subpost):
         content = content.replace('\n', ' ').replace('\r', '')
     return json_response(
