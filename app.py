@@ -28,6 +28,8 @@ EMAIL_ADDRESS = 'no_reply@foo.bar'
 SUMMARY_LENGTH = 60
 # Fixed for positioning
 COUNT_SUBPOST = 10
+# String because input is string
+BAN_DAYS_LIST = ['1', '3', '10', '30']
 
 
 # Configurations for the site
@@ -553,6 +555,27 @@ def user_login_form():
     return render_template('form_login.html')
 
 
+@app.route('/user/ban/<name>')
+def user_ban_form(name):
+    board = request.args.get('board', '')
+    if(board):
+        globally = False
+    else:
+        globally = True
+    uid_result = forum.user_get_uid(name)
+    if(uid_result[0] != 0):
+        return err_response(uid_result)
+    else:
+        return render_template(
+            'form_ban.html',
+            name = name,
+            uid = uid_result[2]['uid'],
+            globally = globally,
+            board = board,
+            days_list = BAN_DAYS_LIST
+        )
+
+
 @app.route('/user/logout')
 def user_logout():
     session.pop('uid', None)
@@ -736,12 +759,12 @@ def ban_info(uid):
     return json_response(forum.ban_info(uid, board))
 
 
-@app.route('/api/ban/add/<int:uid>')
+@app.route('/api/ban/add/<int:uid>', methods=['POST'])
 def ban_add(uid):
-    board = request.args.get('board', '')
-    days = request.args.get('days', '1')
+    board = request.form.get('board', '')
+    days = request.form.get('days', '1')
     try:
-        validate(_('Days'), days, in_list=['1', '3', '10', '30'])
+        validate(_('Days'), days, in_list=BAN_DAYS_LIST)
     except ValidationError as err:
         return validation_err_response(err)
     operator = session.get('uid')
@@ -756,9 +779,9 @@ def ban_add(uid):
         return permission_err_response(err)
 
 
-@app.route('/api/ban/remove/<int:uid>')
+@app.route('/api/ban/remove/<int:uid>', methods=['POST'])
 def ban_remove(uid):
-    board = request.args.get('board', '')
+    board = request.form.get('board', '')
     operator = session.get('uid')
     if(not operator):
         return json_response((254, _('Permission denied.')) )
