@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+{% from 'macros.html' import avatar %}
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ _('User: %(name)s', name=name) ~ ' - ' ~ config['site_name'] }}</title>
+    <link rel="stylesheet" href="/static/global.css" />
+    <style>
+      header { display: flex; align-items: center; }
+      header > .avatar { flex-shrink: 0; }
+      #name_title { flex-grow: 1; text-align: center; }
+      td { padding: 0.15em 0.3em; }
+    </style>
+  </head>
+  <body class="box_center">
+    <div id="container">
+      <header>
+	{{ avatar(data['mail'], size=4) }}
+	<h2 id="name_title">{{ name }}</h2>
+      </header>
+      <p id="bio">{{ data['bio'] }}</p>
+      <table>
+	<tr>
+	  <td>UID</td>
+	  <td>{{ data['uid'] }}</td>
+	</tr>
+	<tr>
+	  <td>{{ _('Register Date') }}</td>
+	  <td>{{ data['reg_date'] | date }}</td>
+	</tr>
+	<tr>
+	  <td>{{ _('Last Login Date') }}</td>
+	  <td>
+	    {% if data['last_login_date'] %}
+	      {{ data['last_login_date'] | date }}
+	    {% else %}
+	      {{ _('Not yet signed in') }}
+	    {% endif %}
+	  </td>
+	</tr>
+      </table>
+    </div>
+  </body>
+</html>
