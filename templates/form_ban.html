@@ -1,0 +1,55 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import field, submit %}
+
+{% block title %}{{ _('Ban %(user)s - %(site)s', user=name, site=config['site_name']) }}{% endblock %}
+{% block body_class %}box_center{% endblock %}
+{% block form_title %}{{ _('Ban') }}{% endblock %}
+
+{% block script %}
+var SUBMIT_URL = '{{ url_for('ban_add', uid=uid) }}';
+var LOCK_FORM_AFTER_OK = true;
+var REDIRECT_URL = '';
+var SUCCESS_CALLBACK = null;
+var OPTIONS = {};
+var REALTIME_VALIDATION = false;
+{% endblock %}
+
+{% block style %}
+#container { width: 15em; }
+td { padding: 0.15em 0.3em; }
+td:first-child { text-align: left; }
+{% endblock %}
+
+{% block form %}
+  <div class="table_wrapper">
+    <table>
+      <tr>
+	<td>{{ _('User') }}</td>
+	<td>{{ name }}</td>
+      </tr>
+      <tr>
+	<td>{{ _('Range') }}</td>
+	{% if globally %}
+	  <td>{{ _('The whole site') }}</td>
+	{% else %}
+	  <input name="board" type="hidden" value="{{ board }}" />
+          <td>{{ _('Board: %(board)s', board=board) }}</td>
+	{% endif %}
+      </tr>
+      <tr>
+	<td>{{ _('Duration') }}</td>
+	<td>
+	  <select name="days">
+	    {% for days in days_list %}
+	      <option value="{{ days }}">{{ ngettext('%(days)d Day', '%(days)d Days', days|int, days=days) }}</option>
+	    {% endfor %}
+	  </select>
+	</td>
+      </tr>
+    </table>
+  </div>
+{% endblock %}
+
+{% block buttons %}
+{{ submit(_('Confirm')) }}
+{% endblock %}
