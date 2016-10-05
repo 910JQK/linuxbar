@@ -19,26 +19,28 @@
 	<h2 id="name_title">{{ name }}</h2>
       </header>
       <p id="bio">{{ data['bio'] }}</p>
-      <table>
-	<tr>
-	  <td>UID</td>
-	  <td>{{ data['uid'] }}</td>
-	</tr>
-	<tr>
-	  <td>{{ _('Register Date') }}</td>
-	  <td>{{ data['reg_date'] | date }}</td>
-	</tr>
-	<tr>
-	  <td>{{ _('Last Login Date') }}</td>
-	  <td>
-	    {% if data['last_login_date'] %}
-	      {{ data['last_login_date'] | date }}
-	    {% else %}
-	      {{ _('Not yet signed in') }}
-	    {% endif %}
-	  </td>
-	</tr>
-      </table>
+      <div class="table_wrapper">
+	<table>
+	  <tr>
+	    <td>UID</td>
+	    <td>{{ data['uid'] }}</td>
+	  </tr>
+	  <tr>
+	    <td>{{ _('Register') }}</td>
+	    <td>{{ data['reg_date'] | date }}</td>
+	  </tr>
+	  <tr>
+	    <td>{{ _('Last Login') }}</td>
+	    <td>
+	      {% if data['last_login_date'] %}
+		{{ data['last_login_date'] | date }}
+	      {% else %}
+		{{ _('Not yet signed in') }}
+	      {% endif %}
+	    </td>
+	  </tr>
+	</table>
+      </div>
     </div>
   </body>
 </html>
