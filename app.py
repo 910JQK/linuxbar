@@ -566,8 +566,11 @@ def user_logout():
 
 @app.route('/user/info/<name>')
 def user_info(name):
-    # waiting for impl
-    return 'Info of user %s' % name
+    result = forum.user_info(name)
+    if(result[0] != 0):
+        return err_response(result)
+    else:
+        return render_template('user_info.html', name=name, data=result[2])
 
 
 @app.route('/user/password-reset')
