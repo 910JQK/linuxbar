@@ -21,6 +21,9 @@
 	  <div class="info subpost_info">
 	    {# determine whether to display in front-end #}
 	    <img class="icon btn subpost_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this subpost') }}" data-sid="{{ subpost['sid'] }}" style="display: none;"/>
+	    <a class="subpost_ban_link" href="{{ url_for('user_ban_form', name=subpost['author']['name']) ~ '?sid=' ~ subpost['sid'] }}" target="_blank" aria-label="ban" alt="ban" title="{{ _('ban this user') }}" style="display: none;">
+	      <img class="icon btn subpost_ban_icon" src="/static/icons/ban.svg" />
+	    </a>
 	    {% if subpost['author']['uid'] == session.get('uid') %}
 	      {# argument `tid` is added by javascript in topic_content.html #}
 	      {# detail can be found at init_subpost_edit_btn() #}

@@ -224,6 +224,8 @@
 			     });
 			     btn.style.display = '';
 			 }
+			 for(let I of list.querySelectorAll('.subpost_ban_link'))
+			     I.style.display = '';
 		     }
 		 } else {
 		     pager.classList.remove('lock');
@@ -376,6 +378,8 @@
 		 });
 		 btn.style.display = '';
 	     }
+	     for(let I of query_all('.subpost_ban_link'))
+		 I.style.display = '';
 	 }
      }
      function show_remaining_subposts(pid) {
@@ -459,6 +463,9 @@
 		<div class="info post_info">
 		  {% if is_admin %}
 		    <img class="icon btn post_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" data-pid="{{ post['pid'] }}" />
+		    <a href="{{ url_for('user_ban_form', name=post['author']['name']) ~ '?board=' ~ topic_info['board'] }}" target="_blank" aria-label="ban" alt="ban" title="{{ _('ban this user') }}">
+		      <img class="icon btn post_ban_icon" src="/static/icons/ban.svg" />
+		    </a>
 		  {% endif %}
 		  {% if post['author']['uid'] == session.get('uid') %}
 		    <a href="{{ url_for('edit_form', id=post['pid']) ~ '?tid=' ~ tid ~ '&bookmark=p' ~ post['pid'] }}">
