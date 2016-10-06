@@ -587,13 +587,18 @@ def user_logout():
         return redirect(url_for('index'))
 
 
-@app.route('/user/info/<name>')
-def user_info(name):
+@app.route('/user/<name>')
+def user(name):
     result = forum.user_info(name)
     if(result[0] != 0):
         return err_response(result)
     else:
         return render_template('user_info.html', name=name, data=result[2])
+
+
+@app.route('/api/user/info/<name>')
+def user_info(name):
+    return json_response(forum.user_info(name))
 
 
 @app.route('/user/password-reset')
