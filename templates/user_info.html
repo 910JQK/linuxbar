@@ -10,10 +10,18 @@
       header > .avatar { flex-shrink: 0; }
       #name_title { flex-grow: 1; text-align: center; }
       td { padding: 0.15em 0.3em; }
+      .icon { width: 0.75em; height: 0.75em; }
     </style>
   </head>
   <body class="box_center">
     <div id="container">
+      <div id="top_right">
+	{% if admin %}
+	  <a href="{{ url_for('user_ban_form', name=name) }}">
+	    <img class="icon" src="/static/icons/ban.svg" alt="Ban" aria-label="Ban" title="Ban this user" />
+	  </a>
+	{% endif %}
+      </div>
       <header>
 	{{ avatar(data['mail'], size=4) }}
 	<h2 id="name_title">{{ name }}</h2>
