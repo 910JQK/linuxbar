@@ -11,6 +11,8 @@ import os
 import io
 import re
 import json
+import imghdr
+import hashlib
 import smtplib
 import datetime
 from email.mime.text import MIMEText
@@ -30,7 +32,9 @@ SUMMARY_LENGTH = 60
 COUNT_SUBPOST = 10
 # String because input is string
 BAN_DAYS_LIST = ['1', '3', '10', '30']
+IMAGE_FORMATS = ['png', 'gif', 'jpeg']
 
+UPLOAD_FOLDER = 'upload'
 
 # Configurations for the site
 config = {}
@@ -1076,10 +1080,53 @@ def api_notification(n_type):
         return json_response((249, _('Not signed in.')) )
 
 
+@app.route('/api/image/upload', methods=['POST'])
+def image_upload():
+    # TODO: DB operations, duplicate test, check in front-end, size control ...
+    def sha256f(f):
+        hash_sha256 = hashlib.sha256()
+        for chunk in iter(lambda: f.read(4096), b''):
+            hash_sha256.update(chunk)
+        return hash_sha256.hexdigest()
+    image = request.files.get('image')
+    if(not image):
+        return json_response((251, _('Invalid request.')) )
+    if(not image.filename):
+        return json_response((251, _('Invalid request.')) )
+    img_format = imghdr.what('', image.read(100))
+    image.seek(0)
+    if(img_format not in IMAGE_FORMATS):
+        return json_response((247, _('Invalid file format.')) )
+    sha256 = sha256f(image)
+    filename = sha256 + '.' + img_format
+    try:
+        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return json_response(
+            (
+                0,
+                _('Image saved successfully.'),
+                {
+                    'hash': sha256,
+                    'format': img_format
+                }
+            )
+        )
+    except Exception as err:
+        return json_response(
+            (246, _('Error while saving image: %s') % str(err))
+        )
+
+
+@app.route('/test/upload')
+def test_upload():
+    return '<form action="/api/image/upload" method=post enctype=multipart/form-data><input type="file" name="image" /><input type=submit value=upload></form>'
+
+
 if __name__ == '__main__':
     result_config = forum.config_get()
     if(result_config[0] != 0):
         raise Exception('unable to load configuration from database')
     config = result_config[2]
     app.secret_key = os.urandom(24)
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.run(debug=DEBUG)
