@@ -558,18 +558,24 @@ def user_login_form():
 @app.route('/user/ban/<name>')
 def user_ban_form(name):
     board = request.args.get('board', '')
+    sid = request.args.get('sid', '')
+    if(not board and sid):
+        result_board = forum.post_get_board(sid, subpost=True)
+        if(result_board[0] != 0):
+            return err_response(result_board)
+        board = result_board[2]['board']
     if(board):
         globally = False
     else:
         globally = True
-    uid_result = forum.user_get_uid(name)
-    if(uid_result[0] != 0):
-        return err_response(uid_result)
+    result_uid = forum.user_get_uid(name)
+    if(result_uid[0] != 0):
+        return err_response(result_uid)
     else:
         return render_template(
             'form_ban.html',
             name = name,
-            uid = uid_result[2]['uid'],
+            uid = result_uid[2]['uid'],
             globally = globally,
             board = board,
             days_list = BAN_DAYS_LIST
@@ -595,9 +601,9 @@ def user(name):
         if(check_result[0] != 0):
             return err_response(check_result)
         else:
-            admin = check_result[2]['admin']
+            is_admin = check_result[2]['admin']
     else:
-        admin = False
+        is_admin = False
     result = forum.user_info(name)
     if(result[0] != 0):
         return err_response(result)
@@ -606,11 +612,11 @@ def user(name):
             'user_info.html',
             name = name,
             data = result[2],
-            admin=admin
+            is_admin = is_admin
         )
 
 
-@app.route('/api/user/info/<name>')
+@app.route('/api/user/info/detail/<name>')
 def user_info(name):
     return json_response(forum.user_info(name))
 
