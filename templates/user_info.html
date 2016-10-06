@@ -16,9 +16,9 @@
   <body class="box_center">
     <div id="container">
       <div id="top_right">
-	{% if admin %}
+	{% if is_admin %}
 	  <a href="{{ url_for('user_ban_form', name=name) }}">
-	    <img class="icon" src="/static/icons/ban.svg" alt="Ban" aria-label="Ban" title="Ban this user" />
+	    <img class="icon" src="/static/icons/ban.svg" alt="Ban" aria-label="Ban" title="{{ _('ban this user') }}" />
 	  </a>
 	{% endif %}
       </div>
