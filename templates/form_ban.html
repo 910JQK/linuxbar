@@ -9,15 +9,26 @@
 var SUBMIT_URL = '{{ url_for('ban_add', uid=uid) }}';
 var LOCK_FORM_AFTER_OK = true;
 var REDIRECT_URL = '';
-var SUCCESS_CALLBACK = null;
+var SUCCESS_CALLBACK = function() {
+    cancel_button.textContent = 'OK';
+    var submit_btn = query('.submit_btn');
+    submit_btn.parentElement.removeChild(submit_btn);
+};
 var OPTIONS = {};
 var REALTIME_VALIDATION = false;
+window.addEventListener('load', function() {
+    cancel_button.addEventListener('click', function(ev) {
+        ev.preventDefault();
+	window.close();
+    });
+});
 {% endblock %}
 
 {% block style %}
 #container { width: 15em; }
 td { padding: 0.15em 0.3em; }
 td:first-child { text-align: left; }
+button { min-width: 4em; }
 {% endblock %}
 
 {% block form %}
@@ -52,4 +63,5 @@ td:first-child { text-align: left; }
 
 {% block buttons %}
 {{ submit(_('Confirm')) }}
+<button id="cancel_button">{{ _('Cancel') }}</button>
 {% endblock %}
