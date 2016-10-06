@@ -1250,7 +1250,7 @@ def post_list(parent, page, count_per_page, subpost=False, no_html=False):
         elif(len(text) > 2):
             if(text.startswith('@@')):
                 at_name = text[1:]
-                return make_link(at_name, '/user/%s' % url_quote(at_name))
+                return make_link(at_name, '/user/%s' % url_quote(at_name[1:]))
             elif(text.startswith('**') and text[2] != '*'):
                 return '<b>%s</b>' % escape(text[2:])
             elif(text.startswith('~~') and text[2] != '~'):
