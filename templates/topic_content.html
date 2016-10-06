@@ -520,7 +520,7 @@
 	<p class="bold">Reply this topic</p>
 	<form id="add_post_form" action="javascript:void(0)">
 	  <input type="hidden" name="parent" value="{{ tid }}" />
-	  <textarea name="content" rows="12" placeholder="[Input Content Here]" required="required"></textarea>
+	  <textarea name="content" rows="12" placeholder="{{ _('[Input Content Here]') }}" required="required"></textarea>
           <p class="message"></p>
           {{ submit(_('Reply')) }}
 	</form>
