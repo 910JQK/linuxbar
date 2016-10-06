@@ -589,11 +589,25 @@ def user_logout():
 
 @app.route('/user/<name>')
 def user(name):
+    current_user = session.get('uid')
+    if(current_user):
+        check_result = forum.admin_check(current_user)
+        if(check_result[0] != 0):
+            return err_response(check_result)
+        else:
+            admin = check_result[2]['admin']
+    else:
+        admin = False
     result = forum.user_info(name)
     if(result[0] != 0):
         return err_response(result)
     else:
-        return render_template('user_info.html', name=name, data=result[2])
+        return render_template(
+            'user_info.html',
+            name = name,
+            data = result[2],
+            admin=admin
+        )
 
 
 @app.route('/api/user/info/<name>')
@@ -774,7 +788,7 @@ def ban_add(uid):
         return validation_err_response(err)
     operator = session.get('uid')
     if(not operator):
-        return json_response((254, _('Permission denied.')) )
+        return json_response((254, _('Not signed in.')) )
     try:
         if(check_permission(operator, board)):
             return json_response(forum.ban_add(uid, int(days), operator, board))
@@ -789,7 +803,7 @@ def ban_remove(uid):
     board = request.form.get('board', '')
     operator = session.get('uid')
     if(not operator):
-        return json_response((254, _('Permission denied.')) )
+        return json_response((254, _('Not signed in.')) )
     try:
         if(check_permission(operator, board)):
             return json_response(forum.ban_remove(uid, board))
