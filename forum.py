@@ -445,6 +445,24 @@ def admin_list(board=''):
         return (1, db_err_msg(err))
 
 
+def admin_board_list(uid):
+    try:
+        query = User.select().where(User.id == uid)
+        if(not query):
+            return (2, _('No such user.'))
+        user = query.get()
+        boards_level0 = []
+        boards_others = []
+        for rec in user.board_managing:
+            if(rec.level == 0):
+                boards_level0.append(rec.board.name)
+            else:
+                boards_others.append(rec.board.name)
+        return (0, OK_MSG, {'level0': boards_level0, 'others': boards_others})
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
 def admin_add(uid, board='', level=1):
     try:
         query = User.select().where(User.id == uid)
