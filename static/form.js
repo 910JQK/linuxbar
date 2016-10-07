@@ -1,3 +1,50 @@
+var format_checking = false;
+var reader = new FileReader();
+
+
+/**
+ * Check if header bytes of a file or a blob matches one of specified formats.
+ *
+ * @param Blob blob
+ * @param Array headers (2d array)
+ * @param Function callback
+ * @return void
+ */
+function check_file_format(blob, headers, callback) {
+    if(format_checking){
+	reader.abort();
+	reader = new FileReader();
+    }
+    format_checking = true;
+    reader.addEventListener('loadend', function() {
+	var arr = new Uint8Array(reader.result);
+	/* valid if one of these formats is matched */
+	var ok_outer = false;
+	for(let header of headers) {
+	    let ok = true;
+	    for(let i=0; i<header.length; i++) {
+		if(!arr[i] || arr[i] != header[i]) {
+		    ok = false;
+		    break;
+		}
+	    }
+	    if(ok) {
+		ok_outer = true;
+		break;
+	    }
+	}
+	callback(ok_outer);
+	format_checking = false;
+    });
+    reader.addEventListener('error', function() {
+	callback(false);
+	format_checking = false;
+    });
+    var segment = blob.slice(0, 100);
+    reader.readAsArrayBuffer(segment);
+}
+
+
 /**
  * Check if the UTF-8 size of the value of an `<input>` is in proper range.
  * Change event handler for form validation.
@@ -19,6 +66,7 @@ function validate_size() {
 	);
     else
 	this.setCustomValidity('');
+    show_validation_message.call(this);
 }
 
 
@@ -35,12 +83,37 @@ function validate_password_confirmation() {
 	this.setCustomValidity(_('Two fields are inconsistent.'));
     else
 	this.setCustomValidity('');
+    show_validation_message.call(this);
+}
+
+
+/**
+ * Check if a file matches specified format.
+ * Change event handler for form validation.
+ *
+ * @this HTMLInputElement
+ * @return void
+ */
+function validate_file() {
+    /* formats: 2d array */
+    var formats = JSON.parse(this.dataset.formats);
+    var file = this.files[0];
+    if(!file)
+	return;
+    var input = this;
+    check_file_format(file, formats, function(ok) {
+	if(!ok)
+	    input.setCustomValidity(_('Invalid file format.'));
+	else
+	    input.setCustomValidity('');
+	show_validation_message.call(input);
+    });
 }
 
 
 /**
  * Show validation message in the description field below an `<input>`.
- * Change event handler for form validation.
+ * Indirect change event handler for form validation.
  *
  * @this HTMLInputElement
  * @return void
@@ -73,22 +146,21 @@ function init_validation(realtime) {
     /* A custom validation will conflict with another. */
     for(let input of query_all('input[data-min], input[data-max]')) {
 	input.addEventListener('change', validate_size);
-	input.addEventListener('change', show_validation_message);
 	if(realtime){
 	    input.addEventListener('keyup', validate_size);
-	    input.addEventListener('keyup', show_validation_message);
 	}
 	/* The browser may save the previous data. */
 	if(input.value)
 	    validate_size.call(input);
+    }
+    for(let input of query_all('input[data-formats]')) {
+	input.addEventListener('change', validate_file);
     }
     var input_confirm = query('input[name="password_confirm"]');
     if(input_confirm) {
 	let input_password = query('input[name="password"]');
 	input_confirm.addEventListener('change', validate_password_confirmation);
 	/* Validation of password confirmation should not be realtime. */
-	input_confirm.addEventListener('change', show_validation_message);
-
 	input_password.addEventListener('change', function(){
 	    input_confirm.value = '';
 	});
