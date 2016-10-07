@@ -1694,24 +1694,26 @@ def user_get_unread_count(uid):
         return (1, db_err_msg(err))
 
 
-def image_add(sha256, uid, name=None):
+def image_add(sha256, uid, img_type, file_name=None):
     # Parameter "sha256" and "uid" must be valid
     try:
-        if(name):
-            user = User.get(User.id == uid)
-            query = Image.select().where(
-                Image.uploader == user,
-                Image.name == name
+        query = Image.select().where(Image.sha256 == sha256)
+        if(not query):
+            Image.create(
+                sha256 = sha256,
+                uploader_id = uid,
+                img_type = img_type,
+                file_name = file_name,
+                date = now()
             )
-            if(query):
-                return (2, _('Name %s already in use.') % name)
-        Image.create(
-            sha256 = sha256,
-            uploader_id = uid,
-            name = name,
-            date = now()
+        return (
+            0,
+            _('Data stored successfully.'),
+            {
+                'hash': sha256,
+                'format': img_type
+            }
         )
-        return (0, _('Data stored successfully.'))
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -1736,27 +1738,10 @@ def image_info(sha256):
         image = query.get()
         return (0, OK_MSG, {
             'uploader': image.uploader.id,
-            'name': image.name,
+            'file_name': image.file_name,
+            'img_type': image.img_type,
             'date': image.date.timestamp()
         })
-    except Exception as err:
-        return (1, db_err_msg(err))
-
-
-def image_get(uid, name):
-    try:
-        query = User.select().where(User.id == uid)
-        if(not query):
-            return (2, _('No such user.'))
-        user = query.get()
-        query = Image.select().where(
-            Image.uploader == user,
-            Image.name == name
-        )
-        if(not query):
-            return (3, _('No such image.'))
-        image = query.get()
-        return (0, OK_MSG, {'sha256': image.sha256})
     except Exception as err:
         return (1, db_err_msg(err))
 
@@ -1778,7 +1763,8 @@ def image_list(uid, page, count_per_page):
         for image in query:
             list.append({
                 'sha256': image.sha256,
-                'name': image.name,
+                'file_name': image.file_name,
+                'img_type': image.img_type,
                 'date': image.date.timestamp()
             })
         return (0, OK_MSG, {'list': list, 'count': count})
