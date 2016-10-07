@@ -35,6 +35,7 @@ BAN_DAYS_LIST = ['1', '3', '10', '30']
 IMAGE_FORMATS = ['png', 'gif', 'jpeg']
 
 UPLOAD_FOLDER = 'upload'
+MAX_UPLOAD_LENGTH = 5 * 1024 * 1024
 
 # Configurations for the site
 config = {}
@@ -1082,12 +1083,14 @@ def api_notification(n_type):
 
 @app.route('/api/image/upload', methods=['POST'])
 def image_upload():
-    # TODO: DB operations, duplicate test, check in front-end, size control ...
     def sha256f(f):
         hash_sha256 = hashlib.sha256()
         for chunk in iter(lambda: f.read(4096), b''):
             hash_sha256.update(chunk)
         return hash_sha256.hexdigest()
+    uid = session.get('uid')
+    if(not uid):
+        return json_response((249, _('Not signed in.')) )
     image = request.files.get('image')
     if(not image):
         return json_response((251, _('Invalid request.')) )
@@ -1100,16 +1103,11 @@ def image_upload():
     sha256 = sha256f(image)
     filename = sha256 + '.' + img_format
     try:
-        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if(not os.path.exists(path)):
+            image.save(path)
         return json_response(
-            (
-                0,
-                _('Image saved successfully.'),
-                {
-                    'hash': sha256,
-                    'format': img_format
-                }
-            )
+            forum.image_add(sha256, uid, img_format, image.filename)
         )
     except Exception as err:
         return json_response(
@@ -1117,9 +1115,9 @@ def image_upload():
         )
 
 
-@app.route('/test/upload')
-def test_upload():
-    return '<form action="/api/image/upload" method=post enctype=multipart/form-data><input type="file" name="image" /><input type=submit value=upload></form>'
+@app.route('/upload/image')
+def upload_image_form():
+    return render_template('form_upload_image.html')
 
 
 if __name__ == '__main__':
@@ -1129,4 +1127,5 @@ if __name__ == '__main__':
     config = result_config[2]
     app.secret_key = os.urandom(24)
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_LENGTH
     app.run(debug=DEBUG)
