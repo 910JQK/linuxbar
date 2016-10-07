@@ -9,6 +9,7 @@ import re
 from html import escape
 from urllib.parse import quote
 from db import *
+from validation import sha256_regex
 
 
 def _(string):
@@ -1275,6 +1276,11 @@ def post_list(parent, page, count_per_page, subpost=False, no_html=False):
                 return '<i>%s</i>' % escape(text[2:])
             elif(text.startswith('!!') and text[2] != '!'):
                 return '<span class="red_text">%s</span>' % escape(text[2:])
+            elif(text.startswith('%%') and sha256_regex.fullmatch(text[2:])):
+                return (
+                    '<img class="content_image" src="/image/%s"></img>'
+                    % text[2:]
+                )
             else:
                 return escape(text)
         else:
