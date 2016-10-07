@@ -9,7 +9,11 @@
 var SUBMIT_URL = '{{ url_for('image_upload') }}';
 var LOCK_FORM_AFTER_OK = true;
 var REDIRECT_URL = '';
-var SUCCESS_CALLBACK = null;
+var SUCCESS_CALLBACK = function() {
+    cancel_button.textContent = 'OK';
+    var submit_btn = query('.submit_btn');
+    submit_btn.parentElement.removeChild(submit_btn);
+};
 var OPTIONS = {};
 var REALTIME_VALIDATION = false;
 window.addEventListener('load', function() {
@@ -18,6 +22,10 @@ window.addEventListener('load', function() {
 	window.close();
     });
 });
+{% endblock %}
+
+{% block style %}
+button { min-width: 4em; }
 {% endblock %}
 
 {% block form_options %} method="post" enctype="multipart/form-data"{% endblock %}
@@ -29,5 +37,5 @@ window.addEventListener('load', function() {
 
 {% block buttons %}
   {{ submit(_('Upload')) }}
-  <button id="cancel_button">Cancel</button>
+  <button id="cancel_button">{{ _('Cancel') }}</button>
 {% endblock %}
