@@ -1571,7 +1571,7 @@ def at_add(id, caller, callee, subpost=False):
         UserInfo.update(
             unread_at = UserInfo.unread_at + 1
         ).where(UserInfo.user == callee_rec)
-        return (0, _('Data stored successfully.'))
+        return (0, _('Image uploaded successfully.'))
     except Exception as err:
         return (1, db_err_msg(err))
 
