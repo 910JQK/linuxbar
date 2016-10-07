@@ -2,7 +2,7 @@
 
 
 from flask import Flask, Response, request, session, redirect, url_for, \
-                  render_template
+                  render_template, send_file, abort
 from flask_babel import Babel
 app = Flask(__name__)
 babel = Babel(app)
@@ -33,6 +33,7 @@ COUNT_SUBPOST = 10
 # String because input is string
 BAN_DAYS_LIST = ['1', '3', '10', '30']
 IMAGE_FORMATS = ['png', 'gif', 'jpeg']
+IMAGE_MIME = {'png': 'image/png', 'jpeg': 'image/jpeg', 'gif': 'image/gif'}
 
 UPLOAD_FOLDER = 'upload'
 MAX_UPLOAD_LENGTH = 5 * 1024 * 1024
@@ -1097,11 +1098,11 @@ def image_upload():
     if(not image.filename):
         return json_response((251, _('Invalid request.')) )
     img_format = imghdr.what('', image.read(100))
-    image.seek(0)
     if(img_format not in IMAGE_FORMATS):
         return json_response((247, _('Invalid file format.')) )
     sha256 = sha256f(image)
     filename = sha256 + '.' + img_format
+    image.seek(0)
     try:
         path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         if(not os.path.exists(path)):
@@ -1113,6 +1114,26 @@ def image_upload():
         return json_response(
             (246, _('Error while saving image: %s') % str(err))
         )
+
+
+@app.route('/image/<sha256>')
+def image(sha256):
+    try:
+        validate_sha256(_('Sha256'), sha256)
+    except ValidationError as err:
+        abort(404)
+    result = forum.image_info(sha256)
+    if(result[0] != 0):
+        if(result[0] == 1):
+            abort(404)
+        else:
+            abort(500)
+    else:
+        img_type = result[2]['img_type']
+        mime = IMAGE_MIME[img_type]
+        file_name = sha256 + '.' + img_type
+        path = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
+        return send_file(path, mime)
 
 
 @app.route('/upload/image')
