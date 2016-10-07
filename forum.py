@@ -1278,8 +1278,8 @@ def post_list(parent, page, count_per_page, subpost=False, no_html=False):
                 return '<span class="red_text">%s</span>' % escape(text[2:])
             elif(text.startswith('%%') and sha256_regex.fullmatch(text[2:])):
                 return (
-                    '<img class="content_image" src="/image/%s"></img>'
-                    % text[2:]
+                    '<a class="content_image_link" href="/image/%s" target="_blank"><img class="content_image" src="/image/%s"></img></a>'
+                    % (text[2:], text[2:])
                 )
             else:
                 return escape(text)
