@@ -1,0 +1,31 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import description, submit %}
+
+{% block title %}{{ _('Upload Image - %(site)s', site=config['site_name']) }}{% endblock %}
+{% block body_class %}box_center{% endblock %}
+{% block form_title %}{{ _('Upload Image') }}{% endblock %}
+
+{% block script %}
+var SUBMIT_URL = '{{ url_for('image_upload') }}';
+var LOCK_FORM_AFTER_OK = true;
+var REDIRECT_URL = '';
+var SUCCESS_CALLBACK = null;
+var OPTIONS = {};
+var REALTIME_VALIDATION = false;
+window.addEventListener('load', function() {
+    cancel_button.addEventListener('click', function(ev) {
+        ev.preventDefault();
+	window.close();
+    });
+});
+{% endblock %}
+
+{% block form %}
+  <input type="file" name="image" aria-label="image file" data-formats="[[137,80,78,71],[255,216],[71,73,70,56]]" autocomplete="off" />
+  {{ description(_('Image file to be uploaded (PNG/JPG/GIF).')) }}
+{% endblock %}
+
+{% block buttons %}
+  {{ submit(_('Upload')) }}
+  <button id="cancel_button">Cancel</button>
+{% endblock %}
