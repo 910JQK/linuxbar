@@ -20,8 +20,10 @@ window.addEventListener('load', function() {
 });
 {% endblock %}
 
+{% block form_options %} method="post" enctype="multipart/form-data"{% endblock %}
+
 {% block form %}
-  <input type="file" name="image" aria-label="image file" data-formats="[[137,80,78,71],[255,216],[71,73,70,56]]" autocomplete="off" />
+  <input type="file" name="image" aria-label="image file" data-formats="[[137,80,78,71],[255,216],[71,73,70,56]]" autocomplete="off" required="required" />
   {{ description(_('Image file to be uploaded (PNG/JPG/GIF).')) }}
 {% endblock %}
 
