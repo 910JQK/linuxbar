@@ -46,7 +46,7 @@
   <body class="{% block body_class %}{% endblock %}">
     <div id="container">
       <h1 class="form_title">{% block form_title %}{% endblock %}</h1>
-      <form id="form" action="javascript:void(0)">
+      <form id="form" action="javascript:void(0)"{% block form_options %}{% endblock %}>
 	  {% block form %}
 	  {% endblock %}
 	  <p class="message">&nbsp;</p>
