@@ -42,6 +42,14 @@
   </div>
 {% endmacro %}
 
+{% macro editor_toolbar() %}
+  <div class="editor_toolbar">
+    <a href="{{ url_for('upload_image_form') }}" target="_blank" aria-label="add an image" title="add an image">
+      <img class="icon" src="/static/icons/image.svg" alt="Add Image" />
+    </a>
+  </div>
+{% endmacro %}
+
 {% macro pager(count, items_per_page, pn, ajax=False) %}
   {% set pages = (count / items_per_page) | round(0, 'ceil') | int %}
   {% if pn <= 4 %}
