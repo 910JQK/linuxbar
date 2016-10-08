@@ -127,6 +127,11 @@ code {
 /* for Ajax pager */
 .page_link:not(.page_current) { cursor: pointer; }
 
+.editor_toolbar .icon {
+    width: 1em;
+    height: 1em;
+}
+
 .bold { font-weight: bold; }
 
 .hidden { display: none !important; }

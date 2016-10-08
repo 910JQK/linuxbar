@@ -259,7 +259,7 @@ AjaxForm.prototype.ok = function(xhr) {
 	    for(let input of this.form.querySelectorAll('input'))
 		input.disabled = true;
 	if(this.success_callback)
-	    this.success_callback();
+	    this.success_callback(result);
 	if(this.redirect_url)
 	    setTimeout(
 		() => location.replace(this.redirect_url),
