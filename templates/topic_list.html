@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import avatar, user_info, pager, field, submit %}
+{% from 'macros.html' import avatar, user_info, pager, field, submit, editor_toolbar %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -139,7 +139,8 @@
 	<form id="add_topic_form" action="javascript:void(0)">
 	  <input type="hidden" name="board" value="{{ board }}" />
 	  {{ field('title', 'Title', '', min=1, max=64, required=true, maxlength=64) }}
-	  <textarea name="content" rows="12" placeholder="[Input Content Here]"></textarea>
+	  {{ editor_toolbar() }}
+	  <textarea name="content" id="main_textarea" rows="12" placeholder="[Input Content Here]"></textarea>
 	  <p class="message"></p>
 	  {{ submit(_('Publish')) }}
 	</form>

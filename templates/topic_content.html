@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import avatar, user_info, pager, field, submit %}
+{% from 'macros.html' import avatar, user_info, pager, field, submit, editor_toolbar %}
 {% from 'subpost_list.html' import subpost_list, subpost_list_pager %}
 {% set COUNT_SUBPOST = count_subpost %}
 {# cut off the subpost list when the following count limit is exceeded #}
@@ -523,7 +523,8 @@
 	<p class="bold">Reply this topic</p>
 	<form id="add_post_form" action="javascript:void(0)">
 	  <input type="hidden" name="parent" value="{{ tid }}" />
-	  <textarea name="content" rows="12" placeholder="{{ _('[Input Content Here]') }}" required="required"></textarea>
+	  {{ editor_toolbar() }}
+	  <textarea name="content" id="main_textarea" rows="12" placeholder="{{ _('[Input Content Here]') }}" required="required"></textarea>
           <p class="message"></p>
           {{ submit(_('Reply')) }}
 	</form>
