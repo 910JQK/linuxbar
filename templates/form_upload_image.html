@@ -9,16 +9,34 @@
 var SUBMIT_URL = '{{ url_for('image_upload') }}';
 var LOCK_FORM_AFTER_OK = true;
 var REDIRECT_URL = '';
-var SUCCESS_CALLBACK = function() {
+var SUCCESS_CALLBACK = function(result) {
     cancel_button.textContent = 'OK';
     var submit_btn = query('.submit_btn');
     submit_btn.parentElement.removeChild(submit_btn);
+    hash = result.data.hash;
 };
 var OPTIONS = {};
 var REALTIME_VALIDATION = false;
+var hash;
 window.addEventListener('load', function() {
     cancel_button.addEventListener('click', function(ev) {
         ev.preventDefault();
+	if(window.opener) {
+	    let t = window.opener.main_textarea;
+	    let s = t.selectionStart;
+	    let v = t.value;
+	    let l = v.length;
+	    let space1 = (s == 0)? '': ' ';
+	    let space2 = (s == l)? '': ' ';
+	    t.value = printf(
+		'%{1}%{2}%%%{3}%{4}%{5}',
+		v.slice(0, s),
+		space1,
+		hash,
+		space2,
+		v.slice(s, t.value.length)
+	    );
+	}
 	window.close();
     });
 });
