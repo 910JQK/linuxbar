@@ -26,12 +26,8 @@ function init() {
 		)
 	    ) {
 		POST(
-		    printf(
-			'/api/ban/remove/%{1}?board=%{2}',
-			uid,
-			encodeURIComponent(board)
-		    ),
-		    {},
+		    printf('/api/ban/remove/%{1}', uid),
+		    { board: board },
 		    function(xhr) {
 			var result = JSON.parse(xhr.responseText);
 			if(result.code == 0) {			
