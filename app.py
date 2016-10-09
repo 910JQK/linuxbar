@@ -633,7 +633,10 @@ def list_ban():
         admin_result = forum.admin_check(uid, board=board)
         if(admin_result[0] != 0):
             return err_response(admin_result)
-        is_admin = admin_result[2]['admin']
+        global_result = forum.admin_check(uid)
+        if(global_result[0] != 0):
+            return err_response(global_result)
+        is_admin = admin_result[2]['admin'] or global_result[2]['admin']
     result = forum.ban_list(int(pn), items_per_page, board=board)
     if(result[0] != 0):
         return err_response(result)
