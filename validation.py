@@ -8,6 +8,7 @@ import re
 id_regex = re.compile('[1-9][0-9]*')
 uint_regex = re.compile('0|[1-9][0-9]*')
 email_regex = re.compile('[^@]+@[^@]+')
+username_regex = re.compile('[^<>"\'/\\\*@]{3,32}')
 token_regex = re.compile('[0-9A-Za-z]{16}')
 sha256_regex = re.compile('[0123456789abcdef]{64}')
 board_short_name_regex = re.compile('[0-9A-Za-z-]{1,32}')
@@ -61,7 +62,7 @@ def validate_email(field, string):
 
 
 def validate_username(field, string):
-    validate(field, string, min=3, max=32)
+    validate(field, string, regex=username_regex)
 
 
 def validate_token(field, string):
