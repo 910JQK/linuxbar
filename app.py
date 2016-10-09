@@ -622,6 +622,32 @@ def user(name):
         )
 
 
+@app.route('/list/ban')
+def list_ban():
+    board = request.args.get('board', '')
+    pn = request.args.get('pn', '1')
+    items_per_page = int(config['count_list_item'])
+    is_admin = False
+    uid = session.get('uid')
+    if(uid):
+        admin_result = forum.admin_check(uid, board=board)
+        if(admin_result[0] != 0):
+            return err_response(admin_result)
+        is_admin = admin_result[2]['admin']
+    result = forum.ban_list(int(pn), items_per_page, board=board)
+    if(result[0] != 0):
+        return err_response(result)
+    else:
+        return render_template(
+            'list_ban.html',
+            data = result[2],
+            board = board,
+            is_admin = is_admin,
+            pn = int(pn),
+            items_per_page = items_per_page
+        )
+
+
 @app.route('/api/user/info/detail/<name>')
 def user_info(name):
     return json_response(forum.user_info(name))
