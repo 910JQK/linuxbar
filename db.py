@@ -92,6 +92,11 @@ class BoardAdmin(BaseModel):
     level = SmallIntegerField(default=0)
 
 
+class DistillateCategory(BaseModel):
+    board = ForeignKeyField(Board, related_name='distillate_category', index=True)
+    name = CharField(max_length=32)
+
+
 class Topic(BaseModel):
     title = CharField(max_length=64)
     board = ForeignKeyField(Board, related_name='topics')
@@ -100,6 +105,11 @@ class Topic(BaseModel):
     reply_count = IntegerField(default=0)
     last_post_date = DateTimeField(index=True)
     last_post_author = ForeignKeyField(User)
+    pinned = BooleanField(default=False, index=True)
+    distillate = BooleanField(default=False, index=True)
+    distillate_category = ForeignKeyField(
+        DistillateCategory, related_name='topics', null=True,
+    )
     deleted = BooleanField(default=False)
     delete_date = DateTimeField(null=True)
     delete_operator = ForeignKeyField(User, 'topics_deleted_by_me', null=True)
