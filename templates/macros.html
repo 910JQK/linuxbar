@@ -42,6 +42,12 @@
   </div>
 {% endmacro %}
 
+{% macro empty_notice() %}
+  <div class="empty_notice box_center">
+    <span>{{ _('Empty') }}</span>
+  </div>
+{% endmacro %}
+
 {% macro editor_toolbar() %}
   <div class="editor_toolbar">
     <a href="{{ url_for('upload_image_form') }}" target="_blank" aria-label="add an image" title="add an image">
