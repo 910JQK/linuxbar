@@ -247,9 +247,14 @@ function update_unread_count() {
 	    }
 	},
 	function(status, text) {
-	    console.error(
-		printf('Failed to get unread count: %1 %2', status, text)
-	    );
+	    if(status != 0)
+		console.error(
+		    printf('Failed to get unread count: %1 %2', status, text)
+		);
+	    else
+		console.error(
+		    'Failed to get unread count: connection error or timeout'
+		);
 	}
     )
 }
