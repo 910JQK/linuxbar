@@ -19,7 +19,7 @@
      .info > * {
 	 margin-left: 0.25em;
      }
-     .info > img, .info > a {
+     .info > img, .info > a, .btn_container > img, .btn_container > a {
 	 margin-left: 0.5em;
      }
      .info > span {
@@ -30,6 +30,11 @@
 	 width: 0.75em;
 	 height: 0.75em;
 	 vertical-align: sub;
+     }
+     .btn_container .icon {
+	 width: 1em;
+	 height: 1em;
+	 vertical-align: middle;
      }
      .content_image {
 	 max-width: 100%;
@@ -445,6 +450,27 @@
   <body class="box_horizontal_center">
     <div id="container">
       {{ user_info() }}
+      <div id="top_left" class="btn_container">
+	{% if is_admin %}
+	  {% if is_level0_admin %}
+	    {% if not topic_info['pinned'] %}
+	      <img class="icon btn pin_btn" src="/static/icons/pin.svg" alt="Pin" aria-label="pin" title="pin this topic" />
+	    {% else %}
+	      <img class="icon btn unpin_btn" src="/static/icons/arrow-thick-bottom.svg" alt="Unpin" aria-label="unpin" title="unpin this topic" />
+	    {% endif %}
+	    <a id="set_distillate_link">
+	      <img class="icon btn distillate_set_btn" src="/static/icons/star.svg" alt="Set Distillate" aria-label="set distillate" title="add this topic to distillate" />
+	    </a>
+	    {% if topic_info['distillate'] %}
+	      <img class="icon btn distillate_unset_btn" src="/static/icons/action-undo.svg" alt="Unset Distillate" aria-label="unset distillate" title="remove this topic from distillate" />
+	    {% endif %}
+	  {% endif %}
+	  <a id="topic_move_link">
+	    <img class="icon btn move_btn" src="/static/icons/move.svg" alt="Move" aria-label="move" title="move this topic to another board" />
+	  </a>
+	  <img class="icon btn delete_btn" src="/static/icons/trash.svg" alt="Delete" aria-label="delete" title="delete this topic" />
+	{% endif %}
+      </div>
       <header>
 	<h1>{{ topic_info['title'] }}</h1>
       </header>
