@@ -76,7 +76,7 @@ def send_mail(subject, addr_from, addr_to, content, html_content=''):
     smtp.quit()
 
 
-def check_permission(operator, board):
+def check_permission(operator, board, level0=False):
     '''Check if `operator` is administrator of `board` ('' means global)
 
     @param int operator
@@ -92,7 +92,14 @@ def check_permission(operator, board):
         check = forum.admin_check(operator, board)
         if(check[0] != 0):
             raise ForumPermissionCheckError(check)
-        return (check_global[2]['admin'] or check[2]['admin'])
+        if(not check[2]['admin']):
+            board_admin = False
+        else:
+            if(level0):
+                board_admin = (check[2]['level'] == 0)
+            else:
+                board_admin = True
+        return (check_global[2]['admin'] or board_admin)
 
 
 def json_response(result):
@@ -829,7 +836,7 @@ def ban_add(uid):
         return validation_err_response(err)
     operator = session.get('uid')
     if(not operator):
-        return json_response((254, _('Not signed in.')) )
+        return json_response((249, _('Not signed in.')) )
     try:
         if(check_permission(operator, board)):
             return json_response(forum.ban_add(uid, int(days), operator, board))
@@ -844,7 +851,7 @@ def ban_remove(uid):
     board = request.form.get('board', '')
     operator = session.get('uid')
     if(not operator):
-        return json_response((254, _('Not signed in.')) )
+        return json_response((249, _('Not signed in.')) )
     try:
         if(check_permission(operator, board)):
             return json_response(forum.ban_remove(uid, board))
@@ -867,6 +874,83 @@ def ban_list():
     except ValidationError as err:
         return validation_err_response(err)
     return json_response(forum.ban_list(int(pn), int(count), board))
+
+
+@app.route('/api/distillate/category/list')
+def distillate_category_list():
+    board = request.args.get('board', '')
+    try:
+        validate_board(_('Board Name'), board)
+    except ValidationError as err:
+        return validation_err_response(err)
+    return json_response(forum.distillate_category_list(board))
+
+
+@app.route('/api/distillate/category/add', methods=['POST'])
+def distillate_category_add():
+    board = request.form.get('board', '')
+    name = request.form.get('name', '')
+    try:
+        validate_board(_('Board Name'), board)
+        validate(_('Category Name'), name, not_empty=True)
+    except ValidationError as err:
+        return validation_err_response(err)
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((249, _('Not signed in.')) )
+    try:
+        if(check_permission(operator, board, level0=True)):
+            return json_response(forum.distillate_category_add(board, name))
+        else:
+            return json_response((254, _('Permission denied.')) )
+    except ForumPermissionCheckError as err:
+        return permission_err_response(err)
+
+
+@app.route('/api/distillate/category/remove', methods=['POST'])
+def distillate_category_remove():
+    board = request.form.get('board', '')
+    name = request.form.get('name', '')
+    try:
+        validate_board(_('Board Name'), board)
+        validate(_('Category Name'), name, not_empty=True)
+    except ValidationError as err:
+        return validation_err_response(err)
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((249, _('Not signed in.')) )
+    try:
+        if(check_permission(operator, board, level0=True)):
+            return json_response(forum.distillate_category_remove(board, name))
+        else:
+            return json_response((254, _('Permission denied.')) )
+    except ForumPermissionCheckError as err:
+        return permission_err_response(err)
+
+
+@app.route('/api/distillate/category/rename', methods=['POST'])
+def distillate_category_rename():
+    board = request.form.get('board', '')
+    name = request.form.get('name', '')
+    new_name = request.form.get('new_name', '')
+    try:
+        validate_board(_('Board Name'), board)
+        validate(_('Category Name'), name, not_empty=True)
+        validate(_('New Name'), name, not_empty=True)
+    except ValidationError as err:
+        return validation_err_response(err)
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((249, _('Not signed in.')) )
+    try:
+        if(check_permission(operator, board, level0=True)):
+            return json_response(
+                forum.distillate_category_rename(board, name, new_name)
+            )
+        else:
+            return json_response((254, _('Permission denied.')) )
+    except ForumPermissionCheckError as err:
+        return permission_err_response(err)
 
 
 @app.route('/api/topic/add', methods=['POST'])
@@ -900,18 +984,20 @@ def topic_add():
     return json_response(forum.topic_add(board, title, uid, summary, content))
 
 
-@app.route('/api/topic/move/<int:tid>')
-def topic_move(tid):
+@app.route('/api/topic/move/')
+def topic_move():
+    tid = request.args.get('tid')
     target = request.args.get('target')
 
     try:
+        validate_id(_('Topic ID'), tid)
         validate_board(_('Target'), target)
     except ValidationError as err:
         return validation_err_response(err)
 
     operator = session.get('uid')
     if(not operator):
-        return json_response((254, _('Permission denied.')) )
+        return json_response((249, _('Not signed in.')) )
 
     result_board = forum.topic_info(tid)
     if(result_board[0] != 0):
@@ -921,6 +1007,54 @@ def topic_move(tid):
     try:
         if(check_permission(operator, board)):
             return json_response(forum.topic_move(tid, target))
+        else:
+            return json_response((254, _('Permission denied.')) )
+    except ForumPermissionCheckError as err:
+        return permission_err_response(err)
+
+
+@app.route('/api/topic/pin/<int:tid>')
+def topic_pin(tid):
+    revert = request.args.get('revert', '')
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((249, _('Not signed in.')) )
+    try:
+        if(check_permission(operator, board, level0=True)):
+            return json_response(forum.topic_pin(tid, revert=bool(revert)) )
+        else:
+            return json_response((254, _('Permission denied.')) )
+    except ForumPermissionCheckError as err:
+        return permission_err_response(err)
+
+
+@app.route('/api/topic/distillate/set/<int:tid>')
+def topic_distillate_set(tid):
+    category = request.args.get('category', '')
+    try:
+        validate(_('Category Name'), category, not_empty=True)
+    except ValidationError as err:
+        return validation_err_response(err)
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((249, _('Not signed in.')) )
+    try:
+        if(check_permission(operator, board, level0=True)):
+            return json_response(forum.topic_distillate_set(tid, category) )
+        else:
+            return json_response((254, _('Permission denied.')) )
+    except ForumPermissionCheckError as err:
+        return permission_err_response(err)
+
+
+@app.route('/api/topic/distillate/unset/<int:tid>')
+def topic_distillate_unset(tid):
+    operator = session.get('uid')
+    if(not operator):
+        return json_response((249, _('Not signed in.')) )
+    try:
+        if(check_permission(operator, board, level0=True)):
+            return json_response(forum.topic_distillate_unset(tid) )
         else:
             return json_response((254, _('Permission denied.')) )
     except ForumPermissionCheckError as err:
