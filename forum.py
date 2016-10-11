@@ -1030,7 +1030,7 @@ def topic_pin(tid, revert=False):
         return (1, db_err_msg(err));
 
 
-def topic_set_distillate(tid, category_name):
+def topic_distillate_set(tid, category_name):
     try:
         query = Topic.select().where(Topic.id == tid, Topic.deleted == False)
         if(not query):
@@ -1051,7 +1051,7 @@ def topic_set_distillate(tid, category_name):
         return (1, db_err_msg(err))
 
 
-def topic_unset_distillate(tid):
+def topic_distillate_unset(tid):
     try:
         query = Topic.select().where(Topic.id == tid, Topic.deleted == False)
         if(not query):
