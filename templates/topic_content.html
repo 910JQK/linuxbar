@@ -56,6 +56,7 @@
 	 margin-top: 1.5em;
 	 margin-bottom: 0.2em;
      }
+     .user_info_link { color: black; }
      .container_right {
 	 flex-grow: 1;
 	 padding: 1.85em 1.5em 0.55em 1.5em;
@@ -458,7 +459,9 @@
 	  <li class="post" id="p{{ post['pid'] }}">
 	    <div class="container_left">
 	      {{ avatar(post['author']['mail'], 6) }}
-	      <div class="name">{{ post['author']['name'] }}</div>
+	      <a class="user_info_link" href="{{ url_for('user', name=post['author']['name']) }}" target="_blank">
+		<span class="name">{{ post['author']['name'] }}</span>
+	      </a>
 	    </div>
 	    <div class="container_right">
 	      <div class="post_body content">{{ post['content'] | safe }}</div>
