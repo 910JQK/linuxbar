@@ -857,6 +857,8 @@ def topic_info(tid):
                 'name': topic.author.name,
                 'mail': md5(topic.author.mail)
             },
+            'pinned': topic.pinned,
+            'distillate': topic.distillate,
             'date': topic.date.timestamp(),
             'last_post_date': topic.last_post_date.timestamp()
         })
@@ -960,7 +962,7 @@ def topic_revert(tid):
         return (1, db_err_msg(err))
 
 
-def topic_list(board, page, count_per_page, only_show_deleted=False):
+def topic_list(board, page, count_per_page, only_show_deleted=False, pinned=False, distillate=False):
     board_name = ''
     try:
         if(board):
@@ -971,7 +973,9 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
             board_name = board_rec.name
             count = Topic.select().where(
                 Topic.board == board_rec,
-                Topic.deleted == only_show_deleted
+                Topic.deleted == only_show_deleted,
+                Topic.pinned == pinned,
+                (not distillate or Topic.distillate == True)
             ).count()
             query = (
                 Topic
@@ -979,7 +983,9 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
                 .join(User)
                 .where(
                     Topic.board == board_rec,
-                    Topic.deleted == only_show_deleted
+                    Topic.deleted == only_show_deleted,
+                    Topic.pinned == pinned,
+                    (not distillate or Topic.distillate == True)
                 )
                 .order_by(Topic.last_post_date.desc())
                 .paginate(page, count_per_page)
@@ -1016,6 +1022,8 @@ def topic_list(board, page, count_per_page, only_show_deleted=False):
                     'mail': md5(topic.last_post_author.mail)
                 },
                 'reply_count': topic.reply_count,
+                'pinned': topic.pinned,
+                'distillate': topic.distillate,
                 'date': topic.date.timestamp(),
                 'last_post_date': topic.last_post_date.timestamp()
             }
