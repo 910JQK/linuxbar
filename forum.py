@@ -843,6 +843,88 @@ def ban_remove(uid, board=''):
         return (1, db_err_msg(err))
 
 
+def distillate_category_list(board):
+    try:
+        query = Board.select().where(Board.short_name == board)
+        if(not query):
+            return (2, _('No such board.'))
+        board_rec = query.get()
+        query = DistillateCategory.select().where(
+            DistillateCategory.board == board_rec
+        )
+        names = []
+        for category in query:
+            names.append(category.name)
+        return (0, OK_MSG, {'categories': names})
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def distillate_category_add(board, name):
+    try:
+        query = Board.select().where(Board.short_name == board)
+        if(not query):
+            return (2, _('No such board.'))
+        board_rec = query.get()
+        query = DistillateCategory.select().where(
+            DistillateCategory.board == board_rec,
+            DistillateCategory.name == name
+        )
+        if(query):
+            return (3, _('A category with the same name already exists.'))
+        DistillateCategory.create(
+            board = board_rec,
+            name = name
+        )
+        return (0, _('Category %s added successfully.') % name)
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def distillate_category_rename(board, name, new_name):
+    try:
+        query = Board.select().where(Board.short_name == board)
+        if(not query):
+            return (2, _('No such board.'))
+        board_rec = query.get()
+        query = DistillateCategory.select().where(
+            DistillateCategory.board == board_rec,
+            DistillateCategory.name == name
+        )
+        if(not query):
+            return (3, _('No such category.'))
+        category = query.get()
+        category.name = new_name
+        category.save()
+        return (0, _('Category renamed successfully.'))
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def distillate_category_remove(board, name):
+    try:
+        query = Board.select().where(Board.short_name == board)
+        if(not query):
+            return (2, _('No such board.'))
+        board_rec = query.get()
+        query = DistillateCategory.select().where(
+            DistillateCategory.board == board_rec,
+            DistillateCategory.name == name
+        )
+        if(not query):
+            return (3, _('No such category.'))
+        category = query.get()
+        (
+            Topic
+            .update(distillate_category = None)
+            .where(Topic.distillate_category == category)
+        )
+        category.delete_instance()
+        return (0, _('Category %s added successfully.') % name)
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
 def topic_info(tid):
     try:
         query = Topic.select().where(Topic.id == tid)
@@ -923,6 +1005,65 @@ def topic_move(tid, board):
         topic_rec.save()
         return (0, _('Topic %d moved from board %s to board %s successfully.')
                      % (topic_rec.id, original_name, board_rec.name))
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def topic_pin(tid, revert=False):
+    try:
+        query = Topic.select().where(Topic.id == tid, Topic.deleted == False)
+        if(not query):
+            return (2, _('Topic does not exist or has been deleted.'))
+        topic = query.get()
+        if(topic.pinned == (not revert)):
+            if(topic.pinned):
+                return (3, _('Topic has already been pinned.'))
+            else:
+                return (4, _('Topic has not been pinned yet.'))
+        topic.pinned = (not revert)
+        topic.save()
+        if(not revert):
+            return (0, _('Topic pinned successfully.'))
+        else:
+            return (0, _('Topic unpinned successfully.'))
+    except Exception as err:
+        return (1, db_err_msg(err));
+
+
+def topic_set_distillate(tid, category_name):
+    try:
+        query = Topic.select().where(Topic.id == tid, Topic.deleted == False)
+        if(not query):
+            return (2, _('Topic does not exist or has been deleted.'))
+        topic = query.get()
+        query = DistillateCategory.select().where(
+            DistillateCategory.board == topic.board,
+            DistillateCategory.name == category_name
+        )
+        if(not query_category):
+            return (3, _('No such category.'))
+        category = query.get()
+        topic.distillate = True
+        topic.distillate_category = category
+        topic.save()
+        return (0, _('Distillate added successfully.'))
+    except Exception as err:
+        return (1, db_err_msg(err))
+
+
+def topic_unset_distillate(tid):
+    try:
+        query = Topic.select().where(Topic.id == tid, Topic.deleted == False)
+        if(not query):
+            return (2, _('Topic does not exist or has been deleted.'))
+        topic = query.get()
+        if(not topic.distillate):
+            return (3, _('Topic is not a distillate.'))
+        else:
+            topic.distillate = False
+            topic.distillate_category = None
+            topic.save()
+            return (0, _('Distillate unset successfully.'))
     except Exception as err:
         return (1, db_err_msg(err))
 
