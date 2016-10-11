@@ -81,6 +81,12 @@ body.box_horizontal_center {
     background-image: linear-gradient(to bottom, hsl(0, 0%, 98%), hsl(0, 0%, 99%));
 }
 
+#container > #top_left {
+    position: absolute;
+    top: 0.5em;
+    left: 1em;
+}
+
 #container > #top_right {
     position: absolute;
     top: 0.5em;
