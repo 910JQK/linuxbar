@@ -23,7 +23,12 @@
   </head>
   <body class="{% block body_class %}{% endblock %}">
     <div id="container">
-      <h1 id="table_title">{% block table_title %}{% endblock %}</h1>
+      <header>
+	<h1 id="table_title">{% block table_title %}{% endblock %}</h1>
+      </header>
+      <hr/>
+      {% block before_table %}
+      {% endblock %}
       <div class="table_wrapper">
 	<table id="main_table">
 	  {% block table_head %}
@@ -32,6 +37,8 @@
 	  {% endblock %}
 	</table>
       </div>
+      {% block after_table %}
+      {% endblock %}
       <div class="pager_wrapper">
 	{% block pager_area %}
 	{% endblock %}
