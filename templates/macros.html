@@ -42,6 +42,30 @@
   </div>
 {% endmacro %}
 
+{% macro topic_manage_menu(tid, pinned, distillate, is_admin, is_level0_admin) %}
+  <div id="topic_manage_menu" class="menu" style="display: none;">
+    {% if is_admin %}
+      {% if is_level0_admin %}
+	{% if not pinned %}
+	  <div class="menu_item" data-menu="manage" title="{{ _('pin this topic') }}">{{ _('Pin') }}</div>
+	{% else %}
+	  <div class="menu_item" data-menu="manage" title="{{ _('unpin this topic') }}">{{ _('Unpin') }}</div>
+	{% endif %}
+	<a id="set_distillate_link">
+	  <div class="menu_item" data-menu="manage" title="{{ _('add this topic to distillate') }}">{{ _('Dist') }}</div>
+	</a>
+	{% if distillate %}
+	  <div class="menu_item" data-menu="manage" title="{{ _('unset distillate for this topic') }}">{{ _('Unset') }}</div>
+	{% endif %}
+      {% endif %}
+      <a id="topic_move_link">
+	<div class="menu_item" data-menu="manage" title="{{ _('move this topic to another board') }}">{{ _('Move') }}</div>
+      </a>
+      <div class="menu_item" data-menu="manage" title="{{ _('delete this topic') }}">{{ _('Delete') }}</div>
+    {% endif %}
+  </div>
+{% endmacro %}
+
 {% macro empty_notice() %}
   <div class="empty_notice box_center">
     <span>{{ _('Empty') }}</span>
