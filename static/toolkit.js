@@ -102,6 +102,21 @@ function POST(url, data, ok, err, timeout) {
 
 
 /**
+ * Create an alert dialog when XHR gets an error
+ *
+ * @param Number status
+ * @param String text
+ * @return void
+ */
+function xhr_err_alert(status, text) {
+    if(status != 0)
+	alert(printf(_('Error: %1 %2'), status, text));
+    else
+	alert(_('Connection Error or Timeout'));
+}
+
+
+/**
  * Return the real length of a string
  *
  * @param String string
