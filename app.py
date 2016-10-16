@@ -215,12 +215,23 @@ def board(name):
         validate_id(_('Page Number'), pn)
     except ValidationError as err:
         return validation_err_response(err, json=False)
+
+    if(int(pn) != 1 or name == ''):
+        pinned_topics = []
+    else:
+        result_pinned = forum.topic_list(name, 1, forum.PINNED_TOPIC_MAX, pinned=True)
+        if(result_pinned[0] != 0):
+            return err_response(result_pinned)
+        else:
+            pinned_topics = result_pinned[2]['list']
+
     result = forum.topic_list(name, int(pn), items_per_page)
     if(result[0] != 0):
         return err_response(result)
     elif(len(result[2]['list']) == 0 and pn != '1'):
         return err_response((248, _('No such page.')) )
     else:
+        result[2]['list'] = pinned_topics + result[2]['list']
         return render_template(
             'topic_list.html',
             index = (not name),
@@ -1027,6 +1038,12 @@ def topic_pin(tid):
     operator = session.get('uid')
     if(not operator):
         return json_response((249, _('Not signed in.')) )
+
+    result_board = forum.topic_info(tid)
+    if(result_board[0] != 0):
+        return json_response(result_board)
+    board = result_board[2]['board']
+
     try:
         if(check_permission(operator, board, level0=True)):
             return json_response(forum.topic_pin(tid, revert=bool(revert)) )
@@ -1046,6 +1063,12 @@ def topic_distillate_set(tid):
     operator = session.get('uid')
     if(not operator):
         return json_response((249, _('Not signed in.')) )
+
+    result_board = forum.topic_info(tid)
+    if(result_board[0] != 0):
+        return json_response(result_board)
+    board = result_board[2]['board']
+
     try:
         if(check_permission(operator, board, level0=True)):
             return json_response(forum.topic_distillate_set(tid, category) )
@@ -1060,6 +1083,12 @@ def topic_distillate_unset(tid):
     operator = session.get('uid')
     if(not operator):
         return json_response((249, _('Not signed in.')) )
+
+    result_board = forum.topic_info(tid)
+    if(result_board[0] != 0):
+        return json_response(result_board)
+    board = result_board[2]['board']
+
     try:
         if(check_permission(operator, board, level0=True)):
             return json_response(forum.topic_distillate_unset(tid) )
@@ -1099,6 +1128,8 @@ def topic_list():
     board = request.args.get('board', '')
     pn = request.args.get('pn', '1')
     count = request.args.get('count', '10')
+    pinned = request.args.get('pinned', '')
+    distillate = request.args.get('distillate', '')
     deleted = request.args.get('deleted', '')
     try:
         validate(_('Board'), board, not_empty=True)
@@ -1107,7 +1138,7 @@ def topic_list():
     except ValidationError as err:
         return validation_err_response(err)
     return json_response(
-        forum.topic_list(board, int(pn), int(count), bool(deleted))
+        forum.topic_list(board, int(pn), int(count), bool(deleted), bool(pinned), bool(distillate))
     )
 
 
