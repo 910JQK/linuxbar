@@ -76,7 +76,7 @@
      #topic_manage_btn {
 	 padding: 0em 0.2em 0.1em 0.2em;
 	 background-color: hsl(0, 0%, 93%);
-	 background-image: linear-gradient(to bottom, hsl(0, 0%, 90%), hsl(0, 0%, 98%));
+	 background-image: linear-gradient(to bottom, hsl(0, 0%, 98%), hsl(0, 0%, 90%));
 	 border: 2px solid hsl(0, 0%, 60%);
 	 border-top: none;
 	 border-bottom-left-radius: 3px;
@@ -184,8 +184,8 @@
      var TID = '{{ tid }}';
      var API_POST_REMOVE = '{{ url_for('post_remove', id=0) }}'.replace(/0$/, '');
      var API_TOPIC_REMOVE = '{{ url_for('topic_remove', tid=0) }}'.replace(/0$/, '');
-     var API_POST_PIN = '{{ url_for('topic_pin', tid=0) }}'.replace(/0$/, '');
-     var API_POST_UNSET = '{{ url_for('topic_distillate_unset', tid=0) }}'.replace(/0$/, '');
+     var API_TOPIC_PIN = '{{ url_for('topic_pin', tid=0) }}'.replace(/0$/, '');
+     var API_TOPIC_UNSET = '{{ url_for('topic_distillate_unset', tid=0) }}'.replace(/0$/, '');
     </script>
     <script type="text/javascript">
      var add_post_form_controller;
@@ -279,7 +279,7 @@
 	     return;
 	 del_post_lock = true;
 	 GET(
-	     API_POST_REMOVE + id +  (is_subpost? '?subpost=1': ''),
+	     API_POST_REMOVE + id +  (is_subpost? '?subpost=subpost': ''),
 	     {},
 	     function (xhr) {
 		 var result = JSON.parse(xhr.responseText);
@@ -316,7 +316,27 @@
 	     function (status, text) {
 		 xhr_err_alert(status, text);
 	     }
-	 )
+	 );
+     }
+     function pin_topic(unpin) {
+	 var message;
+	 if(unpin)
+	     message = _('Do you really want to unpin this topic?');
+	 else
+	     message = _('Do you really want to pin this topic?');
+	 if(!confirm(message))
+	     return;
+	 GET(
+	     API_TOPIC_PIN + TID + (unpin? '?revert=revert': ''),
+	     {},
+	     function (xhr) {
+		 var result = JSON.parse(xhr.responseText);
+		 alert(result.msg)
+	     },
+	     function (status, text) {
+		 xhr_err_alert(status, text);
+	     }
+	 );
      }
      function init_form() {
 	 if(!signed_in)
@@ -456,9 +476,17 @@
 		     menu.style.display = 'none';
 	     }
 	 });
-	 if(topic_del_btn)
+	 if(query('#topic_del_btn'))
 	     topic_del_btn.addEventListener('click', function() {
 		 delete_topic();
+	     });
+	 if(query('#topic_pin_btn'))
+	     topic_pin_btn.addEventListener('click', function() {
+		 pin_topic();
+	     });
+	 if(query('#topic_unpin_btn'))
+	     topic_unpin_btn.addEventListener('click', function() {
+		 pin_topic('unpin');
 	     });
      }
      function init() {
@@ -469,7 +497,7 @@
 	 for(let expand_btn of query_all('.expand_all_btn'))
 	     expand_btn.addEventListener('click', function() {
 		 show_remaining_subposts(this.dataset.pid);
-	     })
+	     });
 	 if(anchor) {
 	     let arr = anchor.split('_');
 	     if(arr[0] == '#goto'){
