@@ -20,6 +20,7 @@ HEX_DIGITS = '0123456789abcdef'
 TOKEN_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 OK_MSG = _('Data retrieved successfully.')
 URL_REGEX = re.compile('(http|ftp)s?://.+')
+PINNED_TOPIC_MAX = 5
 
 
 def db_err_msg(err):
@@ -1015,11 +1016,17 @@ def topic_pin(tid, revert=False):
         if(not query):
             return (2, _('Topic does not exist or has been deleted.'))
         topic = query.get()
+        count = Topic.select().where(
+            Topic.board == topic.board,
+            Topic.pinned == True
+        ).count()
+        if(count >= PINNED_TOPIC_MAX):
+            return (3, _('Pinned topics count limit exceeded.'))
         if(topic.pinned == (not revert)):
             if(topic.pinned):
-                return (3, _('Topic has already been pinned.'))
+                return (4, _('Topic has already been pinned.'))
             else:
-                return (4, _('Topic has not been pinned yet.'))
+                return (5, _('Topic has not been pinned yet.'))
         topic.pinned = (not revert)
         topic.save()
         if(not revert):
