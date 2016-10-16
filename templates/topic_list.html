@@ -29,6 +29,11 @@
      }
      .container_middle { padding: 0em 1.2em; width: 35em; }
      .title { margin-bottom: 0.25em; font-size: 115%; }
+     .topic.pinned .title::before {
+	 content: "{{ _('[Pinned]') }}";
+	 color: hsl(0, 75%, 50%);
+	 margin-right: 0.25em;
+     }
      .container_right { width: 13.5em; }
      .container_right .avatar, .container_right .name {
 	 vertical-align: middle;
@@ -98,7 +103,7 @@
 	  {{ empty_notice() }}
 	{% endif %}
 	{% for topic in data['list'] %}
-	  <li class="topic" data-tid="{{ topic['tid'] }}">
+	  <li class="topic{% if topic['pinned'] and not index %} pinned{% endif %}" data-tid="{{ topic['tid'] }}">
 	    <div class="container_left">
 	      <div class="reply_count">{{ topic['reply_count'] }}</div>
 	    </div>
