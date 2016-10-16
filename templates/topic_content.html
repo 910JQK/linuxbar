@@ -182,6 +182,10 @@
     <script type="text/javascript">
      var COUNT_SUBPOST = '{{ COUNT_SUBPOST }}';
      var TID = '{{ tid }}';
+     var API_POST_REMOVE = '{{ url_for('post_remove', id=0) }}'.replace(/0$/, '');
+     var API_TOPIC_REMOVE = '{{ url_for('topic_remove', tid=0) }}'.replace(/0$/, '');
+     var API_POST_PIN = '{{ url_for('topic_pin', tid=0) }}'.replace(/0$/, '');
+     var API_POST_UNSET = '{{ url_for('topic_distillate_unset', tid=0) }}'.replace(/0$/, '');
     </script>
     <script type="text/javascript">
      var add_post_form_controller;
@@ -263,10 +267,7 @@
 	     function(status, text) {
 		 pager.classList.remove('lock');
 		 if(!no_err_alert) {
-		     if(status != 0)
-			 alert(printf(_('Error: %1 %2'), status, text));
-		     else
-			 alert(_('Connection Error or Timeout'));
+		     xhr_err_alert(status, text);
 		 }
 	     }
 	 )
@@ -278,8 +279,7 @@
 	     return;
 	 del_post_lock = true;
 	 GET(
-	     /* note: bad impl */
-	     '{{ url_for('post_remove', id=0) }}'.replace(/0$/, id) + '?' + (is_subpost? 'subpost=1': ''),
+	     API_POST_REMOVE + id +  (is_subpost? '?subpost=1': ''),
 	     {},
 	     function (xhr) {
 		 var result = JSON.parse(xhr.responseText);
@@ -296,11 +296,25 @@
 		 del_post_lock = false;
 	     },
 	     function (status, text) {
-		 if(status != 0)
-		     alert(printf(_('Error: %1 %2'), status, text));
-		 else
-		     alert(_('Connection Error or Timeout'));
+		 xhr_err_alert(status, text);
 		 del_post_lock = false;
+	     }
+	 )
+     }
+     function delete_topic() {
+	 if(!confirm(_('Do you really want to delete this topic?')) )
+	     return;
+	 GET(
+	     API_TOPIC_REMOVE + TID,
+	     {},
+	     function (xhr) {
+		 var result = JSON.parse(xhr.responseText);
+		 alert(result.msg)
+		 if(result.code == 0)
+		     location.replace('/');
+	     },
+	     function (status, text) {
+		 xhr_err_alert(status, text);
 	     }
 	 )
      }
@@ -442,6 +456,10 @@
 		     menu.style.display = 'none';
 	     }
 	 });
+	 if(topic_del_btn)
+	     topic_del_btn.addEventListener('click', function() {
+		 delete_topic();
+	     });
      }
      function init() {
 	 var anchor = location.hash;
