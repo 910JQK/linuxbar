@@ -51,14 +51,14 @@
 	{% else %}
 	  <div class="menu_item" data-menu="manage" title="{{ _('unpin this topic') }}" id="topic_unpin_btn">{{ _('Unpin') }}</div>
 	{% endif %}
-	<a id="set_distillate_link">
+	<a id="set_distillate_link" target="blank">
 	  <div class="menu_item" data-menu="manage" title="{{ _('add this topic to distillate') }}">{{ _('Dist') }}</div>
 	</a>
 	{% if distillate %}
 	  <div class="menu_item" data-menu="manage" title="{{ _('unset distillate for this topic') }}" id="topic_unset_btn">{{ _('Unset') }}</div>
 	{% endif %}
       {% endif %}
-      <a id="topic_move_link">
+      <a id="topic_move_link" href="{{ url_for('topic_move_form', tid=tid) }}" target="_blank">
 	<div class="menu_item" data-menu="manage" title="{{ _('move this topic to another board') }}">{{ _('Move') }}</div>
       </a>
       <div class="menu_item" data-menu="manage" title="{{ _('delete this topic') }}" id="topic_del_btn">{{ _('Delete') }}</div>
