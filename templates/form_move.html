@@ -1,0 +1,64 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import submit %}
+
+{% block title %}{{ _('Move topic - %(site)s', site=config['site_name']) }}{% endblock %}
+{% block body_class %}box_center{% endblock %}
+{% block form_title %}{{ _('Move topic') }}{% endblock %}
+
+{% block script %}
+var SUBMIT_URL = '{{ url_for('topic_move', tid=tid) }}';
+var LOCK_FORM_AFTER_OK = true;
+var REDIRECT_URL = '';
+var SUCCESS_CALLBACK = function() {
+    cancel_button.textContent = 'OK';
+    var submit_btn = query('.submit_btn');
+    submit_btn.parentElement.removeChild(submit_btn);
+};
+var OPTIONS = {};
+var REALTIME_VALIDATION = false;
+window.addEventListener('load', function() {
+    cancel_button.addEventListener('click', function(ev) {
+        ev.preventDefault();
+	window.close();
+    });
+});
+{% endblock %}
+
+{% block style %}
+#container { width: 15em; }
+td { padding: 0.15em 0.3em; }
+td:first-child { text-align: left; }
+button { min-width: 4em; }
+{% endblock %}
+
+{% block form %}
+  <div class="table_wrapper">
+    <table>
+      <tr>
+	<td>{{ _('TID') }}</td>
+	<td>{{ tid }}</td>
+      </tr>
+      <tr>
+	<td>{{ _('Source') }}</td>
+	<td>{{ source }}</td>
+      </tr>
+      <tr>
+	<td>{{ _('Target') }}</td>
+	<td>
+	  <select name="target">
+	    {% for board in board_list %}
+	      {% if board['short_name'] != source %}
+		<option value="{{ board['short_name'] }}">{{ board['name'] }}</option>
+	      {% endif %}
+	    {% endfor %}
+	  </select>
+	</td>
+      </tr>
+    </table>
+  </div>
+{% endblock %}
+
+{% block buttons %}
+{{ submit(_('Confirm')) }}
+<button id="cancel_button">{{ _('Cancel') }}</button>
+{% endblock %}
