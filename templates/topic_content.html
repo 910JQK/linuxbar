@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import avatar, user_info, pager, field, submit, editor_toolbar %}
+{% from 'macros.html' import avatar, user_info, pager, field, submit, editor_toolbar, topic_manage_menu %}
 {% from 'subpost_list.html' import subpost_list, subpost_list_pager %}
 {% set COUNT_SUBPOST = count_subpost %}
 {# cut off the subpost list when the following count limit is exceeded #}
@@ -63,9 +63,25 @@
      }
      .user_info_link { color: black; }
      .container_right {
+	 position: relative;
 	 flex-grow: 1;
 	 padding: 1.85em 1.5em 0.55em 1.5em;
 	 min-width: 0;
+     }
+     #topic_manage_menu_wrapper {
+	 position: absolute;
+	 top: 0em;
+	 right: 2em;
+     }
+     #topic_manage_btn {
+	 padding: 0em 0.2em 0.1em 0.2em;
+	 background-color: hsl(0, 0%, 93%);
+	 background-image: linear-gradient(to bottom, hsl(0, 0%, 90%), hsl(0, 0%, 98%));
+	 border: 2px solid hsl(0, 0%, 60%);
+	 border-top: none;
+	 border-bottom-left-radius: 3px;
+	 border-bottom-right-radius: 3px;
+	 cursor: pointer;
      }
      .post_body { min-height: 16em; white-space: pre-wrap; }
      .post_footer .icon { vertical-align: middle;  }
@@ -407,6 +423,26 @@
 	 button.style.display = 'none';
 	 list_wrapper.classList.remove('cut');
      }
+     function init_topic_manage_menu() {
+	 var menu = topic_manage_menu;
+	 if(!menu)
+	     return;
+	 document.body.addEventListener('mousemove', function(ev) {
+	     if(
+		 (
+		     ev.target.classList.contains('menu_label')
+		     || ev.target.classList.contains('menu_item')
+		 )
+		 && ev.target.dataset.menu == 'manage'
+	     ) {
+		 if(menu.style.display == 'none')
+		     menu.style.display = '';
+	     } else {
+		 if(menu.style.display != 'none')
+		     menu.style.display = 'none';
+	     }
+	 });
+     }
      function init() {
 	 var anchor = location.hash;
 	 init_form();
@@ -440,6 +476,7 @@
 	 }
 	 init_subpost_edit_btn();
 	 init_subpost_del_btn();
+	 init_topic_manage_menu();
 	 init_timer({date: true, unread_count: signed_in});
 	 if(signed_in)
 	     update_unread_count();
@@ -450,27 +487,6 @@
   <body class="box_horizontal_center">
     <div id="container">
       {{ user_info() }}
-      <div id="top_left" class="btn_container">
-	{% if is_admin %}
-	  {% if is_level0_admin %}
-	    {% if not topic_info['pinned'] %}
-	      <img class="icon btn pin_btn" src="/static/icons/pin.svg" alt="Pin" aria-label="pin" title="pin this topic" />
-	    {% else %}
-	      <img class="icon btn unpin_btn" src="/static/icons/arrow-thick-bottom.svg" alt="Unpin" aria-label="unpin" title="unpin this topic" />
-	    {% endif %}
-	    <a id="set_distillate_link">
-	      <img class="icon btn distillate_set_btn" src="/static/icons/star.svg" alt="Set Distillate" aria-label="set distillate" title="add this topic to distillate" />
-	    </a>
-	    {% if topic_info['distillate'] %}
-	      <img class="icon btn distillate_unset_btn" src="/static/icons/action-undo.svg" alt="Unset Distillate" aria-label="unset distillate" title="remove this topic from distillate" />
-	    {% endif %}
-	  {% endif %}
-	  <a id="topic_move_link">
-	    <img class="icon btn move_btn" src="/static/icons/move.svg" alt="Move" aria-label="move" title="move this topic to another board" />
-	  </a>
-	  <img class="icon btn delete_btn" src="/static/icons/trash.svg" alt="Delete" aria-label="delete" title="delete this topic" />
-	{% endif %}
-      </div>
       <header>
 	<h1>{{ topic_info['title'] }}</h1>
       </header>
@@ -490,6 +506,12 @@
 	      </a>
 	    </div>
 	    <div class="container_right">
+	      {% if loop.index0 == 0 and is_admin %}
+		<div class="menu_wrapper" id="topic_manage_menu_wrapper">
+		  <div class="menu_label" data-menu="manage" id="topic_manage_btn">{{ _('Manage') }}</div>
+		  {{ topic_manage_menu(tid, topic_info['pinned'], topic_info['distillate'], is_admin, is_level0_admin) }}
+		</div>
+	      {% endif %}
 	      <div class="post_body content">{{ post['content'] | safe }}</div>
 	      <div class="post_footer float_right_box" id="f{{ post['pid'] }}">
 		<div class="info post_info">
