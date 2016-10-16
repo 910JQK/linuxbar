@@ -151,6 +151,21 @@ code {
     font-size: 1.5em;
 }
 
+.menu {
+    border: 1px solid gray;
+    border-top: none;
+}
+
+.menu_item {
+    padding: 0.1em 0.25em;
+    color: hsl(233, 80%, 48%);
+    cursor: pointer;
+}
+
+.menu_item:hover {
+    background-color: hsl(0, 0%, 90%);
+}
+
 p[data-color="ok"], span[data-color="ok"] { color: hsl(100, 80%, 45%); }
 p[data-color="err"], span[data-color="err"] { color: hsl(0, 90%, 45%); }
 p[data-color="loading"], span[data-color="loading"] { color: hsl(0, 0%, 20%); }
