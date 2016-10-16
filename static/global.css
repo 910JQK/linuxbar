@@ -159,6 +159,7 @@ code {
 .menu_item {
     padding: 0.1em 0.25em;
     color: hsl(233, 80%, 48%);
+    background-color: hsl(0, 0%, 98%);
     cursor: pointer;
 }
 
