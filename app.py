@@ -302,6 +302,22 @@ def topic(tid):
         )
 
 
+@app.route('/manage/topic/move/<int:tid>')
+def topic_move_form(tid):
+    result_info = forum.topic_info(tid)
+    if(result_info[0] != 0):
+        return err_response(result_info)
+    result_board = forum.board_list()
+    if(result_board[0] != 0):
+        return err_response(result_board)
+    return render_template(
+        'form_move.html',
+        tid = tid,
+        source = result_info[2]['board'],
+        board_list = result_board[2]['list']
+    )
+
+
 @app.route('/api/html/subpost-list')
 def html_subpost_list():
     pid = request.args.get('pid', '')
@@ -1003,13 +1019,11 @@ def topic_add():
     return json_response(forum.topic_add(board, title, uid, summary, content))
 
 
-@app.route('/api/topic/move/')
-def topic_move():
-    tid = request.args.get('tid')
-    target = request.args.get('target')
+@app.route('/api/topic/move/<int:tid>', methods=['POST'])
+def topic_move(tid):
+    target = request.form.get('target')
 
     try:
-        validate_id(_('Topic ID'), tid)
         validate_board(_('Target'), target)
     except ValidationError as err:
         return validation_err_response(err)
