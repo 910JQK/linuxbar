@@ -32,6 +32,7 @@ Dependencies: `python3` `peewee` `flask` `flask-babel`
 As it is still under development, currently, we use Sqlite instead of MySQL for convenience.
 
 Run it:
+
     $ python3 db.py # create database data.db (sqlite3)
     $ python3 app.py # run app, then goto http://localhost:5000
 
