@@ -13,13 +13,12 @@ import re
 import json
 import imghdr
 import hashlib
-import smtplib
 import datetime
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
 import forum
 import captcha
+from utils import *
+from utils import _
 from validation import *
 
 
@@ -44,36 +43,6 @@ config = {}
 
 class ForumPermissionCheckError(Exception):
     pass
-
-
-# reserved for l10n
-def _(string):
-    return string
-
-
-def send_mail(subject, addr_from, addr_to, content, html_content=''):
-    '''Send an HTML email
-
-    @param str subject
-    @param str addr_from
-    @param str addr_to
-    @param str content
-    @return void
-    '''
-    if(html_content):
-        msg = MIMEMultipart('alternative')
-        msg_plaintext = MIMEText(content, 'plain')
-        msg_html = MIMEText(html_content, 'html')
-        msg.attach(msg_html)
-        msg.attach(msg_plaintext)
-    else:
-        msg = MIMEText(content, 'plain')
-    msg['Subject'] = subject
-    msg['From'] = addr_from
-    msg['To'] = addr_to
-    smtp = smtplib.SMTP('localhost')
-    smtp.send_message(msg)
-    smtp.quit()
 
 
 def check_permission(operator, board, level0=False):
@@ -439,7 +408,7 @@ def user_register():
             addr_from = EMAIL_ADDRESS,
             addr_to = mail_to,
             content = _('Activation link: ') + activation_url,
-            html_content = _('Activation link: ')
+            html = _('Activation link: ')
                 + ('<a target="_blank" href="%s">%s</a>'
                 % (activation_url, activation_url))
         )
@@ -482,12 +451,7 @@ def user_register():
     # remove info of activation code (very important !!!)
     del data['activation_code']
 
-    try:
-        send_activation_mail(site_name, mail, activation_url)
-    except Exception as err:
-        forum.user_remove(data['uid'])
-        return json_response((253, _('Failed to send mail: %s') % str(err)) )
-
+    send_activation_mail(site_name, mail, activation_url)
     return json_response(result)
 
 

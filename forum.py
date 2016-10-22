@@ -2,13 +2,15 @@
 
 
 import datetime
-import hashlib
 import random
 import math
 import re
 from html import escape
-from urllib.parse import quote
+
+
 from db import *
+from utils import *
+from utils import _
 from validation import sha256_regex
 
 
@@ -23,24 +25,16 @@ URL_REGEX = re.compile('(http|ftp)s?://.+')
 PINNED_TOPIC_MAX = 5
 
 
+# TODO
+# Result = namedtuple('Result', ['code', 'msg'])
+
+
+#def err_result(err):
+#    return Result(1, _('Database Error: %s') % str(err))
+
+
 def db_err_msg(err):
     return _('Database Error: %s') % str(err)
-
-
-def check_empty(string):
-    return (len(string) == 0)
-
-
-def now():
-    return datetime.datetime.now()
-
-
-def md5(string):
-    return hashlib.md5(bytes(string, encoding='utf8')).hexdigest()
-
-
-def sha256(string):
-    return hashlib.sha256(bytes(string, encoding='utf8')).hexdigest()
 
 
 def gen_salt():
@@ -53,10 +47,6 @@ def gen_token():
 
 def encrypt_password(password, salt):
     return sha256(salt[0:4] + sha256(password) + salt[4:8])
-
-
-def url_quote(text):
-    return quote(text, encoding='utf8')
 
 
 def content_filter(text, entry_callback, line_callback = lambda x: x):
@@ -172,11 +162,11 @@ def config_set(data):
 
 
 def user_register(mail, name, password):
-    if(check_empty(mail)):
+    if not mail:
         return (2, _('Mail address cannot be empty.'))
-    if(check_empty(name)):
+    if not name:
         return (3, _('User ID (name) cannot be empty.'))
-    if(check_empty(password)):
+    if not password:
         return (4, _('Password cannot be empty.'))
 
     mail = mail.lower()
@@ -557,9 +547,9 @@ def board_list():
 
 
 def board_add(short_name, name, desc, announce):
-    if(check_empty(short_name)):
+    if not short_name:
         return (2, _('Board ID (short name) cannot be empty.'))
-    if(check_empty(name)):
+    if not name:
         return (3, _('Board name cannot be empty.'))
     try:
         if(Board.select().where(Board.short_name == short_name)):
@@ -952,9 +942,9 @@ def topic_info(tid):
 def topic_add(board, title, author, summary, post_body):
     # Parameter "author" is the UID of the author, which must be valid.
     date = now()
-    if(check_empty(title)):
+    if not title:
         return (3, _('Title cannot be empty.'))
-    if(check_empty(post_body)):
+    if not post_body:
         return (4, _('Post content cannot be empty.'))
     try:
         post_body, at_list = at_filter(post_body, author)
