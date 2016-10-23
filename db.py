@@ -59,12 +59,8 @@ class UserInfo(BaseModel):
     unread_at = IntegerField(default=0)
 
 
-class SiteAdmin(BaseModel):
-    user = ForeignKeyField(User, related_name='site_managing', primary_key=True)
-
-
 class Board(BaseModel):
-    short_name = CharField(max_length=32, unique=True, index=True)
+    slug = CharField(max_length=32, unique=True, index=True)
     name = CharField(max_length=64, unique=True)
     description = CharField(255)
     announcement = TextField()
@@ -86,10 +82,10 @@ class BanGlobal(BaseModel):
     expire_date = DateTimeField()
 
 
-class BoardAdmin(BaseModel):
+class Admin(BaseModel):
     user = ForeignKeyField(User, related_name='board_managing')
-    board = ForeignKeyField(Board, related_name='admin')
-    level = SmallIntegerField(default=0)
+    board = ForeignKeyField(Board, related_name='admin', null=True)
+    level = SmallIntegerField(null=True)
 
 
 class DistillateCategory(BaseModel):
