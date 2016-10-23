@@ -25,16 +25,36 @@ URL_REGEX = re.compile('(http|ftp)s?://.+')
 PINNED_TOPIC_MAX = 5
 
 
-# TODO
-# Result = namedtuple('Result', ['code', 'msg'])
+Result = namedtuple('Result', ['code', 'msg'])
 
 
-#def err_result(err):
-#    return Result(1, _('Database Error: %s') % str(err))
+def api(process_function):
+    def wrapper(self, *args, **kwargs):
+        if self.valid():
+            try:
+                return Result(*process_function(self, *args, **kwargs))
+            except Exception as err:
+                return Result(1, _('Database Error: %s') % str(err))
+        else:
+            return self.err
+    return wrapper
 
 
-def db_err_msg(err):
-    return _('Database Error: %s') % str(err)
+def api_static(process_function):
+    def wrapper(*args, **kwargs):
+        try:
+            return Result(*process_function(*args, **kwargs))
+        except Exception as err:
+            return Result(1, _('Database Error: %s') % str(err))
+    return staticmethod(wrapper)
+
+
+def find_record(table, field, value):
+    query = table.select().where(getattr(table, field) == value)
+    if query:
+        return query.get()
+    else:
+        return None
 
 
 def gen_salt():
@@ -136,54 +156,75 @@ def at_filter(content, caller):
     return (content_modified, at_list)
 
 
-def config_get():
-    try:
-        query = Config.select()
+class base():
+    record = None
+    err = None
+    def valid(self):
+        return bool(self.record)
+
+
+class config(base):
+    def __init__(self, name):
+        self.record = find_record(Config, 'name', name)
+    @api_static
+    def get_all():
         data = {}
-        for config in query:
+        for config in Config.select():
             data[config.name] = config.value
         return (0, OK_MSG, data)
-    except Exception as err:
-        return (1, db_err_msg(err))
-
-
-def config_set(data):
-    # Invalid config item will be ignored.
-    try:
-        query = Config.select()
-        for config in query:
-            for name in data:
-                if(name == config.name):
-                    config.value = data[config.name]
-                    config.save()
+    @api
+    def get(self):
+        return (1, OK_MSG, {'value': self.record.value})
+    @api
+    def set(self, value):
+        # Invalid config item will be ignored.
+        self.record.value = value
+        self.record.save()
         return (0, _('Config updated successfully.'))
-    except Exception as err:
-        return (1, db_err_msg(err))
 
 
-def user_register(mail, name, password):
-    if not mail:
-        return (2, _('Mail address cannot be empty.'))
-    if not name:
-        return (3, _('User ID (name) cannot be empty.'))
-    if not password:
-        return (4, _('Password cannot be empty.'))
-
-    mail = mail.lower()
-
-    try:
+class user(base):
+    def __init__(self, uid=0, name=''):
+        if uid:
+            self.record = find_record(User, 'id', uid)
+        else if name:
+            self.record = find_record(User, 'name', name)
+        else:
+            self.record = None
+        if not self.record:
+            self.err = (2, _('No such user'))
+    @api_static
+    def login(login_name, password):
+        user = (
+            find_record(User, 'name', login_name)
+            or find_record(User, 'mail', login_name.lower())
+        )
+        if not user:
+            return (2, _('No such user'))
+        salt = user.salt[0].salt
+        info = user.info[0]
+        encrypted_pw = encrypt_password(password, salt)
+        if(encrypted_pw != user.password):
+            info.last_login_failed_date = now()
+            info.save()
+            return (3, _('Wrong password.'))
+        if(not user.activated):
+            return (4, _('User %s has NOT been activated.') % user.name)
+        info.last_login_date = now()
+        info.save()
+        return (0, _('Signed in successfully.'), {
+            'uid': user.id, 'name': user.name, 'mail': md5(user.mail)
+        })
+    @api_static
+    def register(mail, name, password):
+        mail = mail.lower()
         if(User.select().where(User.mail == mail)):
-            return (5, _('Mail address already in use.'))
+            return (5, _('Mail address is already taken.'))
         if(User.select().where(User.name == name)):
-            return (6, _('User ID (name) already in use.'))
-    except Exception as err:
-        return (1, db_err_msg(err))
-
-    salt = gen_salt()
-    encrypted_pw = encrypt_password(password, salt)
-    activation_code = gen_token()
-
-    try:
+            return (6, _('User ID (name) is already taken.'))
+        salt = gen_salt()
+        encrypted_pw = encrypt_password(password, salt)
+        activation_code = gen_token()
         user_rec = User.create(
             mail = mail,
             name = name,
@@ -193,68 +234,53 @@ def user_register(mail, name, password):
         )
         salt_rec = Salt.create(user=user_rec, salt=salt)
         info_rec = UserInfo.create(user=user_rec)
-    except Exception as err:
-        return (1, db_err_msg(err))
-
-    return (0, _(
-        'User %s registered successfully. Activation email has been sent to you.' % name
-    ), {
-        'uid': user_rec.id,
-        'activation_code': activation_code
-    })
-
-
-def user_remove(uid):
-    # used only when activation mail failed to send
-    try:
-        query = User.select().where(User.id == uid)
-        if(not query):
-            return (2, _('No such user.'))
-        user = query.get()
-        user.salt[0].delete_instance()
-        user.delete_instance()
-        return (0, _('User %s deleted successfully.') % user.name)
-    except Exception as err:
-        return (1, db_err_msg(err0))
-
-
-def user_password_reset_get_token(uid):
-    date = now()
-    expire_date = date + datetime.timedelta(minutes=90)
-    token = gen_token()
-    try:
-        query = User.select().where(User.id == uid)
-        if(not query):
-            return (2, _('No such user.'))
-        user = query.get()
+        return (0, _(
+            'User %s registered successfully. Activation email has been sent to you.' % name
+        ), {
+            'uid': user_rec.id,
+            'activation_code': activation_code
+        })
+    @api
+    def remove(self):
+        # used only when activation mail failed to send
+        if self.valid():
+            user = self.record
+            user.salt[0].delete_instance()
+            user.delete_instance()
+            return (0, _('User %s deleted successfully.') % user.name)
+        else:
+            return self.err
+    @api
+    def get_token(self):
+        # get token for password reset
+        if not self.valid():
+            return self.err
+        user = self.record
+        date = now()
+        expire_date = date + datetime.timedelta(minutes=90)
+        token = gen_token()
         encrypted_token = sha256(token)
-        query = PasswordReset.select().where(PasswordReset.user == user)
-        if(not query):
+        reset = find_record(PasswordReset, 'user', user)
+        if not reset:
             PasswordReset.create(
                 user = user,
                 token = encrypted_token,
                 expire_date = expire_date
             )
         else:
-            rec = query.get()
-            if(date < rec.expire_date):
+            if(date < reset.expire_date):
                 return (3, _('A valid token has already sent.'))
-            rec.token = encrypted_token
-            rec.expire_date = expire_date
-            rec.save()
+            reset.token = encrypted_token
+            reset.expire_date = expire_date
+            reset.save()
         return (0, _('Verification code has sent to you.'),
                 {'mail': user.mail, 'token': token})
-    except Exception as err:
-        return (1, db_err_msg(err))
-
-
-def user_password_reset(uid, token, password):
-    try:
+    @api
+    def password_reset(self, token, password):
+        if not self.valid():
+            return self.err
+        user = self.record
         date = now()
-        query = User.select().where(User.id == uid)
-        if(not query):
-            return (2, _('No such user.'))
-        user = query.get()
         salt = user.salt[0].salt
         encrypted_token = sha256(token)
         query = PasswordReset.select().where(
@@ -262,10 +288,10 @@ def user_password_reset(uid, token, password):
             PasswordReset.token == encrypted_token,
             PasswordReset.expire_date > date
         )
-        if(query):
-            reset_rec = query.get()
-            reset_rec.expire_date = date
-            reset_rec.save()
+        if query:
+            reset = query.get()
+            reset.expire_date = date
+            reset.save()
             user.password = encrypt_password(password, user.salt[0].salt)
             user.save()
             return (0, _('Your password reset successfully.'))
@@ -273,103 +299,56 @@ def user_password_reset(uid, token, password):
             return (3, _(
                 'Password reset failed: Invalid or out-of-date verification code.'
             ))
-    except Exception as err:
-        return (1, db_err_msg(err))
-
-
-def user_activate(uid, code):
-    try:
-        query = User.select().where(User.id == uid)
-        if(not query):
-            return (2, _('No such user.'))
-        user = query.get()
-        if(user.activated):
+    @api
+    def activate(self, code):
+        user = self.record
+        if not user.activated:
+            if(code == user.activation_code):
+                user.activated = True
+                user.activation_code = None
+                user.save()
+                return (0, _('User %s activated successfully.') % user.name)
+            else:
+                return (4, _('Wrong activation code.'))
+        else:
             return (3, _('User %s has already been activated.') % user.name)
-        if(code == user.activation_code):
-            user.activated = True
-            user.activation_code = None
-            user.save()
-            return (0, _('User %s activated successfully.') % user.name)
+    @api
+    def get_uid(self):
+        user = self.record
+        if user:
+            return (0, OK_MSG, {'uid': user.id})
         else:
-            return (4, _('Wrong activation code.'))
-    except Exception as err:
-        return (1, db_err_msg(err))
-
-
-def user_login(login_name, password):
-    try:
-        query = User.select().where(User.name == login_name)
-        if(not query):
-            query = User.select().where(User.mail == login_name.lower())
-
-        if(not query):
             return (2, _('No such user.'))
-        user = query.get()
-
-        salt = user.salt[0].salt
-        info = user.info[0]
-
-        encrypted_pw = encrypt_password(password, salt)
-        if(encrypted_pw != user.password):
-            info.last_login_failed_date = now()
-            info.save()
-            return (3, _('Wrong password.'))
-
-        if(not user.activated):
-            return (4, _('User %s has NOT been activated.') % user.name)
-
-        info.last_login_date = now()
-        info.save()
-        data = {'uid': user.id, 'name': user.name, 'mail': md5(user.mail)}
-        return (0, _('Signed in successfully.'), data)
-    except Exception as err:
-        return (1, db_err_msg(err))
-
-
-def user_get_uid(name):
-    try:
-        query = User.select().where(User.name == name)
-        if(not query):
-            return (2, _('No such user.'))
-        user = query.get()
-        return (0, OK_MSG, {'uid': user.id})
-    except Exception as err:
-        return (1, db_err_msg(err))
-
-
-def user_get_name(uid):
-    try:
-        query = User.select().where(User.id == uid)
-        if(not query):
-            return (2, _('No such user.'))
-        user = query.get()
-        return (0, OK_MSG, {'name': user.name})
-    except Exception as err:
-        return (1, db_err_msg(err))
-
-
-def user_info(name):
-    try:
-        query = User.select().where(User.name == name)
-        if(not query):
-            return (2, _('No such user.'))
-        user = query.get()
-        info = user.info[0]
-        if(info.last_login_date):
-            last_login_date = info.last_login_date.timestamp()
+    @api
+    def get_name(self):
+        user = self.record
+        if user:
+            return (0, OK_MSG, {'name': user.name})
         else:
-            last_login_date = None
-        return (0, OK_MSG, {
+            return (2, _('No such user.'))
+    @api
+    def info(self):
+        user.self.record
+        if not user:
+            return (2, _('No such user.'))
+        info = user.info[0]
+        data = (0, OK_MSG, {
             'uid': user.id,
             'mail': user.mail,
             'reg_date': user.reg_date.timestamp(),
             'bio': info.bio,
             'last_login_date': last_login_date,
         })
-    except Exception as err:
-        return (1, db_err_msg(err))
+        if(info.last_login_date):
+            data['last_login_date'] = info.last_login_date.timestamp()
+        return (0, OK_MSG, data)
 
 
+class admin():
+    record = ''
+    err = 
+    def __init__(self, uid):
+        self.record = find_record(Admin, '', )
 def admin_check(uid, board=''):
     try:
         query = User.select().where(User.id == uid)

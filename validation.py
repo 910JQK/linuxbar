@@ -5,13 +5,14 @@ import re
 
 
 # Whether an email address is valid is finally checked by the activation mail
-id_regex = re.compile('[1-9][0-9]*')
-uint_regex = re.compile('0|[1-9][0-9]*')
-email_regex = re.compile('[^@]+@[^@]+')
-username_regex = re.compile('[^<>"\'/\\\*@]{3,32}')
-token_regex = re.compile('[0-9A-Za-z]{16}')
-sha256_regex = re.compile('[0123456789abcdef]{64}')
-board_short_name_regex = re.compile('[0-9A-Za-z-]{1,32}')
+class regex():
+    identifier = re.compile('[1-9][0-9]*')
+    uint = re.compile('0|[1-9][0-9]*')
+    email = re.compile('[^@]+@[^@]+')
+    username = re.compile('[^<>"\'/\\\*@]{3,32}')
+    token = re.compile('[0-9A-Za-z]{16}')
+    sha256 = re.compile('[0123456789abcdef]{64}')
+    board_short_name = re.compile('[0-9A-Za-z-]{1,32}')
 
 
 class ValidationError(Exception):

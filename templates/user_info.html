@@ -40,7 +40,7 @@
 	  <tr>
 	    <td>{{ _('Last Login') }}</td>
 	    <td>
-	      {% if data['last_login_date'] %}
+	      {% if data.get('last_login_date') %}
 		{{ data['last_login_date'] | date }}
 	      {% else %}
 		{{ _('Not yet signed in') }}
