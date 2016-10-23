@@ -11,11 +11,7 @@ from html import escape
 from db import *
 from utils import *
 from utils import _
-from validation import sha256_regex
-
-
-def _(string):
-    return string  # reserved for l10n
+from validation import *
 
 
 HEX_DIGITS = '0123456789abcdef'
@@ -28,24 +24,51 @@ PINNED_TOPIC_MAX = 5
 Result = namedtuple('Result', ['code', 'msg'])
 
 
-def api(process_function):
+def validate_input(validators, value_array):
+    for validate, value in zip(validators, value_array):
+        valid, msg = validate(value)
+        if not valid:
+            return (valid, msg)
+    return (True, None)
+
+
+def constructor(init_function, *validators):
     def wrapper(self, *args, **kwargs):
-        if self.valid():
-            try:
-                return Result(*process_function(self, *args, **kwargs))
-            except Exception as err:
-                return Result(1, _('Database Error: %s') % str(err))
+        valid, msg = validate_input(validators, args)
+        if valid:
+            init_function(self, *args, **kwargs)
         else:
-            return self.err
+            self.record = None
+            self.err = (255, _('Validation Error: %s') % msg)
+    return wrapper
+
+
+def api(process_function, *validators):
+    def wrapper(self, *args, **kwargs):
+        if self.is_valid():
+            valid, msg = validate_input(validators, args)
+            if valid:
+                try:
+                    return Result(*process_function(self, *args, **kwargs))
+                except Exception as err:
+                    return Result(1, _('Database Error: %s') % str(err))
+            else:
+                return Result(255, _('Validation Error: %s') % msg)
+        else:
+            return Result(*self.err)
     return wrapper
 
 
 def api_static(process_function):
     def wrapper(*args, **kwargs):
-        try:
-            return Result(*process_function(*args, **kwargs))
-        except Exception as err:
-            return Result(1, _('Database Error: %s') % str(err))
+        valid, msg = validate_input(validators, args)
+        if valid:
+            try:
+                return Result(*process_function(*args, **kwargs))
+            except Exception as err:
+                return Result(1, _('Database Error: %s') % str(err))
+        else:
+            return Result(255, _('Validation Error: %s') % msg)
     return staticmethod(wrapper)
 
 
@@ -159,13 +182,16 @@ def at_filter(content, caller):
 class base():
     record = None
     err = None
-    def valid(self):
+    def is_valid(self):
         return bool(self.record)
 
 
 class config(base):
+    @constructor(validator.config())
     def __init__(self, name):
         self.record = find_record(Config, 'name', name)
+        if not self.record:
+            self.err = (2, _('No such config item'))
     @api_static
     def get_all():
         data = {}
@@ -177,23 +203,26 @@ class config(base):
         return (1, OK_MSG, {'value': self.record.value})
     @api
     def set(self, value):
-        # Invalid config item will be ignored.
+        # TODO: permission check
         self.record.value = value
         self.record.save()
         return (0, _('Config updated successfully.'))
 
 
 class user(base):
-    def __init__(self, uid=0, name=''):
-        if uid:
-            self.record = find_record(User, 'id', uid)
-        else if name:
-            self.record = find_record(User, 'name', name)
-        else:
-            self.record = None
+    @constructor(validator.id())
+    def __init__(self, uid):
+        self.record = find_record(User, 'id', uid)
         if not self.record:
             self.err = (2, _('No such user'))
-    @api_static
+    @api_static(validator.username())
+    def get_uid(self, name):
+        user = find_record(User, 'name', name)
+        if user:
+            return (0, OK_MSG, {'uid': user.id})
+        else:
+            return (2, _('No such user.'))
+    @api_static(validator.login(), validator.password())
     def login(login_name, password):
         user = (
             find_record(User, 'name', login_name)
@@ -215,7 +244,7 @@ class user(base):
         return (0, _('Signed in successfully.'), {
             'uid': user.id, 'name': user.name, 'mail': md5(user.mail)
         })
-    @api_static
+    @api_static(validator.email(), validator.username(), validator.password())
     def register(mail, name, password):
         mail = mail.lower()
         if(User.select().where(User.mail == mail)):
@@ -243,18 +272,13 @@ class user(base):
     @api
     def remove(self):
         # used only when activation mail failed to send
-        if self.valid():
-            user = self.record
-            user.salt[0].delete_instance()
-            user.delete_instance()
-            return (0, _('User %s deleted successfully.') % user.name)
-        else:
-            return self.err
+        user = self.record
+        user.salt[0].delete_instance()
+        user.delete_instance()
+        return (0, _('User %s deleted successfully.') % user.name)
     @api
     def get_token(self):
         # get token for password reset
-        if not self.valid():
-            return self.err
         user = self.record
         date = now()
         expire_date = date + datetime.timedelta(minutes=90)
@@ -275,10 +299,8 @@ class user(base):
             reset.save()
         return (0, _('Verification code has sent to you.'),
                 {'mail': user.mail, 'token': token})
-    @api
+    @api(validator.token(), validator.password())
     def password_reset(self, token, password):
-        if not self.valid():
-            return self.err
         user = self.record
         date = now()
         salt = user.salt[0].salt
@@ -299,7 +321,7 @@ class user(base):
             return (3, _(
                 'Password reset failed: Invalid or out-of-date verification code.'
             ))
-    @api
+    @api(validator.token(_('Activation Code')) )
     def activate(self, code):
         user = self.record
         if not user.activated:
@@ -313,24 +335,8 @@ class user(base):
         else:
             return (3, _('User %s has already been activated.') % user.name)
     @api
-    def get_uid(self):
-        user = self.record
-        if user:
-            return (0, OK_MSG, {'uid': user.id})
-        else:
-            return (2, _('No such user.'))
-    @api
-    def get_name(self):
-        user = self.record
-        if user:
-            return (0, OK_MSG, {'name': user.name})
-        else:
-            return (2, _('No such user.'))
-    @api
     def info(self):
-        user.self.record
-        if not user:
-            return (2, _('No such user.'))
+        user = self.record
         info = user.info[0]
         data = (0, OK_MSG, {
             'uid': user.id,
@@ -345,10 +351,19 @@ class user(base):
 
 
 class admin():
-    record = ''
-    err = 
-    def __init__(self, uid):
-        self.record = find_record(Admin, '', )
+    @constructor(validator.id(), optional(validator.board()) )
+    def __init__(self, uid, board):
+        user = find_record(User, 'id', uid)
+        if user:
+            self.record = find_record(Admin, 'user', user)
+            if not self.record:
+                self.err = (3, _('No such administrator.'))
+        else:
+            self.record = None
+            self.err = (2, _('No such user.'))
+
+############## A SPLENDID SEPARATOR #########################################
+            
 def admin_check(uid, board=''):
     try:
         query = User.select().where(User.id == uid)
@@ -359,7 +374,7 @@ def admin_check(uid, board=''):
         if(not board):
             admin = user_rec.site_managing
         else:
-            query = Board.select().where(Board.short_name == board)
+            query = Board.select().where(Board.slug == board)
             if(not query):
                 return (3, _('No such board.'))
             board_rec = query.get()
@@ -384,7 +399,7 @@ def admin_list(board=''):
         if(not board):
             query = SiteAdmin.select(SiteAdmin, User).join(User)
         else:
-            query = Board.select().where(Board.short_name == board)
+            query = Board.select().where(Board.slug == board)
             if(not query):
                 return (2, _('No such board.'))
             board_rec = query.get()
@@ -449,7 +464,7 @@ def admin_add(uid, board='', level=1):
                 return (0, _('New site administrator %s added successfully.')
                              % user_rec.name)
         else:
-            query = Board.select().where(Board.short_name == board)
+            query = Board.select().where(Board.slug == board)
             if(not query):
                 return (3, _('No such board.'))
             board_rec = query.get()
@@ -489,7 +504,7 @@ def admin_remove(uid, board=''):
                 return (0, _('Site administrator %s removed successfully.')
                              % user_rec.name)
         else:
-            query = Board.select().where(Board.short_name == board)
+            query = Board.select().where(Board.slug == board)
             if(not query):
                 return (3, _('No such board.'))
             board_rec = query.get()
@@ -515,7 +530,7 @@ def board_list():
         for board in query:
             list.append({
                 'bid': board.id,
-                'short_name': board.short_name,
+                'slug': board.slug,
                 'name': board.name,
                 'desc': board.description,
                 'announce': board.announcement
@@ -525,19 +540,19 @@ def board_list():
         return (1, db_err_msg(err))
 
 
-def board_add(short_name, name, desc, announce):
-    if not short_name:
-        return (2, _('Board ID (short name) cannot be empty.'))
+def board_add(slug, name, desc, announce):
+    if not slug:
+        return (2, _('Board slug (short name) cannot be empty.'))
     if not name:
         return (3, _('Board name cannot be empty.'))
     try:
-        if(Board.select().where(Board.short_name == short_name)):
-            return (4, _('Board with ID (short name) %s already exists.')
-                         % short_name)
+        if(Board.select().where(Board.slug == slug)):
+            return (4, _('Board with slug (short name) %s already exists.')
+                         % slug)
         if(Board.select().where(Board.name == name)):
             return (5, _('Board named %s already exists.') % name)
         Board.create(
-            short_name = short_name,
+            slug = slug,
             name = name,
             description = desc,
             announcement = announce
@@ -547,11 +562,11 @@ def board_add(short_name, name, desc, announce):
         return (1, db_err_msg(err))
 
 
-def board_remove(short_name):
-    # regard short name as ID for convenience
+def board_remove(slug):
+    # regard slug as ID for convenience
     # dangerous operation: provide interface cautiously
     try:
-        query = Board.select().where(Board.short_name == short_name)
+        query = Board.select().where(Board.slug == slug)
         if(not query):
             return (2, _('No such board.'))
         board = query.get()
@@ -561,14 +576,14 @@ def board_remove(short_name):
         return (1, db_err_msg(err))
 
 
-def board_update(original_short_name, short_name, name, desc, announce):
-    # regard short name as ID for convenience
+def board_update(original_slug, slug, name, desc, announce):
+    # regard slug as ID for convenience
     try:
-        query = Board.select().where(Board.short_name == original_short_name)
+        query = Board.select().where(Board.slug == original_slug)
         if(not query):
             return (2, _('No such board.'))
         board = query.get()
-        board.short_name = short_name
+        board.slug = slug
         board.name = name
         board.description = desc
         board.announcement = announce
@@ -589,7 +604,7 @@ def ban_check(uid, board=''):
         if(not board):
             bans = user_rec.banned_global
         else:
-            query = Board.select().where(Board.short_name == board)
+            query = Board.select().where(Board.slug == board)
             if(not query):
                 return (3, _('No such board.'))
             board_rec = query.get()
@@ -620,7 +635,7 @@ def ban_info(uid, board=''):
         if(not board):
             bans = user_rec.banned_global
         else:
-            query = Board.select().where(Board.short_name == board)
+            query = Board.select().where(Board.slug == board)
             if(not query):
                 return (3, _('No such board.'))
             board_rec = query.get()
@@ -671,7 +686,7 @@ def ban_list(page, count_per_page, board=''):
                 .paginate(page, count_per_page)
             )
         else:
-            query = Board.select().where(Board.short_name == board)
+            query = Board.select().where(Board.slug == board)
             if(not query):
                 return (2, _('No such board.'))
             board_rec = query.get()
@@ -728,7 +743,7 @@ def ban_add(uid, days, operator, board=''):
         if(not board):
             bans = user_rec.banned_global
         else:
-            query = Board.select().where(Board.short_name == board)
+            query = Board.select().where(Board.slug == board)
             if(not query):
                 return (3, _('No such board.'))
             board_rec = query.get()
@@ -790,7 +805,7 @@ def ban_remove(uid, board=''):
         if(not board):
             bans = user_rec.banned_global
         else:
-            query = Board.select().where(Board.short_name == board)
+            query = Board.select().where(Board.slug == board)
             if(not query):
                 return (2, _('No such board.'))
             board_rec = query.get()
@@ -815,7 +830,7 @@ def ban_remove(uid, board=''):
 
 def distillate_category_list(board):
     try:
-        query = Board.select().where(Board.short_name == board)
+        query = Board.select().where(Board.slug == board)
         if(not query):
             return (2, _('No such board.'))
         board_rec = query.get()
@@ -832,7 +847,7 @@ def distillate_category_list(board):
 
 def distillate_category_add(board, name):
     try:
-        query = Board.select().where(Board.short_name == board)
+        query = Board.select().where(Board.slug == board)
         if(not query):
             return (2, _('No such board.'))
         board_rec = query.get()
@@ -853,7 +868,7 @@ def distillate_category_add(board, name):
 
 def distillate_category_rename(board, name, new_name):
     try:
-        query = Board.select().where(Board.short_name == board)
+        query = Board.select().where(Board.slug == board)
         if(not query):
             return (2, _('No such board.'))
         board_rec = query.get()
@@ -873,7 +888,7 @@ def distillate_category_rename(board, name, new_name):
 
 def distillate_category_remove(board, name):
     try:
-        query = Board.select().where(Board.short_name == board)
+        query = Board.select().where(Board.slug == board)
         if(not query):
             return (2, _('No such board.'))
         board_rec = query.get()
@@ -902,7 +917,7 @@ def topic_info(tid):
             return (2, _('No such topic.'))
         topic = query.get()
         return (0, OK_MSG, {
-            'board': topic.board.short_name,
+            'board': topic.board.slug,
             'title': topic.title,
             'author': {
                 'uid': topic.author.id,
@@ -927,7 +942,7 @@ def topic_add(board, title, author, summary, post_body):
         return (4, _('Post content cannot be empty.'))
     try:
         post_body, at_list = at_filter(post_body, author)
-        query = Board.select().where(Board.short_name == board)
+        query = Board.select().where(Board.slug == board)
         if(not query):
             return (2, _('No such board'))
         board_rec = query.get()
@@ -957,7 +972,7 @@ def topic_add(board, title, author, summary, post_body):
 
 def topic_move(tid, board):
     try:
-        query = Board.select().where(Board.short_name == board)
+        query = Board.select().where(Board.slug == board)
         if(not query):
             return (2, _('No such board.'))
         board_rec = query.get()
@@ -1083,7 +1098,7 @@ def topic_list(board, page, count_per_page, only_show_deleted=False, pinned=Fals
     board_name = ''
     try:
         if(board):
-            query = Board.select().where(Board.short_name == board)
+            query = Board.select().where(Board.slug == board)
             if(not query):
                 return (2, _('No such board.'))
             board_rec = query.get()
@@ -1168,14 +1183,14 @@ def post_get_board(id, subpost=False):
             if(not query):
                 return (2, _('No such post.'))
             post = query.get()
-            board = post.topic.board.short_name
+            board = post.topic.board.slug
             return (0, OK_MSG, {'board': board})
         else:
             query = Subpost.select().where(Subpost.id == id)
             if(not query):
                 return (2, _('No such post.'))
             subpost = query.get()
-            board = subpost.reply0.board.short_name
+            board = subpost.reply0.board.slug
             return (0, OK_MSG, {'board': board})
     except Exception as err:
         return (1, db_err_msg(err))
@@ -1404,7 +1419,7 @@ def post_list(parent, page, count_per_page, subpost=False, no_html=False):
             elif(
                     not subpost
                     and text.startswith('%%')
-                    and sha256_regex.fullmatch(text[2:])
+                    and regex.sha256.fullmatch(text[2:])
             ):
                 return (
                     '<a class="content_image_link" href="/image/%s" target="_blank"><img class="content_image" src="/image/%s"></img></a>'

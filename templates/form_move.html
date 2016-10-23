@@ -47,8 +47,8 @@ button { min-width: 4em; }
 	<td>
 	  <select name="target">
 	    {% for board in board_list %}
-	      {% if board['short_name'] != source %}
-		<option value="{{ board['short_name'] }}">{{ board['name'] }}</option>
+	      {% if board['slug'] != source %}
+		<option value="{{ board['slug'] }}">{{ board['name'] }}</option>
 	      {% endif %}
 	    {% endfor %}
 	  </select>
