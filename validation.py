@@ -62,10 +62,10 @@ def optional(validator):
 class validator():
     create = create_validator
     @staticmethod
-    def id(name):
+    def id(name=_('ID')):
         return create_validator(name, regex=regex.id)
     @staticmethod
-    def uint(name):
+    def level(name=_('Level')):
         return create_validator(name, regex=regex.uint)
     @staticmethod
     def email(name=_('Email Address')):
@@ -83,7 +83,7 @@ class validator():
     def token(name=_('Token')):
         return create_validator(name, regex=regex.token)
     @staticmethod
-    def sha256(name):
+    def sha256(name=_('SHA-256')):
         return create_validator(name, regex=regex.sha256)
     @staticmethod
     def board(name=_('Board Slug')):
