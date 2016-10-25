@@ -83,9 +83,9 @@ class BanGlobal(BaseModel):
 
 
 class Admin(BaseModel):
-    user = ForeignKeyField(User, related_name='board_managing')
-    board = ForeignKeyField(Board, related_name='admin', null=True)
-    level = SmallIntegerField(null=True)
+    user = ForeignKeyField(User, related_name='admin')
+    board = ForeignKeyField(Board, related_name='admin', default='')
+    level = SmallIntegerField(default=0)
 
 
 class DistillateCategory(BaseModel):
@@ -166,8 +166,8 @@ class Image(BaseModel):
     date = DateTimeField(index=True)
 
 
-tables = [Config, User, Salt, PasswordReset, SiteAdmin, Board, Ban, BanGlobal,
-          BoardAdmin, Topic, Post, Subpost, AtFromPost, AtFromSubpost, Image]
+tables = [Config, User, Salt, PasswordReset, Admin, Board, Ban, BanGlobal,
+          Admin, Topic, Post, Subpost, AtFromPost, AtFromSubpost, Image]
 
 
 if __name__ == '__main__':
