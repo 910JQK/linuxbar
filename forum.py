@@ -22,7 +22,7 @@ PINNED_TOPIC_MAX = 5
 
 
 Result = namedtuple('Result', ['code', 'msg', 'data'])
-Result.__new__.__defaults__ = (None, None, )
+Result.__new__.__defaults__ = (None, None, {})
 
 
 def gen_result(code, msg, data={}):
@@ -79,21 +79,47 @@ def api_static(process_function):
 
 
 def auth(process_function, level=0):
-    def wrapper(*args, operator=None, **kwargs):
+    def wrapper(*args, operator=0, **kwargs):
+        # the following line is a hard-coded operation
+        # caution name of parameters when create new API functions
         board = kwargs.get('board') or ''
         if not operator:
             return (253, _('Not signed in.'))
         user = find_record(User, id=operator)
         if not user:
             return (252, _('Invalid operator.'))
+        board = find_record(Board, slug=board)
+        if not board:
+            return ()
         admin_global = find_record(Admin, user=user, board='')
-        admin_board = find_record(Admin, user=user, board=board)
-        admin = admin_global or admin_board
+        admin_local = find_record(Admin, user=user, board=board)
+        admin = admin_global or admin_local
         # zero is the highest level
         if admin and admin.level <= level:
             return process_function(*args, **kwargs)
         else:
             return (254, _('Permission denied.'))
+    return wrapper
+
+
+def not_banned(process_function):
+    def wrapper(*args, **kwargs):
+        # the following lines is a hard-coded operation
+        # caution name of parameters when create new API functions
+        author = kwargs.get('author') or 0
+        board = kwargs.get('board') or ''
+        if not author:
+            return (253, _('Not signed in.'))
+        user = find_record(User, id=author)
+        if not user:
+            return (251, _('Invalid author.'))
+        now = now()
+        banned_global = find_record(Ban, user=user, board='')
+        banned_local = find_record(Ban, user=user, board=board)
+        for banned in banned_global, banned_local:
+            if banned and now < banned.expire_date:
+                return (250, _('You are being banned.'))
+        return process_function(*args, **kwargs)
     return wrapper
 
 
@@ -438,7 +464,7 @@ class admin(base):
             return (0, OK_MSG, {'admin': False})
 
     @api_static(optional(validator.board()) )
-    def list(board=''):
+    def list(board):
         board = find_record(Board, slug=board)
         if not board:
             return (3, _('No such board'))
@@ -456,7 +482,7 @@ class admin(base):
 
     @api_static(validator.id(), optional(validator.board()), validator.level())
     @auth
-    def add(uid, board='', level=1):
+    def add(uid, board, level=1):
         user = find_record(User, id=uid)
         if not user:
             return (2, _('No such user.'))
@@ -479,10 +505,13 @@ class admin(base):
         return (0, _('Administrator %s removed successfully.') % user.name)
 
 
-############## A SPLENDID SEPARATOR #########################################
-
-
 class board(base):
+    @constructor(validator.board())
+    def __init__(self, board):
+        self.record = find_record(Board, slug=board)
+        if not self.record:
+            self.err = (2, _('No such board'))
+
     @api_static
     def list():
         list = []
@@ -537,34 +566,45 @@ class board(base):
         return (0, _('Info of board named %s updated successfully.') % name)
 
 
-def ban_check(uid, board=''):
-    try:
-        query = User.select().where(User.id == uid)
-        if(not query):
-            return (2, _('No such user.'))
-        user_rec = query.get()
+class ban(base):
+    @constructor(validator.id(), optional(validator.board()) )
+    def __init__(self, uid, board):
+        user = find_record(User, id=uid)
+        board = find_record(Board, slug=board)
+        if user and board:
+            self.record = find_record(Ban, user=user, board=board)
+            if not self.record:
+                self.err = (4, _('User %s is not being banned.') % user.name)
+        elif not user:
+            self.err = (2, _('No such user'))
+        elif not board:
+            self.err = (3, _('No such board'))
 
-        bans = None
-        if(not board):
-            bans = user_rec.banned_global
-        else:
-            query = Board.select().where(Board.slug == board)
-            if(not query):
-                return (3, _('No such board.'))
-            board_rec = query.get()
-            bans = Ban.select().where(
-                Ban.user == user_rec,
-                Ban.board == board_rec
-            )
-    except Exception as err:
-        return (1, db_err_msg(err))
-    if(bans and now() < bans[0].expire_date):
-        return (0, OK_MSG, {
-            'banned': True,
-            'expire_date': bans[0].expire_date.timestamp()
-        })
-    else:
-        return (0, OK_MSG, {'banned': False})
+
+    @api_static(validator.id(), optional(validator.board()) )
+    def check(uid, board):
+        user = find_record(User, id=uid)
+        board = find_record(Board, slug=board)
+        if user and board:
+            record = find_record(Ban, user=user, board=board)
+            if record:
+                banned = (now() < record.expire_date)
+                if banned:
+                    return (0, OK_MSG, {
+                        'banned': True, 'expire_date': record.expire_date
+                    })
+                else:
+                    return (0, OK_MSG, {'banned': False})
+            else:
+                return (0, OK_MSG, {'banned': False})
+        elif not user:
+            return (2, _('No such user.'))
+        elif not board:
+            return (3, _('No such board.'))
+
+
+############## A SPLENDID SEPARATOR #########################################
+
 
 
 def ban_info(uid, board=''):
