@@ -64,28 +64,22 @@ class Board(BaseModel):
     name = CharField(max_length=64, unique=True)
     description = CharField(255)
     announcement = TextField()
+    # TODO: add a sentinel record
+
+
+class Admin(BaseModel):
+    user = ForeignKeyField(User, related_name='admin')
+    board = ForeignKeyField(Board, related_name='admin', default=None)
+    level = SmallIntegerField(default=0)
 
 
 class Ban(BaseModel):
     user = ForeignKeyField(User, related_name='banned', index=True)
     operator = ForeignKeyField(User, related_name='banning', index=True)
-    board = ForeignKeyField(Board, related_name='banning', index=True)
+    board = ForeignKeyField(Board, related_name='banning', index=True,
+                            default=None)
     date = DateTimeField(index=True)
     expire_date = DateTimeField()
-
-
-class BanGlobal(BaseModel):
-    user = ForeignKeyField(User, related_name='banned_global', unique=True,
-                           index=True)
-    operator = ForeignKeyField(User, related_name='banning_global', index=True)
-    date = DateTimeField(index=True)
-    expire_date = DateTimeField()
-
-
-class Admin(BaseModel):
-    user = ForeignKeyField(User, related_name='admin')
-    board = ForeignKeyField(Board, related_name='admin', default='')
-    level = SmallIntegerField(default=0)
 
 
 class DistillateCategory(BaseModel):
