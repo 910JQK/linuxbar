@@ -25,6 +25,10 @@ Result = namedtuple('Result', ['code', 'msg', 'data'])
 Result.__new__.__defaults__ = (None, None, )
 
 
+class RecordRemovedError(Exception):
+    pass
+
+
 def gen_result(code, msg, data={}):
     return Result(code, msg, data)
 
@@ -43,12 +47,14 @@ def constructor(init_function, *validators):
         if valid:
             init_function(self, *args, **kwargs)
         else:
-            self.err = (255, _('Validation Error: %s') % msg)
+            self.err = (254, _('Validation Error: %s') % msg)
     return wrapper
 
 
 def api(process_function, *validators):
     def wrapper(self, *args, **kwargs):
+        if self.deleted:
+            raise RecordRemovedError
         if self.is_valid():
             valid, msg = validate_input(validators, args)
             if valid:
@@ -57,7 +63,7 @@ def api(process_function, *validators):
                 except Exception as err:
                     return gen_result(1, _('Database Error: %s') % str(err))
             else:
-                return gen_result(255, _('Validation Error: %s') % msg)
+                return gen_result(254, _('Validation Error: %s') % msg)
         else:
             return gen_result(*self.err)
     return wrapper
@@ -65,6 +71,8 @@ def api(process_function, *validators):
 
 def api_static(process_function):
     def wrapper(*args, **kwargs):
+        if self.deleted:
+            raise RecordRemovedError
         valid, msg = validate_input(validators, args)
         if valid:
             try:
@@ -72,17 +80,24 @@ def api_static(process_function):
             except Exception as err:
                 return gen_result(1, _('Database Error: %s') % str(err))
         else:
-            return gen_result(255, _('Validation Error: %s') % msg)
+            return gen_result(254, _('Validation Error: %s') % msg)
     return staticmethod(wrapper)
 
 
-def find_record(table, **kwargs):    
+def find_record_all(table, *args, **kwargs):    
     query = table.select().where(
         *((getattr(table, field) == value) for field, value in kwargs.items())
     )
-    if query:
-        return query.get()
-    else:
+    for table_join in args:
+        query = query.switch(table).join(table_join)
+    for record in query:
+        yield record
+
+
+def find_record(table, *args, **kwargs):
+    try:
+        return find_record_all(table, *args, **kwargs).__next__()
+    except StopIteration:
         return None
 
 
@@ -188,6 +203,7 @@ def at_filter(content, caller):
 class base():
     record = None
     err = None
+    deleted = False
     def is_valid(self):
         return bool(self.record)
 
@@ -288,7 +304,8 @@ class user(base):
         user = self.record
         user.salt[0].delete_instance()
         user.delete_instance()
-        return (0, _('User %s deleted successfully.') % user.name)
+        self.deleted = True
+        return (0, _('User %s removed successfully.') % user.name)
 
     @api
     def get_token(self):
@@ -366,6 +383,17 @@ class user(base):
             data['last_login_date'] = info.last_login_date.timestamp()
         return (0, OK_MSG, data)
 
+    @api(validator.id())
+    def admin_list(self, uid):
+        user = self.record
+        data_list = []
+        for record in user.admin:
+            result_list.append({
+                'board': record.board,
+                'level': record.level
+            })
+        return (0, OK_MSG, {'count': len(data_list), 'list': data_list})
+
 
 class admin():
     @constructor(validator.id(), optional(validator.board()) )
@@ -375,11 +403,11 @@ class admin():
         if user and board:
             self.record = find_record(Admin, user=user, board=board)
             if not self.record:
-                self.err = (3, _('No such administrator.'))
+                self.err = (4, _('No such administrator.'))
         elif not user:
             self.err = (2, _('No such user.'))
         elif not board:
-            self.err = (2, _('No such board.'))
+            self.err = (3, _('No such board.'))
 
     @api_static(validator.id(), optional(validator.board()) )
     def check(uid, board):
@@ -388,7 +416,7 @@ class admin():
             return (2, _('No such user.'))        
         board = find_record(Board, slug=board)
         if not board:
-            return (2, _('No such board.'))
+            return (3, _('No such board.'))
         admin_global = find_record(Admin, user=user, board='')
         admin_local = find_record(Admin, user=user, board=board)
         admin = admin_global or admin_local
@@ -397,137 +425,47 @@ class admin():
         else:
             return (0, OK_MSG, {'admin': False})
 
-############## A SPLENDID SEPARATOR #########################################
+    @api_static(optional(validator.board()) )
+    def list(board=''):
+        board = find_record(Board, slug=board)
+        if not board:
+            return (3, _('No such board'))
+        data_list = []
+        for record in find_record_all(Admin, board=board):
+            data_list.append({
+                'level': record.level,
+                'user': {
+                    'uid': record.user.uid,
+                    'name': record.user.name,
+                    'mail': record.user.mail
+                }
+            })
+        return (0, OK_MSG, {'count': len(data_list), 'list': data_list})
 
-
-def admin_list(board=''):
-    try:
-        query = None
-        if(not board):
-            query = SiteAdmin.select(SiteAdmin, User).join(User)
-        else:
-            query = Board.select().where(Board.slug == board)
-            if(not query):
-                return (2, _('No such board.'))
-            board_rec = query.get()
-            query = (
-                BoardAdmin
-                .select(BoardAdmin, User)
-                .join(User)
-                .where(BoardAdmin.board == board_rec)
-            )
-        list = []
-        for admin in query:
-            if(not board):
-                list.append({
-                    'uid': admin.user.id,
-                    'name': admin.user.name,
-                    'mail': md5(admin.user.mail)
-                })
-            else:
-                list.append({
-                    'user': {
-                        'uid': admin.user.id,
-                        'name': admin.user.name,
-                        'mail': md5(admin.user.mail)
-                    },
-                    'level': admin.level
-                })
-        return (0, OK_MSG, {'list': list, 'count': len(list)})
-    except Exception as err:
-        return (1, db_err_msg(err))
-
-
-def admin_board_list(uid):
-    try:
-        query = User.select().where(User.id == uid)
-        if(not query):
+    @api_static(validator.id(), optional(validator.board()), validator.uint())
+    def add(uid, board='', level=1):
+        user = find_record(User, id=uid)
+        if not user:
             return (2, _('No such user.'))
-        user = query.get()
-        boards_level0 = []
-        boards_others = []
-        for rec in user.board_managing:
-            if(rec.level == 0):
-                boards_level0.append(rec.board.name)
-            else:
-                boards_others.append(rec.board.name)
-        return (0, OK_MSG, {'level0': boards_level0, 'others': boards_others})
-    except Exception as err:
-        return (1, db_err_msg(err))
-
-
-def admin_add(uid, board='', level=1):
-    try:
-        query = User.select().where(User.id == uid)
-        if(not query):
-            return (2, _('No such user.'))
-        user_rec = query.get()
-        if(not board):
-            if(user_rec.site_managing):
-                return (4, _('User %s is already a site administrator.')
-                             % user_rec.name)
-            else:
-                SiteAdmin.create(user=user_rec)
-                return (0, _('New site administrator %s added successfully.')
-                             % user_rec.name)
-        else:
-            query = Board.select().where(Board.slug == board)
-            if(not query):
-                return (3, _('No such board.'))
-            board_rec = query.get()
-            query = BoardAdmin.select().where(
-                BoardAdmin.user == user_rec,
-                BoardAdmin.board == board_rec
-            )
-            if(query):
-                return (4, _(
-                    'User %s is already a level-%d administrator of board %s.')
-                    % (user_rec.name, query[0].level, board_rec.name))
-            else:
-                BoardAdmin.create(
-                    user = user_rec,
-                    board = board_rec,
-                    level = level
+        board = find_record(Board, slug=board)
+        if not board:
+            return (3, _('No such board.'))
+        for record in user.admin:
+            if record.board == board and record.level == level:
+                return (
+                    4, _('User %s is already an administrator.') % user.name
                 )
-                return (0, _(
-                    'New level-%d administrator of board %s - %s added successfully.')
-                    % (level, board_rec.name, user_rec.name))
-    except Exception as err:
-        return (1, db_err_msg(err))
+        Admin.create(user=user, board=board, level=level)
+
+    @api
+    def remove():
+        user = self.record.user
+        self.record.delete_instance()
+        self.deleted = True
+        return (0, _('Administrator %s removed successfully.') % user.name)
 
 
-def admin_remove(uid, board=''):
-    try:
-        query = User.select().where(User.id == uid)
-        if(not query):
-            return (2, _('No such user.'))
-        user_rec = query.get()
-        if(not board):
-            admin = user_rec.site_managing
-            if(not admin):
-                return (4, _('No such site administrator.'))
-            else:
-                admin[0].delete_instance()
-                return (0, _('Site administrator %s removed successfully.')
-                             % user_rec.name)
-        else:
-            query = Board.select().where(Board.slug == board)
-            if(not query):
-                return (3, _('No such board.'))
-            board_rec = query.get()
-            admin = BoardAdmin.select().where(
-                BoardAdmin.user == user_rec,
-                BoardAdmin.board == board_rec
-            )
-            if(not admin):
-                return (4, _('No such administrator of board %s.')
-                             % board_rec.name)
-            else:
-                admin[0].delete_instance()
-                return (0, _('Administrator %s of board %s removed successfully.')
-                             % (user_rec.name, board_rec.name))
-    except Exception as err:
-        return (1, db_err_msg(err))
+############## A SPLENDID SEPARATOR #########################################
 
 
 def board_list():
