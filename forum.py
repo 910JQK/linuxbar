@@ -21,7 +21,12 @@ URL_REGEX = re.compile('(http|ftp)s?://.+')
 PINNED_TOPIC_MAX = 5
 
 
-Result = namedtuple('Result', ['code', 'msg'])
+Result = namedtuple('Result', ['code', 'msg', 'data'])
+Result.__new__.__defaults__ = (None, None, )
+
+
+def gen_result(code, msg, data={}):
+    return Result(code, msg, data)
 
 
 def validate_input(validators, value_array):
@@ -38,7 +43,6 @@ def constructor(init_function, *validators):
         if valid:
             init_function(self, *args, **kwargs)
         else:
-            self.record = None
             self.err = (255, _('Validation Error: %s') % msg)
     return wrapper
 
@@ -49,13 +53,13 @@ def api(process_function, *validators):
             valid, msg = validate_input(validators, args)
             if valid:
                 try:
-                    return Result(*process_function(self, *args, **kwargs))
+                    return gen_result(*process_function(self, *args, **kwargs))
                 except Exception as err:
-                    return Result(1, _('Database Error: %s') % str(err))
+                    return gen_result(1, _('Database Error: %s') % str(err))
             else:
-                return Result(255, _('Validation Error: %s') % msg)
+                return gen_result(255, _('Validation Error: %s') % msg)
         else:
-            return Result(*self.err)
+            return gen_result(*self.err)
     return wrapper
 
 
@@ -64,16 +68,18 @@ def api_static(process_function):
         valid, msg = validate_input(validators, args)
         if valid:
             try:
-                return Result(*process_function(*args, **kwargs))
+                return gen_result(*process_function(*args, **kwargs))
             except Exception as err:
-                return Result(1, _('Database Error: %s') % str(err))
+                return gen_result(1, _('Database Error: %s') % str(err))
         else:
-            return Result(255, _('Validation Error: %s') % msg)
+            return gen_result(255, _('Validation Error: %s') % msg)
     return staticmethod(wrapper)
 
 
-def find_record(table, field, value):
-    query = table.select().where(getattr(table, field) == value)
+def find_record(table, **kwargs):    
+    query = table.select().where(
+        *((getattr(table, field) == value) for field, value in kwargs.items())
+    )
     if query:
         return query.get()
     else:
@@ -189,18 +195,21 @@ class base():
 class config(base):
     @constructor(validator.config())
     def __init__(self, name):
-        self.record = find_record(Config, 'name', name)
+        self.record = find_record(Config, name=name)
         if not self.record:
             self.err = (2, _('No such config item'))
+
     @api_static
     def get_all():
         data = {}
         for config in Config.select():
             data[config.name] = config.value
         return (0, OK_MSG, data)
+
     @api
     def get(self):
         return (1, OK_MSG, {'value': self.record.value})
+
     @api
     def set(self, value):
         # TODO: permission check
@@ -212,21 +221,23 @@ class config(base):
 class user(base):
     @constructor(validator.id())
     def __init__(self, uid):
-        self.record = find_record(User, 'id', uid)
+        self.record = find_record(User, id=uid)
         if not self.record:
             self.err = (2, _('No such user'))
+
     @api_static(validator.username())
     def get_uid(self, name):
-        user = find_record(User, 'name', name)
+        user = find_record(User, name=name)
         if user:
             return (0, OK_MSG, {'uid': user.id})
         else:
             return (2, _('No such user.'))
+
     @api_static(validator.login(), validator.password())
     def login(login_name, password):
         user = (
-            find_record(User, 'name', login_name)
-            or find_record(User, 'mail', login_name.lower())
+            find_record(User, name=login_name)
+            or find_record(User, mail=login_name.lower())
         )
         if not user:
             return (2, _('No such user'))
@@ -244,6 +255,7 @@ class user(base):
         return (0, _('Signed in successfully.'), {
             'uid': user.id, 'name': user.name, 'mail': md5(user.mail)
         })
+
     @api_static(validator.email(), validator.username(), validator.password())
     def register(mail, name, password):
         mail = mail.lower()
@@ -269,6 +281,7 @@ class user(base):
             'uid': user_rec.id,
             'activation_code': activation_code
         })
+
     @api
     def remove(self):
         # used only when activation mail failed to send
@@ -276,6 +289,7 @@ class user(base):
         user.salt[0].delete_instance()
         user.delete_instance()
         return (0, _('User %s deleted successfully.') % user.name)
+
     @api
     def get_token(self):
         # get token for password reset
@@ -284,7 +298,7 @@ class user(base):
         expire_date = date + datetime.timedelta(minutes=90)
         token = gen_token()
         encrypted_token = sha256(token)
-        reset = find_record(PasswordReset, 'user', user)
+        reset = find_record(PasswordReset, user=user)
         if not reset:
             PasswordReset.create(
                 user = user,
@@ -299,6 +313,7 @@ class user(base):
             reset.save()
         return (0, _('Verification code has sent to you.'),
                 {'mail': user.mail, 'token': token})
+
     @api(validator.token(), validator.password())
     def password_reset(self, token, password):
         user = self.record
@@ -321,6 +336,7 @@ class user(base):
             return (3, _(
                 'Password reset failed: Invalid or out-of-date verification code.'
             ))
+
     @api(validator.token(_('Activation Code')) )
     def activate(self, code):
         user = self.record
@@ -334,6 +350,7 @@ class user(base):
                 return (4, _('Wrong activation code.'))
         else:
             return (3, _('User %s has already been activated.') % user.name)
+
     @api
     def info(self):
         user = self.record
@@ -353,44 +370,34 @@ class user(base):
 class admin():
     @constructor(validator.id(), optional(validator.board()) )
     def __init__(self, uid, board):
-        user = find_record(User, 'id', uid)
-        if user:
-            self.record = find_record(Admin, 'user', user)
+        user = find_record(User, id=uid)
+        board = find_record(Board, slug=board)
+        if user and board:
+            self.record = find_record(Admin, user=user, board=board)
             if not self.record:
                 self.err = (3, _('No such administrator.'))
-        else:
-            self.record = None
+        elif not user:
             self.err = (2, _('No such user.'))
+        elif not board:
+            self.err = (2, _('No such board.'))
+
+    @api_static(validator.id(), optional(validator.board()) )
+    def check(uid, board):
+        user = find_record(User, id=uid)
+        if not user:
+            return (2, _('No such user.'))        
+        board = find_record(Board, slug=board)
+        if not board:
+            return (2, _('No such board.'))
+        admin_global = find_record(Admin, user=user, board='')
+        admin_local = find_record(Admin, user=user, board=board)
+        admin = admin_global or admin_local
+        if admin_global or admin_local:
+            return (0, OK_MSG, {'admin': True, 'level': admin.level})
+        else:
+            return (0, OK_MSG, {'admin': False})
 
 ############## A SPLENDID SEPARATOR #########################################
-            
-def admin_check(uid, board=''):
-    try:
-        query = User.select().where(User.id == uid)
-        if(not query):
-            return (2, _('No such user.'))
-        user_rec = query.get()
-        admin = None
-        if(not board):
-            admin = user_rec.site_managing
-        else:
-            query = Board.select().where(Board.slug == board)
-            if(not query):
-                return (3, _('No such board.'))
-            board_rec = query.get()
-            admin = BoardAdmin.select().where(
-                BoardAdmin.user == user_rec,
-                BoardAdmin.board == board_rec
-            )
-    except Exception as err:
-        return (1, db_err_msg(err))
-    if(admin):
-        if(not board):
-            return (0, OK_MSG, {'admin': True})
-        else:
-            return (0, OK_MSG, {'admin': True, 'level': admin[0].level})
-    else:
-        return (0, OK_MSG, {'admin': False})
 
 
 def admin_list(board=''):
