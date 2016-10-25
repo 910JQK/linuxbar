@@ -25,10 +25,6 @@ Result = namedtuple('Result', ['code', 'msg', 'data'])
 Result.__new__.__defaults__ = (None, None, )
 
 
-class RecordRemovedError(Exception):
-    pass
-
-
 def gen_result(code, msg, data={}):
     return Result(code, msg, data)
 
@@ -47,14 +43,13 @@ def constructor(init_function, *validators):
         if valid:
             init_function(self, *args, **kwargs)
         else:
-            self.err = (254, _('Validation Error: %s') % msg)
+            self.err = (255, _('Validation Error: %s') % msg)
     return wrapper
 
 
 def api(process_function, *validators):
     def wrapper(self, *args, **kwargs):
-        if self.deleted:
-            raise RecordRemovedError
+        assert not self.deleted:
         if self.is_valid():
             valid, msg = validate_input(validators, args)
             if valid:
@@ -63,7 +58,7 @@ def api(process_function, *validators):
                 except Exception as err:
                     return gen_result(1, _('Database Error: %s') % str(err))
             else:
-                return gen_result(254, _('Validation Error: %s') % msg)
+                return gen_result(255, _('Validation Error: %s') % msg)
         else:
             return gen_result(*self.err)
     return wrapper
@@ -71,8 +66,7 @@ def api(process_function, *validators):
 
 def api_static(process_function):
     def wrapper(*args, **kwargs):
-        if self.deleted:
-            raise RecordRemovedError
+        assert not self.deleted:
         valid, msg = validate_input(validators, args)
         if valid:
             try:
@@ -80,8 +74,27 @@ def api_static(process_function):
             except Exception as err:
                 return gen_result(1, _('Database Error: %s') % str(err))
         else:
-            return gen_result(254, _('Validation Error: %s') % msg)
+            return gen_result(255, _('Validation Error: %s') % msg)
     return staticmethod(wrapper)
+
+
+def auth(process_function, level=0):
+    def wrapper(*args, operator=None, **kwargs):
+        board = kwargs.get('board') or ''
+        if not operator:
+            return (253, _('Not signed in.'))
+        user = find_record(User, id=operator)
+        if not user:
+            return (252, _('Invalid operator.'))
+        admin_global = find_record(Admin, user=user, board='')
+        admin_board = find_record(Admin, user=user, board=board)
+        admin = admin_global or admin_board
+        # zero is the highest level
+        if admin and admin.level <= level:
+            return process_function(*args, **kwargs)
+        else:
+            return (254, _('Permission denied.'))
+    return wrapper
 
 
 def find_record_all(table, *args, **kwargs):    
@@ -227,8 +240,8 @@ class config(base):
         return (1, OK_MSG, {'value': self.record.value})
 
     @api
+    @auth
     def set(self, value):
-        # TODO: permission check
         self.record.value = value
         self.record.save()
         return (0, _('Config updated successfully.'))
@@ -298,14 +311,13 @@ class user(base):
             'activation_code': activation_code
         })
 
-    @api
-    def remove(self):
-        # used only when activation mail failed to send
-        user = self.record
-        user.salt[0].delete_instance()
-        user.delete_instance()
-        self.deleted = True
-        return (0, _('User %s removed successfully.') % user.name)
+#    @api
+#    def remove(self):
+#        user = self.record
+#        user.salt[0].delete_instance()
+#        user.delete_instance()
+#        self.deleted = True
+#        return (0, _('User %s removed successfully.') % user.name)
 
     @api
     def get_token(self):
@@ -395,7 +407,7 @@ class user(base):
         return (0, OK_MSG, {'count': len(data_list), 'list': data_list})
 
 
-class admin():
+class admin(base):
     @constructor(validator.id(), optional(validator.board()) )
     def __init__(self, uid, board):
         user = find_record(User, id=uid)
@@ -442,7 +454,8 @@ class admin():
             })
         return (0, OK_MSG, {'count': len(data_list), 'list': data_list})
 
-    @api_static(validator.id(), optional(validator.board()), validator.uint())
+    @api_static(validator.id(), optional(validator.board()), validator.level())
+    @auth
     def add(uid, board='', level=1):
         user = find_record(User, id=uid)
         if not user:
@@ -458,7 +471,8 @@ class admin():
         Admin.create(user=user, board=board, level=level)
 
     @api
-    def remove():
+    @auth
+    def remove(self):
         user = self.record.user
         self.record.delete_instance()
         self.deleted = True
@@ -468,11 +482,11 @@ class admin():
 ############## A SPLENDID SEPARATOR #########################################
 
 
-def board_list():
-    try:
-        query = Board.select()
+class board(base):
+    @api_static
+    def list():
         list = []
-        for board in query:
+        for board in Board.select():
             list.append({
                 'bid': board.id,
                 'slug': board.slug,
@@ -480,21 +494,19 @@ def board_list():
                 'desc': board.description,
                 'announce': board.announcement
             })
-        return (0, OK_MSG, {'list': list, 'count': len(list)})
-    except Exception as err:
-        return (1, db_err_msg(err))
+        return (0, OK_MSG, {'count': len(list), 'list': list})
 
-
-def board_add(slug, name, desc, announce):
-    if not slug:
-        return (2, _('Board slug (short name) cannot be empty.'))
-    if not name:
-        return (3, _('Board name cannot be empty.'))
-    try:
-        if(Board.select().where(Board.slug == slug)):
-            return (4, _('Board with slug (short name) %s already exists.')
-                         % slug)
-        if(Board.select().where(Board.name == name)):
+    @api_static(
+        validator.board(),
+        validator.create(_('Board Name'), min=1, max=64),
+        validator.create(_('Description'), max=255),
+        validator.create(_('Announcement'), max=2000)
+    )
+    @auth
+    def add(slug, name, desc, announce):
+        if find_record(Board, slug=slug):
+            return (4, _('Board with slug %s already exists.') % slug)
+        if find_record(Board, name=name):
             return (5, _('Board named %s already exists.') % name)
         Board.create(
             slug = slug,
@@ -503,39 +515,26 @@ def board_add(slug, name, desc, announce):
             announcement = announce
         )
         return (0, _('Board named %s created successfully.') % name)
-    except Exception as err:
-        return (1, db_err_msg(err))
 
-
-def board_remove(slug):
-    # regard slug as ID for convenience
+    @api
+    @auth
+    def board_remove(self):
     # dangerous operation: provide interface cautiously
-    try:
-        query = Board.select().where(Board.slug == slug)
-        if(not query):
-            return (2, _('No such board.'))
-        board = query.get()
+        board = self.record
         board.delete_instance()
+        self.deleted = True
         return (0, _('Board named %s removed successfully.') % board.name)
-    except Exception as err:
-        return (1, db_err_msg(err))
 
-
-def board_update(original_slug, slug, name, desc, announce):
-    # regard slug as ID for convenience
-    try:
-        query = Board.select().where(Board.slug == original_slug)
-        if(not query):
-            return (2, _('No such board.'))
-        board = query.get()
+    @api
+    @auth
+    def update(self, slug, name, desc, announce):
+        board = self.record
         board.slug = slug
         board.name = name
         board.description = desc
         board.announcement = announce
         board.save()
         return (0, _('Info of board named %s updated successfully.') % name)
-    except Exception as err:
-        return(1, db_err_msg(err))
 
 
 def ban_check(uid, board=''):
