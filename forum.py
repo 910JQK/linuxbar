@@ -129,15 +129,28 @@ def not_banned(process_function):
     return wrapper
 
 
-def find_record_all(table, *args, **kwargs):
+def get_query(table, *args, **kwargs):
     # NULL_BOARD means "globally valid"
     if kwargs.get('board') and kwargs['board'] == NULL_BOARD:
         kwargs['board'] = None
+    if kwargs.get('pn'):
+        paginate = True
+        pn = int(kwargs['pn'])
+        count = int(kwargs['count'])
+        del kwargs['pn']
+        del kwargs['count']
     query = table.select().where(
         *((getattr(table, field) == value) for field, value in kwargs.items())
     )
     for table_join in args:
         query = query.switch(table).join(table_join)
+    if paginate:
+        query = query.paginate(pn, count)
+    return query
+
+
+def find_record_all(table, *args, **kwargs):
+    query = get_query(table, *args, **kwargs)
     for record in query:
         yield record
 
@@ -147,6 +160,12 @@ def find_record(table, *args, **kwargs):
         return find_record_all(table, *args, **kwargs).__next__()
     except StopIteration:
         return None
+
+
+def write_record(table, **kwargs):
+    if kwargs.get('board') and kwargs['board'] == NULL_BOARD:
+        kwargs['board'] = None
+    return table.create(**kwargs)
 
 
 def find_board(slug):
@@ -546,7 +565,7 @@ class admin(base):
         board = find_board(board)
         if user and board:
             if not find_record(Admin, user=user, board=board, level=level):
-                Admin.create(user=user, board=board, level=level)
+                write_record(Admin, user=user, board=board, level=level)
             else:
                 return (
                     4, _('User %s is already an administrator.') % user.name
@@ -663,96 +682,33 @@ class ban(base):
         elif not board:
             return (3, _('No such board.'))
 
-
-############## A SPLENDID SEPARATOR #########################################
-
-
-
-def ban_info(uid, board=''):
-    try:
-        query = User.select().where(User.id == uid)
-        if(not query):
-            return (2, _('No such user.'))
-        user_rec = query.get()
-
-        bans = None
-        board_rec = None
-        if(not board):
-            bans = user_rec.banned_global
-        else:
-            query = Board.select().where(Board.slug == board)
-            if(not query):
-                return (3, _('No such board.'))
-            board_rec = query.get()
-            bans = Ban.select().where(
-                Ban.user == user_rec,
-                Ban.board == board_rec
+    @api
+    def info():
+        ban = self.record
+        return (0, OK_MSG, {
+            'operator': {
+                'uid': ban.operator.id,
+                'name': ban.operator.name,
+                'mail': md5(ban.operator.mail)
+            },
+            'date': ban.date.timestamp(),
+            'expire_date': ban.expire_date.timestamp(),
+            'days': round(
+                (ban.expire_date - ban.date).total_seconds() / 86400
             )
-        if(not bans or now() >= bans[0].expire_date):
-            if(not board):
-                return (4, _('User %s is not being banned globally.')
-                             % user_rec.name)
-            else:
-                return (4, _('User %s is not being banned on board %s.')
-                             % (user_rec.name, board_rec.name))
-        else:
-            ban = bans[0]
-            return (0, OK_MSG, {
-                'operator': {
-                    'uid': ban.operator.id,
-                    'name': ban.operator.name,
-                    'mail': md5(ban.operator.mail)
-                },
-                'date': ban.date.timestamp(),
-                'expire_date': ban.expire_date.timestamp(),
-                'days': round(
-                    (ban.expire_date - ban.date).total_seconds() / 86400
-                )
-            })
-    except Exception as err:
-        return (1, db_err_msg(err))
+        })
 
 
-def ban_list(page, count_per_page, board=''):
-    date = now()
-    try:
-        bans = None
-        count = 0
-        if(not board):
-            count = BanGlobal.select().where(
-                date < BanGlobal.expire_date
-            ).count()
-            bans = (
-                BanGlobal
-                .select(BanGlobal, User)
-                .join(User)
-                .where(date < BanGlobal.expire_date)
-                .order_by(BanGlobal.date.desc())
-                .paginate(page, count_per_page)
-            )
-        else:
-            query = Board.select().where(Board.slug == board)
-            if(not query):
-                return (2, _('No such board.'))
-            board_rec = query.get()
-            count = Ban.select().where(
-                Ban.board == board_rec,
-                date < Ban.expire_date
-            ).count()
-            bans = (
-                Ban
-                .select(Ban, User)
-                .join(User)
-                .where(
-                    Ban.board == board_rec,
-                    date < Ban.expire_date
-                )
-                .order_by(Ban.date.desc())
-                .paginate(page, count_per_page)
-            )
-        list = []
-        for ban in bans:
-            list.append({
+    @api_static(validator.id(), validator.count(), optional(validator.board()))
+    def list(pn, count, board):
+        date = now()
+        board = find_board(board)
+        if not board:
+            return (2, _('No such board.'))
+        records = find_record_all(Ban, User, board=board, pn=pn, count=count)
+        count = get_query(Ban, board=board).count()
+        data_list = [
+            {
                 'user': {
                     'uid': ban.user.id,
                     'name': ban.user.name,
@@ -768,43 +724,34 @@ def ban_list(page, count_per_page, board=''):
                 'days': round(
                     (ban.expire_date - ban.date).total_seconds() / 86400
                 )
-            })
-        return (0, OK_MSG, {'list': list, 'count': count})
-    except Exception as err:
-        return (1, db_err_msg(err))
+            }
+            for ban in records
+        ]
+        return (0, OK_MSG, {'list': data_list, 'count': count})
 
-
-def ban_add(uid, days, operator, board=''):
-    # Parameter "operator" is UID of the operator, which must be valid.
-    date = now()
-    delta = datetime.timedelta(days=days)
-    expire_date = date + delta
-    try:
-        query = User.select().where(User.id == uid)
-        if(not query):
+    @api_static(
+        validator.id(), validator.id(_('Days')), optional(validator.board())
+    )
+    @auth(level=1)
+    def add(uid, days, board):
+        date = now()
+        delta = datetime.timedelta(days=days)
+        expire_date = date + delta
+        user = find_record(User, id=uid)
+        if not user:
             return (2, _('No such user.'))
-        user_rec = query.get()
-        bans = None
-        if(not board):
-            bans = user_rec.banned_global
-        else:
-            query = Board.select().where(Board.slug == board)
-            if(not query):
-                return (3, _('No such board.'))
-            board_rec = query.get()
-            bans = Ban.select().where(
-                Ban.user == user_rec,
-                Ban.board == board_rec
-            )
-        if(bans):
-            ban = bans[0]
+        board = find_board(board)
+        if not board:
+            return (3, _('No such board.'))
+        ban = find_record(Ban, user=user, board=board)
+        if ban:
             if(delta > ban.expire_date-ban.date):
                 ban.date = date
                 ban.operator_id = operator
                 ban.expire_date = expire_date
                 ban.save()
                 return (0, _('Ban on user %s entered into force.')
-                             % user_rec.name)
+                             % user.name)
             else:
                 return (4, _('Ban with same or longer term already exists.'), {
                     'operator': {
@@ -819,27 +766,19 @@ def ban_add(uid, days, operator, board=''):
                     )
                 })
         else:
-            if(not board):
-                BanGlobal.create(
-                    user = user_rec,
-                    operator_id = operator,
-                    date = date,
-                    expire_date = expire_date
-                )
-            else:
-                Ban.create(
-                    user = user_rec,
-                    operator_id = operator,
-                    board = board_rec,
-                    date = date,
-                    expire_date = expire_date
-                )
+            write_record(
+                Ban,
+                user = user_rec,
+                operator_id = operator,
+                board = board_rec,
+                date = date,
+                expire_date = expire_date
+            )
             return (0, _('Ban on user %s entered into force.') % user_rec.name)
-    except Exception as err:
-        return (1, db_err_msg(err))
 
+############## A SPLENDID SEPARATOR #########################################
 
-def ban_remove(uid, board=''):
+def ban_remove():
     try:
         query = User.select().where(User.id == uid)
         if(not query):
@@ -871,6 +810,9 @@ def ban_remove(uid, board=''):
                          % user_rec.name)
     except Exception as err:
         return (1, db_err_msg(err))
+
+
+
 
 
 def distillate_category_list(board):

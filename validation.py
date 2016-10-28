@@ -70,6 +70,9 @@ class validator():
     def level(name=_('Level')):
         return create_validator(name, regex=regex.uint)
     @staticmethod
+    def count(name=_('Count per Page')):
+        return create_validator(name, regex=regex.id)
+    @staticmethod
     def email(name=_('Email Address')):
         return create_validator(name, min=3, max=64, regex=regex.email)
     @staticmethod
