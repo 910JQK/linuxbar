@@ -14,11 +14,13 @@ from utils import _
 from validation import *
 
 
+EMAIL_ADDRESS = 'no_reply@foo.bar'
 HEX_DIGITS = '0123456789abcdef'
 TOKEN_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 OK_MSG = _('Data retrieved successfully.')
 URL_REGEX = re.compile('(http|ftp)s?://.+')
 PINNED_TOPIC_MAX = 5
+NULL_BOARD = Board('', '', '', '')
 
 
 Result = namedtuple('Result', ['code', 'msg', 'data'])
@@ -29,9 +31,9 @@ def gen_result(code, msg, data={}):
     return Result(code, msg, data)
 
 
-def validate_input(validators, value_array):
-    for validate, value in zip(validators, value_array):
-        valid, msg = validate(value)
+def validate_input(validators, values):
+    for validator, value in zip(validators, values):
+        valid, msg = validator(value)
         if not valid:
             return (valid, msg)
     return (True, None)
@@ -44,6 +46,7 @@ def constructor(init_function, *validators):
             init_function(self, *args, **kwargs)
         else:
             self.err = (255, _('Validation Error: %s') % msg)
+    wrapper.parameters = init_function.__code__.co_varnames
     return wrapper
 
 
@@ -61,6 +64,7 @@ def api(process_function, *validators):
                 return gen_result(255, _('Validation Error: %s') % msg)
         else:
             return gen_result(*self.err)
+    wrapper.parameters = process_function.__code__.co_varnames
     return wrapper
 
 
@@ -75,14 +79,16 @@ def api_static(process_function):
                 return gen_result(1, _('Database Error: %s') % str(err))
         else:
             return gen_result(255, _('Validation Error: %s') % msg)
-    return staticmethod(wrapper)
+    wrapper2nd = staticmethod(wrapper)
+    wrapper2nd.parameters = process_function.__code__.co_varnames
+    return wrapper2nd
 
 
 def auth(process_function, level=0):
     def wrapper(*args, operator=0, **kwargs):
         # the following line is a hard-coded operation
         # caution name of parameters when create new API functions
-        board = kwargs.get('board') or ''
+        board = kwargs.get('board')
         if not operator:
             return (253, _('Not signed in.'))
         user = find_record(User, id=operator)
@@ -91,7 +97,7 @@ def auth(process_function, level=0):
         board = find_record(Board, slug=board)
         if not board:
             return ()
-        admin_global = find_record(Admin, user=user, board='')
+        admin_global = find_record(Admin, user=user, board=None)
         admin_local = find_record(Admin, user=user, board=board)
         admin = admin_global or admin_local
         # zero is the highest level
@@ -107,14 +113,14 @@ def not_banned(process_function):
         # the following lines is a hard-coded operation
         # caution name of parameters when create new API functions
         author = kwargs.get('author') or 0
-        board = kwargs.get('board') or ''
+        board = kwargs.get('board')
         if not author:
             return (253, _('Not signed in.'))
         user = find_record(User, id=author)
         if not user:
             return (251, _('Invalid author.'))
         now = now()
-        banned_global = find_record(Ban, user=user, board='')
+        banned_global = find_record(Ban, user=user, board=None)
         banned_local = find_record(Ban, user=user, board=board)
         for banned in banned_global, banned_local:
             if banned and now < banned.expire_date:
@@ -123,7 +129,10 @@ def not_banned(process_function):
     return wrapper
 
 
-def find_record_all(table, *args, **kwargs):    
+def find_record_all(table, *args, **kwargs):
+    # NULL_BOARD means "globally valid"
+    if kwargs.get('board') and kwargs['board'] == NULL_BOARD:
+        kwargs['board'] = None
     query = table.select().where(
         *((getattr(table, field) == value) for field, value in kwargs.items())
     )
@@ -138,6 +147,15 @@ def find_record(table, *args, **kwargs):
         return find_record_all(table, *args, **kwargs).__next__()
     except StopIteration:
         return None
+
+
+def find_board(slug):
+    # NULL_BOARD means "globally valid"
+    # do not use this function when a board is a required field
+    if slug == '':
+        return NULL_BOARD
+    else:
+        return find_record(Board, slug=slug)
 
 
 def gen_salt():
@@ -273,6 +291,10 @@ class config(base):
         return (0, _('Config updated successfully.'))
 
 
+def get_config(item):
+    return config(item).get().data['value']
+
+
 class user(base):
     @constructor(validator.id())
     def __init__(self, uid):
@@ -313,6 +335,23 @@ class user(base):
 
     @api_static(validator.email(), validator.username(), validator.password())
     def register(mail, name, password):
+        def send_activation_mail(site_name, mail_to, activation_url):
+            '''Make an activation mail and send it by `send_mail`
+
+            @param str site_name
+            @param str mail_to
+            @param str activation_url
+            '''
+            send_mail(
+                subject = _('Activation Mail - %s') % site_name,
+                addr_from = EMAIL_ADDRESS,
+                addr_to = mail_to,
+                content = _('Activation link: ') + activation_url,
+                html = _('Activation link: ')
+                + ('<a target="_blank" href="%s">%s</a>'
+                   % (activation_url, activation_url))
+            )
+
         mail = mail.lower()
         if(User.select().where(User.mail == mail)):
             return (5, _('Mail address is already taken.'))
@@ -328,13 +367,22 @@ class user(base):
             activation_code = activation_code,
             reg_date = now()
         )
+        site_name = get_config('site_name')
+        site_url = get_config('site_url')
+        activation_url = (
+            '%s/user/activate/%d/%s' % (
+                site_url,
+                user_rec.id,
+                activation_code
+            )
+        )
+        send_activation_mail(site_name, mail, activation_url)
         salt_rec = Salt.create(user=user_rec, salt=salt)
         info_rec = UserInfo.create(user=user_rec)
         return (0, _(
             'User %s registered successfully. Activation email has been sent to you.' % name
         ), {
-            'uid': user_rec.id,
-            'activation_code': activation_code
+            'uid': user_rec.id
         })
 
 #    @api
@@ -360,6 +408,15 @@ class user(base):
                 token = encrypted_token,
                 expire_date = expire_date
             )
+            send_mail(
+                subject = _('Password Reset - %s') % get_config('site_name'),
+                addr_from = EMAIL_ADDRESS,
+                addr_to = user.mail,
+                content = (
+                    _('Verification Code: %s (Valid in 90 minutes)')
+                    % token
+                )
+            )
         else:
             if(date < reset.expire_date):
                 return (3, _('A valid token has already sent.'))
@@ -367,7 +424,7 @@ class user(base):
             reset.expire_date = expire_date
             reset.save()
         return (0, _('Verification code has sent to you.'),
-                {'mail': user.mail, 'token': token})
+                {'mail': user.mail})
 
     @api(validator.token(), validator.password())
     def password_reset(self, token, password):
@@ -424,12 +481,13 @@ class user(base):
     @api(validator.id())
     def admin_list(self, uid):
         user = self.record
-        data_list = []
-        for record in user.admin:
-            result_list.append({
+        data_list = [
+            {
                 'board': record.board,
                 'level': record.level
-            })
+            }
+            for record in user.admin
+        ]
         return (0, OK_MSG, {'count': len(data_list), 'list': data_list})
 
 
@@ -437,7 +495,7 @@ class admin(base):
     @constructor(validator.id(), optional(validator.board()) )
     def __init__(self, uid, board):
         user = find_record(User, id=uid)
-        board = find_record(Board, slug=board)
+        board = find_board(board)
         if user and board:
             self.record = find_record(Admin, user=user, board=board)
             if not self.record:
@@ -451,8 +509,8 @@ class admin(base):
     def check(uid, board):
         user = find_record(User, id=uid)
         if not user:
-            return (2, _('No such user.'))        
-        board = find_record(Board, slug=board)
+            return (2, _('No such user.'))
+        board = find_board(board)
         if not board:
             return (3, _('No such board.'))
         admin_global = find_record(Admin, user=user, board='')
@@ -465,36 +523,38 @@ class admin(base):
 
     @api_static(optional(validator.board()) )
     def list(board):
-        board = find_record(Board, slug=board)
+        board = find_board(board)
         if not board:
             return (3, _('No such board'))
-        data_list = []
-        for record in find_record_all(Admin, board=board):
-            data_list.append({
+        data_list = [
+            {
                 'level': record.level,
                 'user': {
                     'uid': record.user.uid,
                     'name': record.user.name,
                     'mail': record.user.mail
                 }
-            })
+            }
+            for record in find_record_all(Admin, board=board)
+        ]
         return (0, OK_MSG, {'count': len(data_list), 'list': data_list})
 
     @api_static(validator.id(), optional(validator.board()), validator.level())
     @auth
     def add(uid, board, level=1):
         user = find_record(User, id=uid)
-        if not user:
-            return (2, _('No such user.'))
-        board = find_record(Board, slug=board)
-        if not board:
-            return (3, _('No such board.'))
-        for record in user.admin:
-            if record.board == board and record.level == level:
+        board = find_board(board)
+        if user and board:
+            if not find_record(Admin, user=user, board=board, level=level):
+                Admin.create(user=user, board=board, level=level)
+            else:
                 return (
                     4, _('User %s is already an administrator.') % user.name
                 )
-        Admin.create(user=user, board=board, level=level)
+        elif not user:
+            return (2, _('No such user.'))
+        elif not board:
+            return (3, _('No such board.'))
 
     @api
     @auth
@@ -514,16 +574,17 @@ class board(base):
 
     @api_static
     def list():
-        list = []
-        for board in Board.select():
-            list.append({
+        data_list = [
+            {
                 'bid': board.id,
                 'slug': board.slug,
                 'name': board.name,
                 'desc': board.description,
                 'announce': board.announcement
-            })
-        return (0, OK_MSG, {'count': len(list), 'list': list})
+            }
+            for board in Board.select()
+        ]
+        return (0, OK_MSG, {'count': len(data_list), 'list': data_list})
 
     @api_static(
         validator.board(),
@@ -570,7 +631,7 @@ class ban(base):
     @constructor(validator.id(), optional(validator.board()) )
     def __init__(self, uid, board):
         user = find_record(User, id=uid)
-        board = find_record(Board, slug=board)
+        board = find_board(board)
         if user and board:
             self.record = find_record(Ban, user=user, board=board)
             if not self.record:
@@ -584,7 +645,7 @@ class ban(base):
     @api_static(validator.id(), optional(validator.board()) )
     def check(uid, board):
         user = find_record(User, id=uid)
-        board = find_record(Board, slug=board)
+        board = find_board(board)
         if user and board:
             record = find_record(Ban, user=user, board=board)
             if record:
