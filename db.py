@@ -9,8 +9,7 @@ DEFAULT_SITE_URL = 'http://127.0.0.1:5000'
 DEFAULT_TOPICS_PER_PAGE = '30'
 DEFAULT_POSTS_PER_PAGE = '25'
 DEFAULT_LIST_ITEM_PER_PAGE = '15'
-# in order to position a subpost, fixed value is required
-# DEFAULT_SUBPOSTS_PER_PAGE = '10'
+DEFAULT_SUBPOSTS_PER_PAGE = '10'
 
 
 # use sqlite temporarily
@@ -64,12 +63,13 @@ class Board(BaseModel):
     name = CharField(max_length=64, unique=True)
     description = CharField(255)
     announcement = TextField()
-    # TODO: add a sentinel record
 
 
 class Admin(BaseModel):
     user = ForeignKeyField(User, related_name='admin')
-    board = ForeignKeyField(Board, related_name='admin', default=None)
+    board = ForeignKeyField(Board, related_name='admin', null=True,
+                            default=None)
+    glob = BooleanField(default=True)
     level = SmallIntegerField(default=0)
 
 
@@ -77,7 +77,7 @@ class Ban(BaseModel):
     user = ForeignKeyField(User, related_name='banned', index=True)
     operator = ForeignKeyField(User, related_name='banning', index=True)
     board = ForeignKeyField(Board, related_name='banning', index=True,
-                            default=None)
+                            null=True, default=None)
     date = DateTimeField(index=True)
     expire_date = DateTimeField()
 
@@ -107,28 +107,15 @@ class Topic(BaseModel):
 
 
 class Post(BaseModel):
-    ordinal = IntegerField()
-    content = TextField()
-    topic = ForeignKeyField(Topic, related_name='posts')
-    topic_author = ForeignKeyField(User) # a post emits a reply to its topic
-    author = ForeignKeyField(User, related_name='posts')
-    edited = BooleanField(default=False)
-    edit_date = DateTimeField(null=True)
-    deleted = BooleanField(default=False)
-    delete_date = DateTimeField(null=True)
-    delete_operator = ForeignKeyField(User, 'posts_deleted_by_me', null=True)
-    date = DateTimeField(index=True)
-
-
-class Subpost(BaseModel):
+    subpost = BooleanField(default=False)
     ordinal = IntegerField()
     content = TextField()
     author = ForeignKeyField(User, related_name='subposts')
     # a sub-post emits replies both to the post and the topic
     reply0 = ForeignKeyField(Topic, related_name='subposts')
     reply0_author = ForeignKeyField(User, related_name='reply0')
-    reply1 = ForeignKeyField(Post, related_name='subposts')
-    reply1_author = ForeignKeyField(User, related_name='reply1')
+    reply1 = ForeignKeyField(Post, related_name='subposts', null=True)
+    reply1_author = ForeignKeyField(User, related_name='reply1', null=True)
     # a sub-post may emit a reply to another sub-post
     reply2 = ForeignKeyField('self', related_name='replies', null=True)
     reply2_author = ForeignKeyField(User, related_name='reply2', null=True)
@@ -140,16 +127,10 @@ class Subpost(BaseModel):
     date = DateTimeField(index=True)
 
 
-class AtFromPost(BaseModel):
+class At(BaseModel):
     post = ForeignKeyField(Post, related_name='At')
     caller = ForeignKeyField(User, related_name='at_from_post_sent')
     callee = ForeignKeyField(User, related_name='at_from_post_received')
-
-
-class AtFromSubpost(BaseModel):
-    subpost = ForeignKeyField(Subpost, related_name='At')
-    caller = ForeignKeyField(User, related_name='at_from_subpost_sent')
-    callee = ForeignKeyField(User, related_name='at_from_subpost_received')
 
 
 class Image(BaseModel):
@@ -160,8 +141,8 @@ class Image(BaseModel):
     date = DateTimeField(index=True)
 
 
-tables = [Config, User, Salt, PasswordReset, Admin, Board, Ban, BanGlobal,
-          Admin, Topic, Post, Subpost, AtFromPost, AtFromSubpost, Image]
+tables = [Config, User, Salt, UserInfo, PasswordReset, Admin, Board, Ban,
+          Topic, Post, DistillateCategory, At, Image]
 
 
 if __name__ == '__main__':
@@ -177,7 +158,7 @@ if __name__ == '__main__':
     Config.create(name='count_topic', value=DEFAULT_TOPICS_PER_PAGE)
     Config.create(name='count_post', value=DEFAULT_POSTS_PER_PAGE)
     Config.create(name='count_list_item', value=DEFAULT_LIST_ITEM_PER_PAGE)
-#   Config.create(name='count_subpost', value=DEFAULT_SUBPOSTS_PER_PAGE)
+    Config.create(name='count_subpost', value=DEFAULT_SUBPOSTS_PER_PAGE)
     print('Default configurations have been written into database.')
 
     db.close()
