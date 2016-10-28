@@ -47,6 +47,8 @@ def create_validator(name, min=0, max=0, required=False, in_list=None, regex=Non
             else:
                 return invalid(_('%s: Wrong format.') % name)
         return (True, None)
+    check.field_name = name
+    check.requirements = kwargs
     return check
 
 
