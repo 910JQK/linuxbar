@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-
+from __future__ import division
 from flask import Flask, Response, request, session, redirect, url_for, \
                   render_template, send_file, abort
 from flask_babel import Babel
@@ -9,7 +9,6 @@ babel = Babel(app)
 
 import os
 import io
-import re
 import json
 import imghdr
 import hashlib
@@ -53,18 +52,18 @@ def check_permission(operator, board, level0=False):
     @return bool
     '''
     check_global = forum.admin_check(operator)
-    if(check_global[0] != 0):
+    if check_global[0] != 0:
         raise ForumPermissionCheckError(check_global)
-    if(not board):
+    if not board:
         return check_global[2]['admin']
     else:
         check = forum.admin_check(operator, board)
-        if(check[0] != 0):
+        if check[0] != 0:
             raise ForumPermissionCheckError(check)
-        if(not check[2]['admin']):
+        if not check[2]['admin']:
             board_admin = False
         else:
-            if(level0):
+            if level0:
                 board_admin = (check[2]['level'] == 0)
             else:
                 board_admin = True
@@ -77,8 +76,10 @@ def json_response(result):
     @param tuple result (int, str[, dict])
     @return Response
     '''
-    formatted_result = {'code': result[0], 'msg': result[1]}
-    if(len(result) == 3 and result[2]):
+    formatted_result = {'code': result[0],
+                        'msg': result[1]
+                       }
+    if len(result) == 3 and result[2]:
         formatted_result['data'] = result[2]
     return Response(json.dumps(formatted_result), mimetype='application/json')
 
@@ -98,7 +99,7 @@ def validation_err_response(err, json=True):
     @param ValidationError err
     @return Response
     '''
-    if(json):
+    if json:
         return json_response((255, _('Validation error: %s') % str(err)) )
     else:
         return render_template(
@@ -124,48 +125,48 @@ def inject_data():
 @app.template_filter('date')
 def format_date(timestamp, detailed=False):
     # behaviour of this function must be consistent with the front-end
-    if(detailed):
+    if detailed:
         return datetime.datetime.fromtimestamp(int(timestamp)).isoformat(' ');
     date = datetime.datetime.fromtimestamp(timestamp)
     delta = round((datetime.datetime.now() - date).total_seconds())
-    if(delta < 60):
+    if delta < 60:
         return _('just now')
-    elif(delta < 3600):
-        minutes = delta // 60
-        if(minutes == 1):
+    elif delta < 3600:
+        minutes = delta / 60
+        if minutes == 1:
             return _('a minute ago')
         else:
             return _('%d minutes ago') % minutes
-    elif(delta < 86400):
-        hours = delta // 3600
-        if(hours == 1):
+    elif delta < 86400:
+        hours = delta / 3600
+        if hours == 1:
             return _('an hour ago')
         else:
             return _('%d hours ago') % hours
     # 604800 = 86400*7
-    elif(delta < 604800):
-        days = delta // 86400
-        if(days == 1):
+    elif delta < 604800:
+        days = delta / 86400
+        if days == 1:
             return _('a day ago')
         else:
             return _('%d days ago') % days
     # 2629746 = 86400*(31+28+97/400+31+30+31+30+31+31+30+31+30+31)/12
-    elif(delta < 2629746):
-        weeks = delta // 604800
-        if(weeks == 1):
+    elif delta < 2629746:
+        weeks = delta / 604800
+        if weeks == 1:
             return _('a week ago')
         else:
             return _('%d weeks ago') % weeks
     # 31556952 = 86400*(365+97/400)
-    elif(delta < 31556952):
-        months = delta // 2629746
-        if(months == 1):
+    elif delta < 31556952:
+        months = delta / 2629746
+        if months == 1:
             return _('a month ago')
         else:
             return _('%d months ago') % months
     else:
-        years = delta // 31556952
-        if(years == 1):
+        years = delta / 31556952
+        if years == 1:
             return _('a year ago')
         else:
             return _('%d years ago') % years
@@ -185,19 +186,19 @@ def board(name):
     except ValidationError as err:
         return validation_err_response(err, json=False)
 
-    if(int(pn) != 1 or name == ''):
+    if int(pn) != 1 or name == '':
         pinned_topics = []
     else:
         result_pinned = forum.topic_list(name, 1, forum.PINNED_TOPIC_MAX, pinned=True)
-        if(result_pinned[0] != 0):
+        if result_pinned[0] != 0:
             return err_response(result_pinned)
         else:
             pinned_topics = result_pinned[2]['list']
 
     result = forum.topic_list(name, int(pn), items_per_page)
-    if(result[0] != 0):
+    if result[0] != 0:
         return err_response(result)
-    elif(len(result[2]['list']) == 0 and pn != '1'):
+    elif not result[2]['list'] and pn != '1':
         return err_response((248, _('No such page.')) )
     else:
         result[2]['list'] = pinned_topics + result[2]['list']
@@ -222,32 +223,32 @@ def topic(tid):
         return validation_err_response(err, json=False)
 
     result_info = forum.topic_info(tid)
-    if(result_info[0] != 0):
+    if result_info[0] != 0:
         return err_response(result_info)
     topic_info = result_info[2]
 
     is_admin = False
     is_level0_admin = False
     uid = session.get('uid')
-    if(uid):
+    if uid:
         result_admin_site = forum.admin_check(uid)
-        if(result_admin_site[0] != 0):
+        if result_admin_site[0] != 0:
             return err_response(result_admin_site)
         result_admin = forum.admin_check(uid, topic_info['board'])
-        if(result_admin[0] != 0):
+        if result_admin[0] != 0:
             return err_response(result_admin)
-        if(result_admin_site[2]['admin']):
+        if result_admin_site[2]['admin']:
             is_level0_admin = True
-        elif(result_admin[2]['admin']):
+        elif result_admin[2]['admin']:
             is_level0_admin = (result_admin[2]['level'] == 0)
         else:
             is_level0_admin = False
         is_admin = (result_admin_site[2]['admin'] or result_admin[2]['admin'])
 
     result = forum.post_list(tid, int(pn), count_post)
-    if(result[0] != 0):
+    if result[0] != 0:
         return err_response(result)
-    elif(len(result[2]['list']) == 0):
+    elif not result[2]['list']:
         return err_response((248, _('No such page.')) )
     else:
         data = result[2]
@@ -255,7 +256,7 @@ def topic(tid):
             result_subpost = forum.post_list(
                 post['pid'], 1, COUNT_SUBPOST, subpost=True
             )
-            if(result_subpost[0] != 0):
+            if result_subpost[0] != 0:
                 return err_response(result_subpost)
             post['subposts'] = result_subpost[2]
         return render_template(
@@ -274,10 +275,10 @@ def topic(tid):
 @app.route('/manage/topic/move/<int:tid>')
 def topic_move_form(tid):
     result_info = forum.topic_info(tid)
-    if(result_info[0] != 0):
+    if result_info[0] != 0:
         return err_response(result_info)
     result_board = forum.board_list()
-    if(result_board[0] != 0):
+    if result_board[0] != 0:
         return err_response(result_board)
     return render_template(
         'form_move.html',
@@ -294,13 +295,13 @@ def html_subpost_list():
 
     try:
         validate_id(_('Post ID'), pid)
-        if(pn != '-1'):
+        if pn != '-1':
             validate_id(_('Page Number'), pn)
     except ValidationError as err:
         return validation_err_response(err, json=False)
 
     result = forum.post_list(pid, int(pn), COUNT_SUBPOST, subpost=True)
-    if(result[0] != 0):
+    if result[0] != 0:
         return err_response(result)
     else:
         # get the exact page number when last page (pn == -1) is specified
@@ -327,7 +328,7 @@ def edit_form(id):
         return validation_err_response(err, json=False)
 
     result = forum.post_get_content(id, bool(subpost))
-    if(result[0] != 0):
+    if result[0] != 0:
         return err_response(result)
     else:
         return render_template(
@@ -350,12 +351,12 @@ def notification(n_type):
     except ValidationError as err:
         return validation_err_response(err)
     uid = session.get('uid')
-    if(uid):
-        if(n_type == 'replyme'):
+    if uid:
+        if n_type == 'replyme':
             result = forum.reply_get(uid, int(pn), COUNT)
-        elif(n_type == 'atme'):
+        elif n_type == 'atme':
             result = forum.at_get(uid, int(pn), COUNT)
-        if(result[0] != 0):
+        if result[0] != 0:
             return err_response(result)
         else:
             return render_template(
@@ -413,7 +414,7 @@ def user_register():
                 % (activation_url, activation_url))
         )
 
-    if(session.get('uid')):
+    if session.get('uid'):
         return json_response((251, _('Already signed in.')))
 
     mail = request.form.get('mail', '')
@@ -430,12 +431,12 @@ def user_register():
     except ValidationError as err:
         return validation_err_response(err)
 
-    if(captcha_text.lower() != session.get('captcha')):
+    if captcha_text.lower() != session.get('captcha'):
         return json_response((250, _('Wrong captcha.')) )
     session.pop('captcha', None)
 
     result = forum.user_register(mail, name, password)
-    if(result[0] != 0):
+    if result[0] != 0:
         return json_response(result)
     data = result[2]
 
@@ -462,7 +463,7 @@ def user_activate(uid, code):
     except ValidationError as err:
         return validation_err_response(err, json=False)
     result = forum.user_activate(uid, code)
-    if(result[0] != 0):
+    if result[0] != 0:
         return err_response(result)
     else:
         return render_template('activated.html')
@@ -476,12 +477,12 @@ def user_password_reset_get_token(username):
         return validation_err_response(err)
 
     result_getuid = forum.user_get_uid(username)
-    if(result_getuid[0] != 0):
+    if result_getuid[0] != 0:
         return json_response(result_getuid)
     uid = result_getuid[2]['uid']
 
     result = forum.user_password_reset_get_token(uid)
-    if(result[0] != 0):
+    if result[0] != 0:
         return json_response(result)
     data = result[2]
 
@@ -516,7 +517,7 @@ def user_password_reset():
         return validation_err_response(err)
 
     result_getuid = forum.user_get_uid(username)
-    if(result_getuid[0] != 0):
+    if result_getuid[0] != 0:
         return json_response(result_getuid)
     uid = result_getuid[2]['uid']
 
@@ -525,7 +526,7 @@ def user_password_reset():
 
 @app.route('/api/user/login', methods=['POST'])
 def user_login():
-    if(session.get('uid')):
+    if session.get('uid'):
         return json_response((251, _('Already signed in.')) )
     login_name = request.form.get('login_name', '')
     password = request.form.get('password', '')
@@ -537,11 +538,11 @@ def user_login():
     except ValidationError as err:
         return validation_err_response(err)
     result = forum.user_login(login_name, password)
-    if(result[0] == 0):
+    if result[0] == 0:
         session['uid'] = result[2]['uid']
         session['name'] = result[2]['name']
         session['mail'] = result[2]['mail']
-        if(long_term):
+        if long_term:
             session.permanent = True
         else:
             session.permanent = False
@@ -551,7 +552,7 @@ def user_login():
 @app.route('/api/user/info/unread')
 def user_get_unread_count():
     uid = session.get('uid')
-    if(not uid):
+    if not uid:
         return json_response((249, _('Not signed in.')) )
     else:
         return json_response(forum.user_get_unread_count(uid))
@@ -571,17 +572,17 @@ def user_login_form():
 def user_ban_form(name):
     board = request.args.get('board', '')
     sid = request.args.get('sid', '')
-    if(not board and sid):
+    if not board and sid:
         result_board = forum.post_get_board(sid, subpost=True)
-        if(result_board[0] != 0):
+        if result_board[0] != 0:
             return err_response(result_board)
         board = result_board[2]['board']
-    if(board):
+    if board:
         globally = False
     else:
         globally = True
     result_uid = forum.user_get_uid(name)
-    if(result_uid[0] != 0):
+    if result_uid[0] != 0:
         return err_response(result_uid)
     else:
         return render_template(
@@ -599,7 +600,7 @@ def user_logout():
     session.pop('uid', None)
     session.pop('name', None)
     session.pop('mail', None)
-    if(request.args.get('ret')):
+    if request.args.get('ret'):
         return redirect(request.args['ret'])
     else:
         return redirect(url_for('index'))
@@ -608,16 +609,16 @@ def user_logout():
 @app.route('/user/<name>')
 def user(name):
     current_user = session.get('uid')
-    if(current_user):
+    if current_user:
         check_result = forum.admin_check(current_user)
-        if(check_result[0] != 0):
+        if check_result[0] != 0:
             return err_response(check_result)
         else:
             is_admin = check_result[2]['admin']
     else:
         is_admin = False
     result = forum.user_info(name)
-    if(result[0] != 0):
+    if result[0] != 0:
         return err_response(result)
     else:
         return render_template(
@@ -635,16 +636,16 @@ def list_ban():
     items_per_page = int(config['count_list_item'])
     is_admin = False
     uid = session.get('uid')
-    if(uid):
+    if uid:
         admin_result = forum.admin_check(uid, board=board)
-        if(admin_result[0] != 0):
+        if admin_result[0] != 0:
             return err_response(admin_result)
         global_result = forum.admin_check(uid)
-        if(global_result[0] != 0):
+        if global_result[0] != 0:
             return err_response(global_result)
         is_admin = admin_result[2]['admin'] or global_result[2]['admin']
     result = forum.ban_list(int(pn), items_per_page, board=board)
-    if(result[0] != 0):
+    if result[0] != 0:
         return err_response(result)
     else:
         return render_template(
@@ -671,7 +672,7 @@ def user_password_reset_form():
 def admin_check(uid):
     board = request.args.get('board', '')
     try:
-        if(board):
+        if board:
             validate_board(_('Board Name'), board)
     except ValidationError as err:
         return validation_err_response(err)
@@ -689,26 +690,26 @@ def admin_add(uid):
         return validation_err_response(err)
 
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((254, _('Permission denied.')) )
 
-    if(level == '0'):
+    if level == '0':
         check = forum.admin_check(operator)
-        if(check[0] != 0):
+        if check[0] != 0:
             return json_response(check)
-        if(check[2]['admin']):
+        if check[2]['admin']:
             return json_response(forum.admin_add(uid, board, int(level)) )
         else:
             return json_response((254, _('Permission denied.')) )
     else:
         check_site = forum.admin_check(operator)
         check_board = forum.admin_check(operator, board)
-        if(check_site[0] != 0):
+        if check_site[0] != 0:
             return json_response(check_site)
-        if(check_board[0] != 0):
+        if check_board[0] != 0:
             return json_response(check_board)
-        if(check_site[2]['admin']
-           or (check_board[2]['admin'] and check_board[2]['level'] == 0)):
+        if check_site[2]['admin']
+           or (check_board[2]['admin'] and check_board[2]['level'] == 0):
             return json_response(forum.admin_add(uid, board, int(level)) )
         else:
             return json_response((254, _('Permission denied.')) )
@@ -723,31 +724,31 @@ def admin_remove(uid):
         return validation_err_response(err)
 
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((254, _('Permission denied.')) )
 
     check = forum.admin_check(uid, board)
-    if(check[0] != 0):
+    if check[0] != 0:
         return json_response(check)
-    if(not check[2]['admin']):
+    if not check[2]['admin']:
         return json_response((4, _('No such board administrator.')) )
-    if(check[2]['level'] == 0):
+    if check[2]['level'] == 0:
         check_op = forum.admin_check(operator)
-        if(check_op[0] != 0):
+        if check_op[0] != 0:
             return json_response(check_op)
-        if(check_op[2]['admin']):
+        if check_op[2]['admin']:
             return json_response(forum.admin_remove(uid, board))
         else:
             return json_response((254, _('Permission denied.')) )
     else:
         check_site = forum.admin_check(operator)
         check_board = forum.admin_check(operator, board)
-        if(check_site[0] != 0):
+        if check_site[0] != 0:
             return json_response(check_site)
-        if(check_board[0] != 0):
+        if check_board[0] != 0:
             return json_response(check_board)
-        if(check_site[2]['admin']
-           or (check_board[2]['admin'] and check_board[2]['level'] == 0)):
+        if check_site[2]['admin']
+           or (check_board[2]['admin'] and check_board[2]['level'] == 0):
             return json_response(forum.admin_remove(uid, board))
         else:
             return json_response((254, _('Permission denied.')) )
@@ -757,7 +758,7 @@ def admin_remove(uid):
 def admin_list():
     board = request.args.get('board', '')
     try:
-        if(board):
+        if board:
             validate_board(_('Board Name'), board)
     except ValidationError as err:
         return validation_err_response(err)
@@ -777,18 +778,18 @@ def board_add_or_update():
         validate(_('Name'), name, max=64, not_empty=True)
         validate(_('Description'), desc, max=255, not_empty=True)
         validate(_('Announcement'), announce)
-        if(update):
+        if update:
             validate_board(_('Original URL Name'), original_board)
     except ValidationError as err:
         return validation_err_response(err)
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((254, _('Permission denied.')) )
     check = forum.admin_check(operator)
-    if(check[0] != 0):
+    if check[0] != 0:
         return json_response(check)
-    if(check[2]['admin']):
-        if(not update):
+    if check[2]['admin']:
+        if not update:
             return json_response(forum.board_add(board, name, desc, announce))
         else:
             return json_response(forum.board_update(
@@ -807,7 +808,7 @@ def board_list():
 def ban_check(uid):
     board = request.args.get('board', '')
     try:
-        if(board):
+        if board:
             validate_board(_('Board Name'), board)
     except ValidationError as err:
         return validation_err_response(err)
@@ -818,7 +819,7 @@ def ban_check(uid):
 def ban_info(uid):
     board = request.args.get('board', '')
     try:
-        if(board):
+        if board:
             validate_board(_('Board Name'), board)
     except ValidationError as err:
         return validation_err_response(err)
@@ -834,10 +835,10 @@ def ban_add(uid):
     except ValidationError as err:
         return validation_err_response(err)
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((249, _('Not signed in.')) )
     try:
-        if(check_permission(operator, board)):
+        if check_permission(operator, board):
             return json_response(forum.ban_add(uid, int(days), operator, board))
         else:
             return json_response((254, _('Permission denied.')) )
@@ -849,10 +850,10 @@ def ban_add(uid):
 def ban_remove(uid):
     board = request.form.get('board', '')
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((249, _('Not signed in.')) )
     try:
-        if(check_permission(operator, board)):
+        if check_permission(operator, board):
             return json_response(forum.ban_remove(uid, board))
         else:
             return json_response((254, _('Permission denied.')) )
@@ -866,7 +867,7 @@ def ban_list():
     pn = request.args.get('pn', '1')
     count = request.args.get('count', '10')
     try:
-        if(board):
+        if board:
             validate_board(_('Board Name'), board)
         validate_id(_('Page Number'), pn)
         validate_id(_('Count per Page'), count)
@@ -895,10 +896,10 @@ def distillate_category_add():
     except ValidationError as err:
         return validation_err_response(err)
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((249, _('Not signed in.')) )
     try:
-        if(check_permission(operator, board, level0=True)):
+        if check_permission(operator, board, level0=True):
             return json_response(forum.distillate_category_add(board, name))
         else:
             return json_response((254, _('Permission denied.')) )
@@ -916,10 +917,10 @@ def distillate_category_remove():
     except ValidationError as err:
         return validation_err_response(err)
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((249, _('Not signed in.')) )
     try:
-        if(check_permission(operator, board, level0=True)):
+        if check_permission(operator, board, level0=True):
             return json_response(forum.distillate_category_remove(board, name))
         else:
             return json_response((254, _('Permission denied.')) )
@@ -939,10 +940,10 @@ def distillate_category_rename():
     except ValidationError as err:
         return validation_err_response(err)
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((249, _('Not signed in.')) )
     try:
-        if(check_permission(operator, board, level0=True)):
+        if check_permission(operator, board, level0=True):
             return json_response(
                 forum.distillate_category_rename(board, name, new_name)
             )
@@ -957,7 +958,7 @@ def topic_add():
     board = request.form.get('board', '')
     title = request.form.get('title', '')
     content = request.form.get('content', '')
-    if(not content):
+    if not content:
         content = title
     s_len = SUMMARY_LENGTH
     summary = (content[:s_len-3] + '...') if len(content) > s_len else content
@@ -967,17 +968,17 @@ def topic_add():
     except ValidationError as err:
         return validation_err_response(err)
     uid = session.get('uid')
-    if(not uid):
+    if not uid:
         return json_response((249, _('Not signed in.')) )
 
     result_ban_global = forum.ban_check(uid)
-    if(result_ban_global[0] != 0):
+    if result_ban_global[0] != 0:
         return json_response(result_ban_global)
     result_ban_local = forum.ban_check(uid, board)
-    if(result_ban_local[0] != 0):
+    if result_ban_local[0] != 0:
         return json_response(result_ban_local)
 
-    if(result_ban_global[2]['banned'] or result_ban_local[2]['banned']):
+    if result_ban_global[2]['banned'] or result_ban_local[2]['banned']:
         return json_response((252, _('You are being banned.')) )
 
     return json_response(forum.topic_add(board, title, uid, summary, content))
@@ -993,16 +994,16 @@ def topic_move(tid):
         return validation_err_response(err)
 
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((249, _('Not signed in.')) )
 
     result_board = forum.topic_info(tid)
-    if(result_board[0] != 0):
+    if result_board[0] != 0:
         return json_response(result_board)
     board = result_board[2]['board']
 
     try:
-        if(check_permission(operator, board)):
+        if check_permission(operator, board):
             return json_response(forum.topic_move(tid, target))
         else:
             return json_response((254, _('Permission denied.')) )
@@ -1014,16 +1015,16 @@ def topic_move(tid):
 def topic_pin(tid):
     revert = request.args.get('revert', '')
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((249, _('Not signed in.')) )
 
     result_board = forum.topic_info(tid)
-    if(result_board[0] != 0):
+    if result_board[0] != 0:
         return json_response(result_board)
     board = result_board[2]['board']
 
     try:
-        if(check_permission(operator, board, level0=True)):
+        if check_permission(operator, board, level0=True):
             return json_response(forum.topic_pin(tid, revert=bool(revert)) )
         else:
             return json_response((254, _('Permission denied.')) )
@@ -1039,16 +1040,16 @@ def topic_distillate_set(tid):
     except ValidationError as err:
         return validation_err_response(err)
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((249, _('Not signed in.')) )
 
     result_board = forum.topic_info(tid)
-    if(result_board[0] != 0):
+    if result_board[0] != 0:
         return json_response(result_board)
     board = result_board[2]['board']
 
     try:
-        if(check_permission(operator, board, level0=True)):
+        if check_permission(operator, board, level0=True):
             return json_response(forum.topic_distillate_set(tid, category) )
         else:
             return json_response((254, _('Permission denied.')) )
@@ -1059,16 +1060,16 @@ def topic_distillate_set(tid):
 @app.route('/api/topic/distillate/unset/<int:tid>')
 def topic_distillate_unset(tid):
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((249, _('Not signed in.')) )
 
     result_board = forum.topic_info(tid)
-    if(result_board[0] != 0):
+    if result_board[0] != 0:
         return json_response(result_board)
     board = result_board[2]['board']
 
     try:
-        if(check_permission(operator, board, level0=True)):
+        if check_permission(operator, board, level0=True):
             return json_response(forum.topic_distillate_unset(tid) )
         else:
             return json_response((254, _('Permission denied.')) )
@@ -1081,17 +1082,17 @@ def topic_remove(tid):
     revert = request.args.get('revert')
 
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((254, _('Permission denied.')) )
 
     result_board = forum.topic_info(tid)
-    if(result_board[0] != 0):
+    if result_board[0] != 0:
         return json_response(result_board)
     board = result_board[2]['board']
 
     try:
-        if(check_permission(operator, board)):
-            if(not revert):
+        if check_permission(operator, board):
+            if not revert:
                 return json_response(forum.topic_remove(tid, operator))
             else:
                 return json_response(forum.topic_revert(tid))
@@ -1129,36 +1130,36 @@ def post_add():
     subpost = request.args.get('subpost', '')
     try:
         validate_id(_('Parent Topic/Post ID'), parent)
-        if(not subpost):
+        if not subpost:
             validate(_('Content'), content, not_empty=True)
         else:
             validate(_('Content'), content, min=1, max=200)
-        if(reply != '0'):
+        if reply != '0':
             validate_id(_('Subpost to Reply'), reply)
     except ValidationError as err:
         return validation_err_response(err)
     uid = session.get('uid')
-    if(not uid):
+    if not uid:
         return json_response((249, _('Not signed in.')) )
 
-    if(subpost):
+    if subpost:
         result_board = forum.post_get_board(parent)
     else:
         result_board = forum.topic_info(parent)
-    if(result_board[0] != 0):
+    if result_board[0] != 0:
         return json_response(result_board)
     board = result_board[2]['board']
     result_ban_global = forum.ban_check(uid)
-    if(result_ban_global[0] != 0):
+    if result_ban_global[0] != 0:
         return json_response(result_ban_global)
     result_ban_local = forum.ban_check(uid, board)
-    if(result_ban_local[0] != 0):
+    if result_ban_local[0] != 0:
         return json_response(result_ban_local)
 
-    if(result_ban_global[2]['banned'] or result_ban_local[2]['banned']):
+    if result_ban_global[2]['banned'] or result_ban_local[2]['banned']:
         return json_response((252, _('You are being banned.')) )
 
-    if(subpost):
+    if subpost:
         content = content.replace('\n', ' ').replace('\r', '')
     return json_response(
         forum.post_add(parent, uid, content, bool(subpost), int(reply))
@@ -1175,12 +1176,12 @@ def post_edit(id):
     except ValidationError as err:
         return validation_err_response(err)
     get_author = forum.post_get_author(id, bool(subpost))
-    if(get_author[0] != 0):
+    if get_author[0] != 0:
         return json_response(get_author)
     author = get_author[2]['author']
-    if(subpost):
+    if subpost:
         new_content = new_content.replace('\n', ' ').replace('\r', '')
-    if(author == session.get('uid')):
+    if author == session.get('uid'):
         return json_response(forum.post_edit(id, new_content, bool(subpost)) )
     else:
         return json_response((254, _('Permission denied.')) )
@@ -1192,17 +1193,17 @@ def post_remove(id):
     subpost = request.args.get('subpost')
 
     operator = session.get('uid')
-    if(not operator):
+    if not operator:
         return json_response((254, _('Permission denied.')) )
 
     result_board = forum.post_get_board(id, subpost=bool(subpost))
-    if(result_board[0] != 0):
+    if result_board[0] != 0:
         return json_response(result_board)
     board = result_board[2]['board']
 
     try:
-        if(check_permission(operator, board)):
-            if(not revert):
+        if check_permission(operator, board):
+            if not revert:
                 return json_response(
                     forum.post_remove(id, operator, subpost=bool(subpost))
                 )
@@ -1230,7 +1231,7 @@ def post_list():
     subpost = request.args.get('subpost', '')
     try:
         validate_id(_('Parent Topic/Post ID'), parent)
-        if(pn != '-1'):
+        if pn != '-1':
             validate_id(_('Page Number'), pn)
         validate_id(_('Count per Page'), count)
     except ValidationError as err:
@@ -1253,10 +1254,10 @@ def api_notification(n_type):
     except ValidationError as err:
         return validation_err_response(err)
     uid = session.get('uid')
-    if(uid):
-        if(n_type == 'replyme'):
+    if uid:
+        if n_type == 'replyme':
             return json_response(forum.reply_get(uid, int(pn), int(count)) )
-        elif(n_type == 'atme'):
+        elif n_type == 'atme':
             return json_response(forum.at_get(uid, int(pn), int(count)) )
     else:
         return json_response((249, _('Not signed in.')) )
@@ -1270,22 +1271,22 @@ def image_upload():
             hash_sha256.update(chunk)
         return hash_sha256.hexdigest()
     uid = session.get('uid')
-    if(not uid):
+    if not uid:
         return json_response((249, _('Not signed in.')) )
     image = request.files.get('image')
-    if(not image):
+    if not image:
         return json_response((251, _('Invalid request.')) )
-    if(not image.filename):
+    if not image.filename:
         return json_response((251, _('Invalid request.')) )
     img_format = imghdr.what('', image.read(100))
-    if(img_format not in IMAGE_FORMATS):
+    if img_format not in IMAGE_FORMATS:
         return json_response((247, _('Invalid file format.')) )
     sha256 = sha256f(image)
     filename = sha256 + '.' + img_format
     image.seek(0)
     try:
         path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        if(not os.path.exists(path)):
+        if not os.path.exists(path):
             image.save(path)
         return json_response(
             forum.image_add(sha256, uid, img_format, image.filename)
@@ -1303,8 +1304,8 @@ def image(sha256):
     except ValidationError as err:
         abort(404)
     result = forum.image_info(sha256)
-    if(result[0] != 0):
-        if(result[0] == 1):
+    if result[0] != 0:
+        if result[0] == 1:
             abort(404)
         else:
             abort(500)
@@ -1323,7 +1324,7 @@ def upload_image_form():
 
 if __name__ == '__main__':
     result_config = forum.config_get()
-    if(result_config[0] != 0):
+    if result_config[0] != 0:
         raise Exception('unable to load configuration from database')
     config = result_config[2]
     app.secret_key = os.urandom(24)
