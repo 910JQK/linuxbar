@@ -1,14 +1,14 @@
 {% extends 'form.html' %}
 {% from 'macros.html' import field, submit %}
 
-{% block title %}{{ _('Sign up - %(site)s', site=config['site_name']) }}{% endblock %}
+{% block title %}{{ _('Sign up - %(site)s'.format(site=config['site_name'])) }}{% endblock %}
 {% block body_class %}box_horizontal_center{% endblock %}
 {% block form_title %}{{ _('Sign up') }}{% endblock %}
 
 {% block script %}
-var SUBMIT_URL = '{{ url_for('user_register') }}';
+var SUBMIT_URL = '{{ url_for('api.user_register') }}';
 var LOCK_FORM_AFTER_OK = true;
-var REDIRECT_URL = '{{ url_for('user_login_form') }}';
+var REDIRECT_URL = '{{ url_for('main.user_login_form') }}';
 var SUCCESS_CALLBACK = null;
 var OPTIONS = { redirect_delay: 5000 };
 var REALTIME_VALIDATION = true;

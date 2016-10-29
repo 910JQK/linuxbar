@@ -1,20 +1,6 @@
 #!/usr/bin/env python3
-
-
 from peewee import *
-
-
-DEFAULT_SITE_NAME = 'Linuxbar'
-DEFAULT_SITE_URL = 'http://127.0.0.1:5000'
-DEFAULT_TOPICS_PER_PAGE = '30'
-DEFAULT_POSTS_PER_PAGE = '25'
-DEFAULT_LIST_ITEM_PER_PAGE = '15'
-# in order to position a subpost, fixed value is required
-# DEFAULT_SUBPOSTS_PER_PAGE = '10'
-
-
-# use sqlite temporarily
-db = SqliteDatabase('data.db')
+from . import db
 
 
 class BaseModel(Model):
@@ -172,22 +158,3 @@ class Image(BaseModel):
 
 tables = [Config, User, Salt, PasswordReset, SiteAdmin, Board, Ban, BanGlobal,
           BoardAdmin, Topic, Post, Subpost, AtFromPost, AtFromSubpost, Image]
-
-
-if __name__ == '__main__':
-    db.connect()
-
-    print('Creating tables ...')
-    db.create_tables(tables)
-    print('Tables have been created.')
-
-    print('Writing default configurations ...')
-    Config.create(name='site_name', value=DEFAULT_SITE_NAME)
-    Config.create(name='site_url', value=DEFAULT_SITE_URL)
-    Config.create(name='count_topic', value=DEFAULT_TOPICS_PER_PAGE)
-    Config.create(name='count_post', value=DEFAULT_POSTS_PER_PAGE)
-    Config.create(name='count_list_item', value=DEFAULT_LIST_ITEM_PER_PAGE)
-#   Config.create(name='count_subpost', value=DEFAULT_SUBPOSTS_PER_PAGE)
-    print('Default configurations have been written into database.')
-
-    db.close()

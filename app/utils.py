@@ -7,8 +7,23 @@ from urllib.parse import quote
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+from flask import Response, jsonify
+import json
 
 now = datetime.datetime.now
+
+
+def json_response(result):
+    '''Generate JSON responses from the return values of functions of forum.py
+    @param tuple result (int, str[, dict])
+    @return Response
+    '''
+    formatted_result = {'code': result[0],
+                        'msg': result[1]
+                       }
+    if len(result) == 3 and result[2]:
+        formatted_result['data'] = result[2]
+    return Response(json.dumps(formatted_result), mimetype='application/json')
 
 
 # reserved for l10n

@@ -5,7 +5,7 @@
 {% endmacro %}
 
 {% macro field(name, label, desc, type='text', min=0, max=0, required=false, maxlength=0) %}
-{% if name == 'captcha' %}<img class="captcha_image" src="/captcha/get" /><br/>{% endif %}
+{% if name == 'captcha' %}<img class="captcha_image" src="{{ url_for('main.captcha_get') }}" /><br/>{% endif %}
 <input type="{{ type }}" name="{{ name }}" aria-label="{{ label }}" placeholder="{{ label }}" {% if min %}data-min="{{ min }}"{% endif %} {% if max %}data-max="{{ max }}"{% endif %} {% if required %}required="required"{% endif %} {% if maxlength %}maxlength="{{ maxlength }}"{% endif %} {% if name == 'captcha' %}autocomplete="off"{% endif %} />
 {# Tip: Don't add a element here! Input.nextElementSibling() is used to show validation message. #}
 {{ description(desc) }}
