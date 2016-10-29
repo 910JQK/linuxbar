@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 
-
 import datetime
 import random
 import math
 import re
 from html import escape
 
-
-from db import *
-from utils import *
-from utils import _
-from validation import sha256_regex
+from .models import *
+from .utils import *
+from .utils import _
+from .validation import sha256_regex
 
 
 def _(string):

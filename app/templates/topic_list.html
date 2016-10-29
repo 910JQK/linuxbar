@@ -74,9 +74,9 @@
 	 if(has_form) {
 	     form_controller = new AjaxForm(
 		 add_topic_form,
-		 '{{ url_for('topic_add') }}',
+		 '{{ url_for("api.topic_add") }}',
 		 false,
-		 '{% if not index %}{{ url_for('board', name=board) }}{% endif %}'
+		 '{% if not index %}{{ url_for("main.board", name=board) }}{% endif %}'
 	     );
 	     init_validation(true);
 	 }

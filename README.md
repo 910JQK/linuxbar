@@ -33,8 +33,9 @@ As it is still under development, currently, we use Sqlite instead of MySQL for 
 
 Run it:
 
-    $ python3 db.py # create database data.db (sqlite3)
-    $ python3 app.py # run app, then goto http://localhost:5000
+    $ pip install -r requirements/dev.txt
+    $ python3 manage.py init_db # create database data.db (sqlite3)
+    $ python3 manage.py runserver -d # run app, then goto http://localhost:5000
 
 ## TODO
 
