@@ -708,8 +708,10 @@ def admin_add(uid):
             return json_response(check_site)
         if check_board[0] != 0:
             return json_response(check_board)
-        if check_site[2]['admin']
-           or (check_board[2]['admin'] and check_board[2]['level'] == 0):
+        if (
+                check_site[2]['admin']
+                or (check_board[2]['admin'] and check_board[2]['level'] == 0)
+            ):
             return json_response(forum.admin_add(uid, board, int(level)) )
         else:
             return json_response((254, _('Permission denied.')) )
@@ -747,8 +749,10 @@ def admin_remove(uid):
             return json_response(check_site)
         if check_board[0] != 0:
             return json_response(check_board)
-        if check_site[2]['admin']
-           or (check_board[2]['admin'] and check_board[2]['level'] == 0):
+        if (
+                check_site[2]['admin']
+                or (check_board[2]['admin'] and check_board[2]['level'] == 0)
+           ):
             return json_response(forum.admin_remove(uid, board))
         else:
             return json_response((254, _('Permission denied.')) )
