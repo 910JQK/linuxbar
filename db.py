@@ -170,8 +170,9 @@ class Image(BaseModel):
     date = DateTimeField(index=True)
 
 
-tables = [Config, User, Salt, PasswordReset, SiteAdmin, Board, Ban, BanGlobal,
-          BoardAdmin, Topic, Post, Subpost, AtFromPost, AtFromSubpost, Image]
+tables = [Config, User, Salt, UserInfo, PasswordReset, SiteAdmin, Board, Ban,
+          BanGlobal, BoardAdmin, Topic, Post, Subpost, AtFromPost,
+          AtFromSubpost, Image]
 
 
 if __name__ == '__main__':
