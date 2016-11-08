@@ -18,15 +18,13 @@ user = Blueprint(
 
 login_manager = LoginManager()
 login_manager.login_view = 'user.login'
+login_manager.login_message = _('Please sign in to access this page.')
+login_manager.REMEMBER_COOKIE_HTTPONLY = True
 
 
 @login_manager.user_loader
 def load_user(uid):
     return User.get(User.id == int(uid))
-
-
-def init_app(app):
-    login_manager.init_app(app)
 
 
 def send_token_activation(user, token):
