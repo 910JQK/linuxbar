@@ -1,3 +1,4 @@
+import datetime
 from peewee import *
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -14,6 +15,9 @@ db = SqliteDatabase('data.db')
 class Config(BaseModel):
     name = CharField(max_length=64, primary_key=True)
     value = CharField(max_length=255)
+    @classmethod
+    def get(Config, name):
+        return Config.get(Config.name == name).value
 
 
 class User(UserMixin, BaseModel):
@@ -53,15 +57,16 @@ class PasswordResetToken(BaseModel):
     expire_date = DateTimeField()
     token_hash = FixedCharField(max_length=64, index=True)
     def set_token(self, token):
+        self.expire_date = now() + datetime.timedelta(minutes=20)
         self.token_hash = sha256(token)
     def check_token(self, token):
         date = now()
         if date < expire_date:
+            self.expire_date = date
+            self.save()
             if self.token_hash == sha256(token):
                 return True
             else:
-                self.expire_date = date
-                self.save()
                 return False
         else:
             return False
