@@ -6,10 +6,10 @@ from wtforms.validators import ValidationError
 from utils import _
 
 
-username_regex = re.compile('[^<>"\'/\\\*@]{3,32}')
-token_regex = re.compile('[0-9A-Za-z]{16}')
-sha256_regex = re.compile('[0123456789abcdef]{64}')
-board_slug_regex = re.compile('[0-9A-Za-z-]{1,32}')
+REGEX_USERNAME = re.compile('[^<>"\'/\\\*@]{3,32}')
+REGEX_SHA256 = re.compile('[0123456789abcdef]{64}')
+REGEX_BOARD_SLUG = re.compile('[0-9A-Za-z-]{1,32}')
+REGEX_TOKEN = re.compile('[0-9A-Za-z]{16}')
 
 
 def size_validator(min=0, max=0):
