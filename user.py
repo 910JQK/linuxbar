@@ -64,26 +64,31 @@ def send_token_reset_password(user, token):
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        conflict = User.select().where(
-            User.mail == form.mail.data
-            | User.name == form.name.data
-        )
-        if not conflict:
-            user = User(
-                mail = form.mail.data,
-                name = form.name.data,
-                date_register = now()
+        if session.get('captcha') == form.captcha.data:
+            conflict = User.select().where(
+                User.mail == form.mail.data
+                | User.name == form.name.data
             )
-            token = get_token()
-            user.set_activation_token(token)
-            user.save()
-            send_token_activation(user, token)
-        else:
-            if conflict.mail == form.mail.data:
-                flash(_('Email address already in use.'))
+            if not conflict:
+                user = User(
+                    mail = form.mail.data,
+                    name = form.name.data,
+                    date_register = now()
+                )
+                token = gen_token()
+                user.set_activation_token(token)
+                user.save()
+                send_token_activation(user, token)
+                flash(_('Signed up successfully'))
+                redirect(url_for('.login'))
             else:
-                flash(_('Name already in use.'))
-    return render_template('register.html')
+                if conflict.mail == form.mail.data:
+                    flash(_('Email address already in use.'))
+                else:
+                    flash(_('Name already in use.'))
+        else:
+            flash(_('Wrong captcha.'))
+    return render_template('register.html', form=form)
 
 
 @user.route('/activate/<int:uid>/<token>')
@@ -117,25 +122,25 @@ def login():
             return redirect(request.args.get('next') or url_for('index'))
         else:
             flash('Invalid login name or password.')
-    return render_template('login.html')
+    return render_template('login.html', form=form)
 
 
 @user.route('/get-token')
 def get_token():
     form = GetTokenForm()
     if form.validate_on_submit():
-        uid = form.uid.data
-        user = find_record(User, id=uid)
+        mail = form.mail.data
+        user = find_record(User, mail=mail)
         if user:
             token = gen_token()
             token_record = PasswordResetToken(user=user)
             token_record.set_token(token)
             token_record.save()
             send_token_password_reset(user, token)
-            return redirect(url_for('.password_reset', uid=uid))
+            return redirect(url_for('.password_reset', uid=user.uid))
         else:
             flash('No such user.')
-    return render_template('get_token.html')
+    return render_template('get_token.html', form=form)
 
 
 @user.route('/password-reset/<int:uid>')
@@ -153,7 +158,7 @@ def password_reset(uid):
                 flash('Invalid token.')
         else:
             flash('No such user.')
-    return render_template('password_reset.html')
+    return render_template('password_reset.html', uid=uid, form=form)
 
 
 @user.route('/logout')
