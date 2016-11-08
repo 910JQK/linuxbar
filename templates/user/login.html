@@ -1,0 +1,17 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import field, submit %}
+
+{% block title %}{{ _('Sign in - %(site)s', site=config['site_name']) }}{% endblock %}
+{% block body_class %}box_center{% endblock %}
+{% block form_title %}{{ _('Sign in') }}{% endblock %}
+
+{% block form %}
+  {{ field(form.login_name) }}
+  {{ field(form.password) }}
+  {{ field(form.remember_me) }}
+{% endblock %}
+
+
+{% block buttons %}
+  {{ submit(_('Sign in')) }}
+{% endblock %}

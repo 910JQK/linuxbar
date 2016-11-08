@@ -1,0 +1,23 @@
+{% macro description(desc, errors) %}
+  {% if not errors %}
+    <p class="field_desc">{{ desc }}</p>
+  {% else %}
+    <p class="field_desc err_desc">{{ errors[0] | string }}</p>
+  {% endif %}
+{% endmacro %}
+
+
+{% macro field(wtf_field) %}
+  {% if wtf_field.type == 'BooleanField' %}
+    {{ wtf_field(**{'aria-label': wtf_field.label.text, 'autocomplete': 'off'}) }}
+    {{ wtf_field.label }}
+  {% else %}
+    {{ wtf_field(**{'placeholder': wtf_field.label.text, 'aria-label': wtf_field.label.text, 'autocomplete': 'off'}) }}
+    {{ description(wtf_field.description, errors=wtf_field.errors) }}
+  {% endif %}
+{% endmacro %}
+
+
+{% macro submit(label) %}
+  <input type="submit" class="submit_btn" value="{{ label }}" />
+{% endmacro %}
