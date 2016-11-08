@@ -1,0 +1,168 @@
+/* TODO: Firstly make style for PC and then make style for mobile devices. */
+/* TODO: Use different layout for different viewport sizes. */
+
+body {
+    font-family: sans-serif;
+    background-color: hsl(0, 0%, 90%);
+}
+
+a {
+    text-decoration: none;
+    outline: none;
+    color: hsl(233, 80%, 48%);
+}
+
+input[type="text"], input[type="password"] {
+    width: 20em;
+}
+
+button::-moz-focus-inner, input[type="submit"]::-moz-focus-inner {
+    border: 0px;
+}
+
+button, input[type="submit"] {
+    background-color: hsl(0, 0%, 95%);
+    background-image: linear-gradient(to bottom, hsl(0, 0%, 95%), hsl(0, 0%, 90%));
+    color: hsl(0, 0%, 30%);
+    border: 1px solid hsl(0, 0%, 80%);
+    border-radius: 3px;
+    box-shadow: 0 1px 2px hsla(0, 0%, 40%, 0.3);
+}
+
+button:hover:enabled, input[type="submit"]:hover:enabled {
+    cursor: pointer;
+    background-image: linear-gradient(to bottom, hsl(0, 0%, 98%), hsl(0, 0%, 95%));
+}
+
+button:active:enabled, input[type="submit"]:active:enabled {
+    background-image: radial-gradient(hsl(0, 0%, 98%), hsl(0, 0%, 85%));
+}
+
+button:focus, input[type="submit"]:focus {
+    border: 1px solid hsl(0, 0%, 50%);
+    outline: none;
+}
+
+button:disabled, input[type="submit"]:disabled {
+    color: hsl(0, 0%, 60%);
+}
+
+body.box_center {
+    margin: 0px;
+    width: 100vw;
+    height: 100vh;
+}
+
+.box_center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+body.box_horizontal_center {
+    margin: 0px;
+}
+
+.box_horizontal_center {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.box_horizontal_center > #container {
+    margin: 3.6em 0em;
+}
+
+#container {
+    position: relative;
+    padding: 2.5em;
+    box-shadow: 0 3px 9px hsla(0, 0%, 40%, 0.3);
+    background-color: white;
+    background-image: linear-gradient(to bottom, hsl(0, 0%, 98%), hsl(0, 0%, 99%));
+}
+
+#container > #top_left {
+    position: absolute;
+    top: 0.5em;
+    left: 1em;
+}
+
+#container > #top_right {
+    position: absolute;
+    top: 0.5em;
+    right: 1em;
+}
+
+#container > #top_right * {
+    vertical-align: middle;
+}
+
+#container > #top_right a {
+    color: hsl(0, 0%, 48%);
+}
+
+span.separator {
+    color: hsl(0, 0%, 60%);
+    margin: 0em 0.1em;
+}
+
+code, .code_block {
+    background-color: hsl(0, 0%, 93%);
+    border-radius: 0.4em;
+}
+
+code {
+    padding: 0.2em;
+}
+
+.code_block {
+    margin: 0.2em 0em;
+    padding: 0.2em;
+}
+
+.page_link {
+    font-size: 120%;
+    padding: 0.1em 0.5em;
+    margin: 0em 0.1em;
+    border: 1px solid hsl(0, 0%, 80%);
+    background-color: hsl(0, 0%, 97%);
+}
+
+.page_current { color: inherit; }
+
+/* for Ajax pager */
+.page_link:not(.page_current) { cursor: pointer; }
+
+.editor_toolbar .icon {
+    width: 1em;
+    height: 1em;
+}
+
+.bold { font-weight: bold; }
+
+.hidden { display: none !important; }
+
+.red_text { color: hsl(0, 90%, 50%); }
+
+.table_wrapper { display: flex; justify-content: center; }
+
+.empty_notice > span {
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+.menu {
+    border: 1px solid gray;
+    border-top: none;
+}
+
+.menu_item {
+    padding: 0.1em 0.25em;
+    color: hsl(233, 80%, 48%);
+    background-color: hsl(0, 0%, 98%);
+    cursor: pointer;
+}
+
+.menu_item:hover {
+    background-color: hsl(0, 0%, 90%);
+}
