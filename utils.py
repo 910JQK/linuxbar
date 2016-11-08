@@ -1,5 +1,10 @@
 import hashlib
 import datetime
+import threading
+from html import escape
+from urllib.parse import quote
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 now = datetime.datetime.now
@@ -16,6 +21,25 @@ def sha256(string):
 
 def gen_token():
     return ''.join(random.choice(TOKEN_CHARS) for i in range(0, 16))
+
+
+def url_quote(text):
+    return quote(text, encoding='utf8')
+
+
+def find_record_all(table, *args, **kwargs):
+    query = table.select().where(
+        *((getattr(table, field) == value) for field, value in kwargs.items())
+    )
+    for record in query:
+        yield record
+
+
+def find_record(table, *args, **kwargs):
+    try:
+        return find_record_all(table, *args, **kwargs).__next__()
+    except StopIteration:
+        return None
 
 
 class EmailThread(threading.Thread):
