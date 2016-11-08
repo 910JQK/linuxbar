@@ -12,6 +12,11 @@ from config import DEFAULT_CONFIG
 db = SqliteDatabase('data.db')
 
 
+class BaseModel(Model):
+    class Meta:
+        database = db
+
+
 class Config(BaseModel):
     name = CharField(max_length=64, primary_key=True)
     value = CharField(max_length=255)
@@ -79,6 +84,6 @@ def init_db():
     print('Creating tables...')
     db.create_tables(tables)
     print('Writing default configurations...')
-    for (name, value) in DEFAULT_CONFIG:
+    for (name, value) in DEFAULT_CONFIG.items():
         Config.create(name=name, value=value)
     print('Database initialized successfully.')

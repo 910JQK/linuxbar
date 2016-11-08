@@ -48,7 +48,7 @@ class RegisterForm(FlaskForm):
             PasswordConfirm()
         ],
         description = _('Repeat your password to confirm.')
-    ])
+    )
     captcha = StringField(
         _('Captcha'),
         validators = [
@@ -71,6 +71,12 @@ class LoginForm(FlaskForm):
             Required()
         ],
         description = _("Your password. Won't be encrypted if not using HTTPS.")
+    )
+    remember_me = BooleanField(
+        _('Remember me'),
+        validators = [
+            Required()
+        ]        
     )
 
 
@@ -98,7 +104,7 @@ class PasswordResetForm(FlaskForm):
             PasswordConfirm()
         ],
         description = _('Repeat your password to confirm.')
-    ])
+    )
     token = StringField(
         _('Token'),
         validators = [

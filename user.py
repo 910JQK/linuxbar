@@ -12,7 +12,7 @@ from models import Config, User
 
 
 user = Blueprint(
-    'user', __name__, template_folder='templates/user', static_folder='static'
+    'user', __name__, template_folder='templates', static_folder='static'
 )
 
 
@@ -86,7 +86,7 @@ def register():
                     flash(_('Name already in use.'))
         else:
             flash(_('Wrong captcha.'))
-    return render_template('register.html', form=form)
+    return render_template('user/register.html', form=form)
 
 
 @user.route('/activate/<int:uid>/<token>')
@@ -120,7 +120,7 @@ def login():
             return redirect(request.args.get('next') or url_for('index'))
         else:
             flash('Invalid login name or password.')
-    return render_template('login.html', form=form)
+    return render_template('user/login.html', form=form)
 
 
 @user.route('/get-token')
@@ -138,7 +138,7 @@ def get_token():
             return redirect(url_for('.password_reset', uid=user.uid))
         else:
             flash('No such user.')
-    return render_template('get_token.html', form=form)
+    return render_template('render/get_token.html', form=form)
 
 
 @user.route('/password-reset/<int:uid>')
@@ -156,7 +156,7 @@ def password_reset(uid):
                 flash('Invalid token.')
         else:
             flash('No such user.')
-    return render_template('password_reset.html', uid=uid, form=form)
+    return render_template('user/password_reset.html', uid=uid, form=form)
 
 
 @user.route('/logout')
