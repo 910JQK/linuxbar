@@ -16,6 +16,14 @@ input[type="text"], input[type="password"] {
     width: 20em;
 }
 
+input[type="checkbox"] {
+    vertical-algin: text-bottom;
+}
+
+input[type="checkbox"] + label {
+    color: hsl(0, 0%, 15%)
+}
+
 button::-moz-focus-inner, input[type="submit"]::-moz-focus-inner {
     border: 0px;
 }

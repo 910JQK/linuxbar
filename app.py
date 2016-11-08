@@ -5,6 +5,7 @@ import os
 from flask import Flask
 from flask_babel import Babel
 from flask_login import current_user
+from flask_wtf.csrf import CsrfProtect
 
 
 from models import Config
@@ -14,6 +15,7 @@ from user import user, login_manager
 app = Flask(__name__)
 babel = Babel(app)
 login_manager.init_app(app)
+CsrfProtect(app)
 app.register_blueprint(user, url_prefix='/user')
 DEBUG = True
 
@@ -21,7 +23,7 @@ DEBUG = True
 @app.context_processor
 def inject_data():
     def get_config(name):
-        return Config.get(name)
+        return Config.Get(name)
     return dict(get_config=get_config)
 
 

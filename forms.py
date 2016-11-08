@@ -73,10 +73,7 @@ class LoginForm(FlaskForm):
         description = _("Your password. Won't be encrypted if not using HTTPS.")
     )
     remember_me = BooleanField(
-        _('Remember me'),
-        validators = [
-            Required()
-        ]        
+        _('Remember me')
     )
 
 

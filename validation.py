@@ -13,8 +13,8 @@ REGEX_TOKEN = re.compile('[0-9A-Za-z]{16}')
 
 
 def SizeRange(min=0, max=0):
-    def check(field):
-        label = field.label
+    def check(form, field):
+        label = field.label.text
         string = field.data
         size = len(string.encode('utf8'))
         if(min and size < min):

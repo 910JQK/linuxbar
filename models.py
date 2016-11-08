@@ -21,7 +21,7 @@ class Config(BaseModel):
     name = CharField(max_length=64, primary_key=True)
     value = CharField(max_length=255)
     @classmethod
-    def get(Config, name):
+    def Get(Config, name):
         return Config.get(Config.name == name).value
 
 

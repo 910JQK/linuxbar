@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, redirect, render_template, url_for
+from flask import Blueprint, request, flash, redirect, render_template, url_for, abort
 from flask_login import (
     LoginManager, current_user, login_required, login_user, logout_user
 )
@@ -29,11 +29,11 @@ def load_user(uid):
 
 def send_token_activation(user, token):
     url = (
-        Config.get('site_url') + url_for('.activate', uid=user.id, token=token)
+        Config.Get('site_url') + url_for('.activate', uid=user.id, token=token)
     )
     send_mail(
-        subject = _('Activation Mail - %s') % Config.get('site_name'),
-        addr_from = Config.get('mail_addr'),
+        subject = _('Activation Mail - %s') % Config.Get('site_name'),
+        addr_from = Config.Get('mail_addr'),
         addr_to = user.mail,
         content = _('Activation link for %s: ') % user.name + url,
         html = _(
@@ -50,9 +50,9 @@ def send_token_reset_password(user, token):
     send_mail(
         subject = (
             _('Reset Password for %s - %s')
-            % (user.name, Config.get('site_name'))
+            % (user.name, Config.Get('site_name'))
         ),
-        addr_from = Config.get('mail_addr'),
+        addr_from = Config.Get('mail_addr'),
         addr_to = user.mail,
         content = _('Your token is: %s') % token
     )
@@ -91,7 +91,7 @@ def register():
 
 @user.route('/activate/<int:uid>/<token>')
 def activate(uid, token):
-    if TOKEN_REGEX.fullmatch(token):
+    if REGEX_TOKEN.fullmatch(token):
         user = find_record(User, id=uid)
         if user:
             if user.activate(token):
@@ -110,20 +110,20 @@ def activate(uid, token):
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.select().where(
+        query = User.select().where(
             User.mail == form.login_name.data
             | User.name == form.login_name.data
         )
-        if user and user.check_password(form.password.data):
-            login_user(user, form.remember_me.data)
-            flash('Signed in successfully.')
+        if query and query.get().check_password(form.password.data):
+            login_user(query.get(), form.remember_me.data)
+            flash(_('Signed in successfully.'))
             return redirect(request.args.get('next') or url_for('index'))
         else:
-            flash('Invalid login name or password.')
+            flash(_('Invalid login name or password.'))
     return render_template('user/login.html', form=form)
 
 
-@user.route('/get-token')
+@user.route('/get-token', methods=['GET', 'POST'])
 def get_token():
     form = GetTokenForm()
     if form.validate_on_submit():
@@ -137,11 +137,11 @@ def get_token():
             send_token_password_reset(user, token)
             return redirect(url_for('.password_reset', uid=user.uid))
         else:
-            flash('No such user.')
+            flash(_('No such user.'))
     return render_template('render/get_token.html', form=form)
 
 
-@user.route('/password-reset/<int:uid>')
+@user.route('/password-reset/<int:uid>', methods=['GET', 'POST'])
 def password_reset(uid):
     form = PasswordResetForm()
     if form.validate_on_submit():
@@ -150,12 +150,12 @@ def password_reset(uid):
             token_record = find_record(PasswordResetToken, user=user)
             if token_record and token_record.check_token(token):
                 user.set_password(form.password.data)
-                flash('Password reset successfully.')
+                flash(_('Password reset successfully.'))
                 return redirect(url_for('.login'))
             else:
-                flash('Invalid token.')
+                flash(_('Invalid token.'))
         else:
-            flash('No such user.')
+            flash(_('No such user.'))
     return render_template('user/password_reset.html', uid=uid, form=form)
 
 
@@ -163,5 +163,5 @@ def password_reset(uid):
 @login_required
 def logout():
     logout_user()
-    flash('Signed out successfully.')
+    flash(_('Signed out successfully.'))
     return redirect(url_for('index'))

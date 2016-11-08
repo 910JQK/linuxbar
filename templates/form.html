@@ -7,6 +7,7 @@
     <style>
      #container > h1 { margin-top: 0px; }
      .field_desc { color: gray; font-size: 75%; text-align: left; }
+     .field_desc.err { color: hsl(0, 90%, 45%); }
      .message { margin: auto; max-width: 20em; }
      .form_title, .message, #form, #container-buttons { text-align: center; }
      #container-buttons { margin-top: 0.75em; }
@@ -25,13 +26,21 @@
   <body class="{% block body_class %}{% endblock %}">
     <div id="container">
       <h1 class="form_title">{% block form_title %}{% endblock %}</h1>
-      <form id="form" {% block form_options %}{% endblock %}>
-	  {% block form %}
+      <form id="form" method="post"{% block form_options %}{% endblock %}>
+	{{ form.csrf_token() }}
+	{% block form %}
+	{% endblock %}
+	<p class="message">
+	  {% with messages = get_flashed_messages() %}
+	    {% if messages %}
+	      {{ messages[0] }}
+	    {% endif %}
+	  {% endwith %}
+	</p>
+	<div id="container-buttons">
+	  {% block buttons %}
 	  {% endblock %}
-	  <div id="container-buttons">
-	      {% block buttons %}
-	      {% endblock %}
-	  </div>
+	</div>	  
       </form>
     </div>
   </body>

@@ -2,7 +2,7 @@
   {% if not errors %}
     <p class="field_desc">{{ desc }}</p>
   {% else %}
-    <p class="field_desc err_desc">{{ errors[0] | string }}</p>
+    <p class="field_desc err">{{ errors[0] | string }}</p>
   {% endif %}
 {% endmacro %}
 
