@@ -12,7 +12,7 @@ REGEX_BOARD_SLUG = re.compile('[0-9A-Za-z-]{1,32}')
 REGEX_TOKEN = re.compile('[0-9A-Za-z]{16}')
 
 
-def size_validator(min=0, max=0):
+def SizeRange(min=0, max=0):
     def check(field):
         label = field.label
         string = field.data
