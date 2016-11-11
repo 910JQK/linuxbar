@@ -17,7 +17,7 @@ input[type="text"], input[type="password"] {
 }
 
 input[type="checkbox"] {
-    vertical-algin: text-bottom;
+    vertical-align: text-bottom;
 }
 
 input[type="checkbox"] + label {

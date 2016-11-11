@@ -22,9 +22,7 @@ DEBUG = True
 
 @app.context_processor
 def inject_data():
-    def get_config(name):
-        return Config.Get(name)
-    return dict(get_config=get_config)
+    return {'get_config': Config.Get}
 
 
 @app.route('/')
@@ -40,7 +38,7 @@ def index():
 
 
 def main():
-    app.secret_key = os.urandom(24)
+    app.secret_key = b'\xe9\xd3\x8fV0n\xcajX~P%*\xf1=O\xb7\xbc\xfa\xe5\xf5db'
     app.run(debug=DEBUG)
 
 
