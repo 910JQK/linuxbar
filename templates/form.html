@@ -8,7 +8,8 @@
      #container > h1 { margin-top: 0px; }
      .field_desc { color: gray; font-size: 75%; text-align: left; }
      .field_desc.err { color: hsl(0, 90%, 45%); }
-     .message { margin: auto; max-width: 20em; }
+     .message_list { margin: auto; padding: 0; max-width: 20em; }
+     .message_list > li { list-style-type: none; } 
      .form_title, .message, #form, #container-buttons { text-align: center; }
      #container-buttons { margin-top: 0.75em; }
      #container-buttons > button { margin: 0em 1em; }
@@ -30,13 +31,15 @@
 	{{ form.csrf_token() }}
 	{% block form %}
 	{% endblock %}
-	<p class="message">
-	  {% with messages = get_flashed_messages() %}
+	{% with messages = get_flashed_messages(with_categories=true) %}
+	  <ul class="message_list">
 	    {% if messages %}
-	      {{ messages[0] }}
+	      {% for category, message in messages %}
+		<li class="message {{ category }}">{{ message }}</li>
+	      {% endfor %}
 	    {% endif %}
-	  {% endwith %}
-	</p>
+	  </ul>
+	{% endwith %}
 	<div id="container-buttons">
 	  {% block buttons %}
 	  {% endblock %}

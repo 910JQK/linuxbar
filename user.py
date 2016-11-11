@@ -77,15 +77,15 @@ def register():
                 user.set_activation_token(token)
                 user.save()
                 send_token_activation(user, token)
-                flash(_('Signed up successfully'))
+                flash(_('Signed up successfully'), 'ok')
                 redirect(url_for('.login'))
             else:
                 if conflict.mail == form.mail.data:
-                    flash(_('Email address already in use.'))
+                    flash(_('Email address already in use.'), 'err')
                 else:
-                    flash(_('Name already in use.'))
+                    flash(_('Name already in use.'), 'err')
         else:
-            flash(_('Wrong captcha.'))
+            flash(_('Wrong captcha.'), 'err')
     return render_template('user/register.html', form=form)
 
 
@@ -95,14 +95,14 @@ def activate(uid, token):
         user = find_record(User, id=uid)
         if user:
             if user.activate(token):
-                flash(_('User %s activated successfully.') % user.name)
+                flash(_('User %s activated successfully.') % user.name, 'ok')
                 return redirect(url_for('.login'))
             else:
-                flash(_('Wrong activation token.'))
+                flash(_('Wrong activation token.'), 'err')
         else:
-            flash(_('No such user.'))
+            flash(_('No such user.'), 'err')
     else:
-        flash(_('Wrong token format.'))
+        flash(_('Wrong token format.'), 'err')
     return redirect(url_for('index'))
 
 
@@ -116,10 +116,10 @@ def login():
         )
         if query and query.get().check_password(form.password.data):
             login_user(query.get(), form.remember_me.data)
-            flash(_('Signed in successfully.'))
+            flash(_('Signed in successfully.'), 'ok')
             return redirect(request.args.get('next') or url_for('index'))
         else:
-            flash(_('Invalid login name or password.'))
+            flash(_('Invalid login name or password.'), 'err')
     return render_template('user/login.html', form=form)
 
 
@@ -137,7 +137,7 @@ def get_token():
             send_token_password_reset(user, token)
             return redirect(url_for('.password_reset', uid=user.uid))
         else:
-            flash(_('No such user.'))
+            flash(_('No such user.'), 'err')
     return render_template('render/get_token.html', form=form)
 
 
@@ -150,12 +150,12 @@ def password_reset(uid):
             token_record = find_record(PasswordResetToken, user=user)
             if token_record and token_record.check_token(token):
                 user.set_password(form.password.data)
-                flash(_('Password reset successfully.'))
+                flash(_('Password reset successfully.'), 'ok')
                 return redirect(url_for('.login'))
             else:
-                flash(_('Invalid token.'))
+                flash(_('Invalid token.'), 'err')
         else:
-            flash(_('No such user.'))
+            flash(_('No such user.'), 'err')
     return render_template('user/password_reset.html', uid=uid, form=form)
 
 
@@ -163,5 +163,5 @@ def password_reset(uid):
 @login_required
 def logout():
     logout_user()
-    flash(_('Signed out successfully.'))
+    flash(_('Signed out successfully.'), 'ok')
     return redirect(url_for('index'))

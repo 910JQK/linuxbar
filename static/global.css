@@ -174,3 +174,7 @@ code {
 .menu_item:hover {
     background-color: hsl(0, 0%, 90%);
 }
+
+
+.message.ok { color: hsl(100, 80%, 45%); }
+.message.err { color: hsl(0, 90%, 45%); }
