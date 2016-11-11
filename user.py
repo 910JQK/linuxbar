@@ -116,14 +116,19 @@ def login():
             (User.mail == form.login_name.data)
             | (User.name == form.login_name.data)
         )
-        if query and query.get().check_password(form.password.data):
-            user = query.get()            
+        user = bool(query) and query.get()
+        if user and user.check_password(form.password.data):
             if login_user(user, form.remember_me.data):
+                user.date_last_login = now()
+                user.save()
                 flash(_('Signed in successfully.'), 'ok')
                 return redirect(request.args.get('next') or url_for('index'))
             else:
                 flash(_('This user is inactive.'), 'err')
         else:
+            if user:
+                user.date_last_fail = now()
+                user.save()
             flash(_('Invalid login name or password.'), 'err')
     return render_template('user/login.html', form=form)
 
