@@ -8,6 +8,11 @@
 
 
 {% macro field(wtf_field) %}
+  {% if wtf_field.name == 'captcha' %}
+    <div class="captcha_wrapper">
+      <img class="captcha_image" src="{{ url_for('get_captcha') }}" />
+    </div>
+  {% endif %}
   {% if wtf_field.type == 'BooleanField' %}
     {{ wtf_field(**{'aria-label': wtf_field.label.text, 'autocomplete': 'off'}) }}
     {{ wtf_field.label }}

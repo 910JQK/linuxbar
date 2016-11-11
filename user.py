@@ -1,4 +1,4 @@
-from flask import Blueprint, request, flash, redirect, render_template, url_for, abort
+from flask import Blueprint, session, request, flash, redirect, render_template, url_for, abort
 from flask_login import (
     LoginManager, current_user, login_required, login_user, logout_user
 )
@@ -7,7 +7,7 @@ from flask_login import (
 from utils import _
 from utils import *
 from validation import REGEX_TOKEN
-from forms import LoginForm
+from forms import LoginForm, RegisterForm
 from models import Config, User
 
 
@@ -61,6 +61,7 @@ def send_token_reset_password(user, token):
 @user.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
+    signed_up = False
     if form.validate_on_submit():
         if session.get('captcha') == form.captcha.data:
             conflict = User.select().where(
@@ -75,10 +76,11 @@ def register():
                 )
                 token = gen_token()
                 user.set_activation_token(token)
+                user.set_password(form.password.data)
                 user.save()
                 send_token_activation(user, token)
-                flash(_('Signed up successfully'), 'ok')
-                redirect(url_for('.login'))
+                flash(_('Signed up successfully. Activation mail has been sent to you. Please login after activation.'), 'ok')
+                signed_up = True
             else:
                 if conflict.mail == form.mail.data:
                     flash(_('Email address already in use.'), 'err')
@@ -86,7 +88,7 @@ def register():
                     flash(_('Name already in use.'), 'err')
         else:
             flash(_('Wrong captcha.'), 'err')
-    return render_template('user/register.html', form=form)
+    return render_template('user/register.html', form=form, signed_up=signed_up)
 
 
 @user.route('/activate/<int:uid>/<token>')
@@ -111,13 +113,16 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         query = User.select().where(
-            User.mail == form.login_name.data
-            | User.name == form.login_name.data
+            (User.mail == form.login_name.data)
+            | (User.name == form.login_name.data)
         )
         if query and query.get().check_password(form.password.data):
-            login_user(query.get(), form.remember_me.data)
-            flash(_('Signed in successfully.'), 'ok')
-            return redirect(request.args.get('next') or url_for('index'))
+            user = query.get()            
+            if login_user(user, form.remember_me.data):
+                flash(_('Signed in successfully.'), 'ok')
+                return redirect(request.args.get('next') or url_for('index'))
+            else:
+                flash(_('This user is inactive.'), 'err')
         else:
             flash(_('Invalid login name or password.'), 'err')
     return render_template('user/login.html', form=form)
@@ -138,7 +143,7 @@ def get_token():
             return redirect(url_for('.password_reset', uid=user.uid))
         else:
             flash(_('No such user.'), 'err')
-    return render_template('render/get_token.html', form=form)
+    return render_template('user/get_token.html', form=form)
 
 
 @user.route('/password-reset/<int:uid>', methods=['GET', 'POST'])

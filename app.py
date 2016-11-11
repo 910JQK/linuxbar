@@ -2,12 +2,14 @@
 
 
 import os
-from flask import Flask
+import io
+from flask import Flask, Response, session
 from flask_babel import Babel
 from flask_login import current_user
 from flask_wtf.csrf import CsrfProtect
 
 
+import captcha
 from models import Config
 from user import user, login_manager
 
@@ -30,11 +32,22 @@ def index():
     # just for testing
     html = '<!DOCTYPE html><title>Test</title><h1>It just works, but very ugly.</h1>'
     if current_user.is_authenticated:
-        html += '<div><span>%d</span><span>%s</span><a href="/user/logout">Logout</a></div>' % current_user.id, current_user.name
+        html += '<div><span>%d</span><span> / </span><span>%s</span></div><div><a href="/user/logout">Logout</a></div>' % (current_user.id, current_user.name)
     else:
         html += '<div><a target="_blank" href="/user/register">Register</a></div>'
         html += '<div><a target="_blank" href="/user/login">Sign in</a></div>'
     return html
+
+
+@app.route('/get-captcha')
+def get_captcha():
+    code = captcha.gen_captcha()
+    session['captcha'] = code.lower()
+    image = captcha.gen_image(code)
+    output = io.BytesIO()
+    image.save(output, format='PNG')
+    image_data = output.getvalue()
+    return Response(image_data, mimetype='image/png')
 
 
 def main():

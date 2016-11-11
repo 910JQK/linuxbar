@@ -1,0 +1,23 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import field, submit %}
+
+{% block title %}{{ _('Sign up - %(site)s', site=get_config('site_name')) }}{% endblock %}
+{% block body_class %}box_horizontal_center{% endblock %}
+{% block form_title %}{{ _('Sign up') }}{% endblock %}
+
+{% block form %}
+  <fieldset{% if signed_up %} disabled="disabled"{% endif %}>
+    {{ field(form.mail) }}
+    {{ field(form.name) }}
+    {{ field(form.password) }}
+    {{ field(form.confirm) }}
+    {{ field(form.captcha) }}
+  </fieldset>
+{% endblock %}
+
+
+{% block buttons %}
+  {% if not signed_up %}
+    {{ submit(_('Sign up')) }}
+  {% endif %}
+{% endblock %}

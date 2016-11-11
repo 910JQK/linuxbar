@@ -53,7 +53,8 @@ class RegisterForm(FlaskForm):
         _('Captcha'),
         validators = [
             Required(), Regexp(CAPTCHA_REGEX, message=_('Invalid captcha'))
-        ]
+        ],
+        description = 'Input the text on the image.'
     )
 
 

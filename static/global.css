@@ -12,6 +12,8 @@ a {
     color: hsl(233, 80%, 48%);
 }
 
+fieldset { border: none; }
+
 input[type="text"], input[type="password"] {
     width: 20em;
 }
