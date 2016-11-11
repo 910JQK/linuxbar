@@ -1,0 +1,15 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import field, submit %}
+
+{% block title %}{{ _('Reset Password - %(site)s', site=get_config('site_name')) }}{% endblock %}
+{% block body_class %}box_center{% endblock %}
+{% block form_title %}{{ _('Verify your identity') }}{% endblock %}
+
+{% block form %}
+  {{ field(form.mail) }}
+{% endblock %}
+
+
+{% block buttons %}
+  {{ submit(_('Send email')) }}
+{% endblock %}

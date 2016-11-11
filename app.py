@@ -36,6 +36,7 @@ def index():
     else:
         html += '<div><a target="_blank" href="/user/register">Register</a></div>'
         html += '<div><a target="_blank" href="/user/login">Sign in</a></div>'
+        html += '<div><a target="_blank" href="/user/get-token">Reset Password</a></div>'
     return html
 
 

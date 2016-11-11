@@ -7,8 +7,8 @@ from flask_login import (
 from utils import _
 from utils import *
 from validation import REGEX_TOKEN
-from forms import LoginForm, RegisterForm
-from models import Config, User
+from forms import LoginForm, RegisterForm, GetTokenForm, PasswordResetForm
+from models import Config, User, PasswordResetToken
 
 
 user = Blueprint(
@@ -46,7 +46,7 @@ def send_token_activation(user, token):
     )
 
 
-def send_token_reset_password(user, token):
+def send_token_password_reset(user, token):
     send_mail(
         subject = (
             _('Reset Password for %s - %s')
@@ -135,12 +135,21 @@ def get_token():
         mail = form.mail.data
         user = find_record(User, mail=mail)
         if user:
-            token = gen_token()
-            token_record = PasswordResetToken(user=user)
-            token_record.set_token(token)
-            token_record.save()
-            send_token_password_reset(user, token)
-            return redirect(url_for('.password_reset', uid=user.uid))
+            old_token_record = find_record(PasswordResetToken, user=user)
+            if not old_token_record or old_token_record.expire_date < now():
+                token = gen_token()
+                token_record = (
+                    old_token_record or PasswordResetToken(user=user)
+                )
+                token_record.set_token(token)
+                if old_token_record:
+                    token_record.save()
+                else:
+                    token_record.save(force_insert=True)
+                send_token_password_reset(user, token)
+                return redirect(url_for('.password_reset', uid=user.id))
+            else:
+                flash(_('A valid token has already been sent to you.'), 'err')
         else:
             flash(_('No such user.'), 'err')
     return render_template('user/get_token.html', form=form)
@@ -150,18 +159,20 @@ def get_token():
 def password_reset(uid):
     form = PasswordResetForm()
     if form.validate_on_submit():
+        token = form.token.data
         user = find_record(User, id=uid)
         if user:
             token_record = find_record(PasswordResetToken, user=user)
             if token_record and token_record.check_token(token):
                 user.set_password(form.password.data)
+                user.save()
                 flash(_('Password reset successfully.'), 'ok')
                 return redirect(url_for('.login'))
             else:
                 flash(_('Invalid token.'), 'err')
         else:
             flash(_('No such user.'), 'err')
-    return render_template('user/password_reset.html', uid=uid, form=form)
+    return render_template('user/password_reset.html', form=form)
 
 
 @user.route('/logout')

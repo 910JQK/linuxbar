@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 
 from utils import *
-from config import DEFAULT_CONFIG
+from config import DEFAULT_CONFIG, TOKEN_LIFETIME
 
 
 # use sqlite temporarily
@@ -62,11 +62,11 @@ class PasswordResetToken(BaseModel):
     expire_date = DateTimeField()
     token_hash = FixedCharField(max_length=64, index=True)
     def set_token(self, token):
-        self.expire_date = now() + datetime.timedelta(minutes=20)
+        self.expire_date = now() + datetime.timedelta(minutes=TOKEN_LIFETIME)
         self.token_hash = sha256(token)
     def check_token(self, token):
         date = now()
-        if date < expire_date:
+        if date < self.expire_date:
             self.expire_date = date
             self.save()
             if self.token_hash == sha256(token):
@@ -77,7 +77,7 @@ class PasswordResetToken(BaseModel):
             return False
 
 
-tables = [Config, User]
+tables = [Config, User, PasswordResetToken]
 
 
 def init_db():

@@ -5,6 +5,7 @@ from wtforms.validators import *
 
 from utils import _
 from validation import *
+from config import TOKEN_LIFETIME
 from captcha import CAPTCHA_REGEX
 
 
@@ -84,7 +85,7 @@ class GetTokenForm(FlaskForm):
         validators = [
             Required(), Email(_('Invalid Email Address.'))
         ],
-        description = _('Email address of your account')
+        description = _('Email address of your account.')
     )
 
 
@@ -108,5 +109,8 @@ class PasswordResetForm(FlaskForm):
         validators = [
             Regexp(REGEX_TOKEN, message=_('Invalid token format'))
         ],
-        description = _('The token sent to you by email.')
+        description = (
+            _('The token sent to you by email. Valid in %d minutes.')
+            % TOKEN_LIFETIME
+        )
     )
