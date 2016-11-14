@@ -154,9 +154,9 @@ class DeleteRecord(BaseModel):
 
 
 class Message(BaseModel):
-    post = ForeignKeyField(Post, related_name='at')
-    caller = ForeignKeyField(User, related_name='at_calling')
-    callee = ForeignKeyField(User, related_name='at_called')
+    post = ForeignKeyField(Post, related_name='msg')
+    caller = ForeignKeyField(User, related_name='msg_calling')
+    callee = ForeignKeyField(User, related_name='msg_called')
     is_system_message = BooleanField(default=False)
 
 
