@@ -103,9 +103,9 @@ class Topic(BaseModel):
     reply_count = IntegerField(default=0)
     last_reply_date = DateTimeField()
     last_reply_author = ForeignKeyField(User)
-    pinned = BooleanField(default=False, index=True)
-    distillate = BooleanField(default=False, index=True)
-    deleted = BooleanField(default=False, index=True)
+    is_pinned = BooleanField(default=False, index=True)
+    is_distillate = BooleanField(default=False, index=True)
+    is_deleted = BooleanField(default=False, index=True)
 
 
 class TagRelation(BaseModel):
@@ -114,14 +114,14 @@ class TagRelation(BaseModel):
 
 
 class Post(BaseModel):
-    topic = ForeignKeyField(Topic, related_name='posts')
+    topic = ForeignKeyField(Topic, related_name='posts', null=True)
     topic_author = ForeignKeyField(User)
     ordinal = IntegerField()
     content = TextField()
     date = DateTimeField()
     last_edit_date = DateTimeField(null=True)
     author = ForeignKeyField(User, related_name='posts')
-    subpost = BooleanField(default=False)
+    is_subpost = BooleanField(default=False)
     reply_post = ForeignKeyField(
         'self',
         related_name = 'fk_reply_post',
@@ -142,21 +142,22 @@ class Post(BaseModel):
         related_name = 'fk_reply_subpost_author',
         null = True
     )
-    deleted = BooleanField(default=False)
+    is_deleted = BooleanField(default=False)
 
 
 class DeleteRecord(BaseModel):
     topic = ForeignKeyField(Topic, related_name='delete_record', null=True)
     post = ForeignKeyField(Post, related_name='delete_record', null=True)
-    revert = BooleanField(default=False)
+    is_revert = BooleanField(default=False)
     date = DateTimeField()
     operator = ForeignKeyField(User, related_name='del_rec_topic')
 
 
-class At(BaseModel):
+class Message(BaseModel):
     post = ForeignKeyField(Post, related_name='at')
     caller = ForeignKeyField(User, related_name='at_calling')
     callee = ForeignKeyField(User, related_name='at_called')
+    is_system_message = BooleanField(default=False)
 
 
 class Image(BaseModel):
@@ -170,7 +171,7 @@ class Image(BaseModel):
 tables = [
     Config, User, PasswordResetToken, Ban,
     Tag, Topic, TagRelation, Post,
-    DeleteRecord, At, Image
+    DeleteRecord, Message, Image
 ]
 
 
