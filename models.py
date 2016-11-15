@@ -127,19 +127,9 @@ class Post(BaseModel):
         related_name = 'fk_reply_post',
         null = True
     )
-    reply_post_author = ForeignKeyField(
-        User,
-        related_name = 'fk_reply_post_author',
-        null = True
-    )
     reply_subpost = ForeignKeyField(
         'self',
         related_name = 'fk_reply_subpost',
-        null = True
-    )
-    reply_subpost_author = ForeignKeyField(
-        User,
-        related_name = 'fk_reply_subpost_author',
         null = True
     )
     is_deleted = BooleanField(default=False)
