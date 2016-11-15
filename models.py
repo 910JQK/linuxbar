@@ -121,17 +121,7 @@ class Post(BaseModel):
     date = DateTimeField()
     last_edit_date = DateTimeField(null=True)
     author = ForeignKeyField(User, related_name='posts')
-    is_subpost = BooleanField(default=False)
-    reply_post = ForeignKeyField(
-        'self',
-        related_name = 'fk_reply_post',
-        null = True
-    )
-    reply_subpost = ForeignKeyField(
-        'self',
-        related_name = 'fk_reply_subpost',
-        null = True
-    )
+    path = TextField(default='/')
     is_deleted = BooleanField(default=False)
 
 
