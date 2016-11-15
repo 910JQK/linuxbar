@@ -58,7 +58,7 @@ class User(UserMixin, BaseModel):
 
 
 class UserConfig(BaseModel):
-    user = ForeignKeyField(User, related_name='info', primary_key=True)
+    user = ForeignKeyField(User, related_name='config', primary_key=True)
     view_nested = BooleanField(default=True)
     view_expanded = BooleanField(default=True)
 

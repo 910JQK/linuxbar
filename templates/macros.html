@@ -14,8 +14,10 @@
     </div>
   {% endif %}
   {% if wtf_field.type == 'BooleanField' %}
-    {{ wtf_field(**{'aria-label': wtf_field.label.text, 'autocomplete': 'off'}) }}
-    {{ wtf_field.label }}
+    <div class="checkbox_wrapper">
+      {{ wtf_field(**{'aria-label': wtf_field.label.text, 'autocomplete': 'off'}) }}
+      {{ wtf_field.label }}
+    </div>
   {% else %}
     {{ wtf_field(**{'placeholder': wtf_field.label.text, 'aria-label': wtf_field.label.text, 'autocomplete': 'off'}) }}
     {{ description(wtf_field.description, errors=wtf_field.errors) }}

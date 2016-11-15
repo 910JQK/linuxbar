@@ -1,0 +1,30 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import field, submit %}
+
+{% block title %}{{ _('User Config - %(site)s', site=get_config('site_name')) }}{% endblock %}
+{% block body_class %}box_center{% endblock %}
+{% block form_title %}{{ _('Configurations') }}{% endblock %}
+
+{% block style %}
+  td { text-align: left; }
+{% endblock %}
+
+{% block form %}
+  <table>
+    <tr>
+      <td>
+	{{ field(form.view_nested) }}
+      </td>
+    </tr>
+    <tr>
+      <td>
+	{{ field(form.view_expanded) }}
+      </td>
+    </tr>
+  </table>
+{% endblock %}
+
+
+{% block buttons %}
+  {{ submit(_('Update')) }}
+{% endblock %}

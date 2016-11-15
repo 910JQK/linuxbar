@@ -114,3 +114,9 @@ class PasswordResetForm(FlaskForm):
             % TOKEN_LIFETIME
         )
     )
+
+
+class UserConfigForm(FlaskForm):
+    view_nested = BooleanField(_('Show nested tree structure of posts'))
+    view_expanded = BooleanField(_('Expand all the tree structure of posts'))
+    bio = TextAreaField(_('Bio'), description=_('A brief description of you.'))
