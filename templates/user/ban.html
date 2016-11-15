@@ -14,20 +14,24 @@
 
 {% block form %}
   <div class="table_wrapper">
-    <table>
-      <tr>
-	<td>{{ _('User') }}</td>
-	<td>{{ user.name }}</td>
-      </tr>
-      <tr>
-	<td>{{ _('Days') }}</td>
-	<td>{{ field(form.days) }}</td>
-      </tr>
-    </table>
+    <fieldset{% if ok %} disabled="disabled"{% endif %}>
+      <table>
+	<tr>
+	  <td>{{ _('User') }}</td>
+	  <td>{{ user.name }}</td>
+	</tr>
+	<tr>
+	  <td>{{ _('Days') }}</td>
+	  <td>{{ field(form.days) }}</td>
+	</tr>
+      </table>
+    </fieldset>
   </div>
 {% endblock %}
 
 
 {% block buttons %}
-  {{ submit(_('Confirm')) }}
+  {% if not ok %}
+    {{ submit(_('Confirm')) }}
+  {% endif %}
 {% endblock %}

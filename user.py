@@ -245,6 +245,7 @@ def profile_edit():
 def ban(uid):
     user = find_record(User, id=uid)
     if user:
+        ok = False
         form = BanForm()
         if form.validate_on_submit():
             if Ban.try_to_create(user, int(form.days.data), current_user):
@@ -252,9 +253,10 @@ def ban(uid):
                     _('Ban on user %s entered into force.') % user.name,
                     'ok'
                 )
+                ok = True
             else:
-                flash(_('A ban with longer duration already exists.'))
-        return render_template('user/ban.html', user=user, form=form)
+                flash(_('A ban with longer duration already exists.'), 'err')
+        return render_template('user/ban.html', user=user, form=form, ok=ok)
     else:
         abort(404)
 
