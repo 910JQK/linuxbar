@@ -18,8 +18,14 @@ now = datetime.datetime.now
 
 
 # reserved for l10n
-def _(string):
-    return string
+def _(string, string_pl=None, n=None):
+    if not string_pl:
+        return string
+    else:
+        if n == 1:
+            return string
+        else:
+            return string_pl
 
 
 def sha256(string):

@@ -13,9 +13,10 @@ from forms import (
     GetTokenForm,
     PasswordResetForm,
     UserConfigForm,
-    ProfileForm
+    ProfileForm,
+    BanForm
 )
-from models import Config, User, PasswordResetToken, UserConfig, Profile
+from models import Config, User, PasswordResetToken, UserConfig, Profile, Ban
 
 
 user = Blueprint(
@@ -32,6 +33,19 @@ login_manager.REMEMBER_COOKIE_HTTPONLY = True
 @login_manager.user_loader
 def load_user(uid):
     return User.get(User.id == int(uid))
+
+
+def admin_required(f, *args, **kwargs):
+    def wrapper(*args, **kwargs):
+        if current_user.is_authenticated:
+            if current_user.admin_level > 0:
+                return f(*args, **kwargs)
+            else:
+                abort(401)
+        else:
+            flash(login_manager.login_message)
+            return redirect(url_for('.login'))
+    return wrapper
 
 
 def send_token_activation(user, token):
@@ -224,6 +238,25 @@ def profile_edit():
         profile.save()
         flash(_('Profile updated successfully.'), 'ok')
     return render_template('user/profile_edit.html', form=form)
+
+
+@user.route('/ban/<int:uid>', methods=['GET', 'POST'])
+@admin_required
+def ban(uid):
+    user = find_record(User, id=uid)
+    if user:
+        form = BanForm()
+        if form.validate_on_submit():
+            if Ban.try_to_create(user, int(form.days.data), current_user):
+                flash(
+                    _('Ban on user %s entered into force.') % user.name,
+                    'ok'
+                )
+            else:
+                flash(_('A ban with longer duration already exists.'))
+        return render_template('user/ban.html', user=user, form=form)
+    else:
+        abort(404)
 
 
 @user.route('/logout')

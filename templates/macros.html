@@ -23,7 +23,9 @@
     </div>
   {% else %}
     {{ wtf_field(**{'placeholder': wtf_field.label.text, 'aria-label': wtf_field.label.text, 'autocomplete': 'off'}) }}
-    {{ description(wtf_field.description, errors=wtf_field.errors) }}
+    {% if wtf_field.description %}
+      {{ description(wtf_field.description, errors=wtf_field.errors) }}
+    {% endif %}
   {% endif %}
 {% endmacro %}
 

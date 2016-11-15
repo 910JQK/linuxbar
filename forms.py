@@ -5,7 +5,7 @@ from wtforms.validators import *
 
 from utils import _
 from validation import *
-from config import TOKEN_LIFETIME
+from config import TOKEN_LIFETIME, BAN_DAYS
 from captcha import CAPTCHA_REGEX
 
 
@@ -142,4 +142,17 @@ class ProfileForm(FlaskForm):
         _('IM Accounts'),
         validators = [Optional(), Length(max=255)],
         description = _('Your instant-messaging accounts.')
+    )
+
+
+class BanForm(FlaskForm):
+    days = SelectField(
+        _('Duration'),
+        choices = [
+            (
+                str(days),
+                _('%d Day', '%d Days', days) % days
+            )
+            for days in BAN_DAYS
+        ]
     )

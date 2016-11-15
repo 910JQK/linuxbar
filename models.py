@@ -101,6 +101,27 @@ class Ban(BaseModel):
         return (
             now() < self.date + datetime.timedelta(days=self.days)
         )
+    @classmethod
+    def try_to_create(Ban, user, days, operator):
+        query = Ban.select().where(Ban.user == user)
+        if query:
+            ban = query.get()
+            if ban.is_valid() and ban.days > days:
+                return False
+            else:
+                ban.date = now()
+                ban.days = days
+                ban.operator_id = operator.id
+                ban.save()
+                return True
+        else:
+            Ban.create(
+                user = user,
+                date = now(),
+                days = days,
+                operator_id = operator.id
+            )
+            return True
 
 
 class Tag(BaseModel):
