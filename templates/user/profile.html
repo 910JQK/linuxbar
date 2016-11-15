@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+{% from 'macros.html' import avatar %}
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ _('User: %(name)s', name=user.name) ~ ' - ' ~ config['site_name'] }}</title>
+    <link rel="stylesheet" href="/static/global.css" />
+    <style>
+      header { display: flex; align-items: center; }
+      header > .avatar { flex-shrink: 0; }
+      #name_title { flex-grow: 1; text-align: center; }
+      td { padding: 0.15em 0.3em; }
+      .icon { width: 0.75em; height: 0.75em; }
+    </style>
+  </head>
+  <body class="box_center">
+    <div id="container">
+      <header>
+	{{ avatar(user.mail, size=4) }}
+	<h2 id="name_title">{{ user.name }}</h2>
+      </header>
+      <p id="bio">{{ profile.bio }}</p>
+      <div class="table_wrapper">
+	<table>
+	  <tr>
+	    <td>UID</td>
+	    <td>{{ user.id }}</td>
+	  </tr>
+	  <tr>
+	    <td>{{ _('Register') }}</td>
+	    <td>{{ user.date_register | date }}</td>
+	  </tr>
+	  <tr>
+	    <td>{{ _('Last Login') }}</td>
+	    <td>
+	      {% if user.date_last_login %}
+		{{ user.date_last_login | date }}
+	      {% else %}
+		{{ _('Not yet signed in') }}
+	      {% endif %}
+	    </td>
+	  </tr>
+	  <tr>
+	    <td>{{ _('Location') }}</td>
+	    <td>{{ profile.location }}</td>
+	  </tr>
+	  <tr>
+	    <td>{{ _('Birth Year') }}</td>
+	    <td>{{ profile.birth_year }}</td>	    
+	  </tr>
+	  <tr>
+	    <td>{{ _('Occupation') }}</td>
+	    <td>{{ profile.occupation }}</td>
+	  </tr>
+	  <tr>
+	    <td>{{ _('IM Accounts') }}</td>
+	    <td>{{ profile.im_accounts }}</td>
+	  </tr>
+	</table>
+      </div>
+    </div>
+  </body>
+</html>

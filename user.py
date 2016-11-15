@@ -8,9 +8,14 @@ from utils import _
 from utils import *
 from validation import REGEX_TOKEN
 from forms import (
-    LoginForm, RegisterForm, GetTokenForm, PasswordResetForm, UserConfigForm
+    LoginForm,
+    RegisterForm,
+    GetTokenForm,
+    PasswordResetForm,
+    UserConfigForm,
+    ProfileForm
 )
-from models import Config, User, PasswordResetToken, UserConfig
+from models import Config, User, PasswordResetToken, UserConfig, Profile
 
 
 user = Blueprint(
@@ -81,6 +86,7 @@ def register():
                 user.set_password(form.password.data)
                 user.save()
                 UserConfig.create(user=user)
+                Profile.create(user=user)
                 send_token_activation(user, token)
                 flash(_('Signed up successfully. Activation mail has been sent to you. Please login after activation.'), 'ok')
                 signed_up = True
@@ -193,6 +199,31 @@ def config():
         user_config.save()
         flash(_('Configurations updated successfully.'), 'ok')
     return render_template('user/config.html', form=form)
+
+
+@user.route('/profile/<int:uid>')
+def profile(uid):
+    user = find_record(User, id=uid)
+    if user:
+        return render_template(
+            'user/profile.html',
+            user = user,
+            profile = user.profile[0]
+        )
+    else:
+        abort(404)
+
+
+@user.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def profile_edit():
+    profile = current_user.profile[0]
+    form = ProfileForm(obj=profile)
+    if form.validate_on_submit():
+        form.populate_obj(profile)
+        profile.save()
+        flash(_('Profile updated successfully.'), 'ok')
+    return render_template('user/profile_edit.html', form=form)
 
 
 @user.route('/logout')

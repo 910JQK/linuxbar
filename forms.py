@@ -119,4 +119,27 @@ class PasswordResetForm(FlaskForm):
 class UserConfigForm(FlaskForm):
     view_nested = BooleanField(_('Show nested tree structure of posts'))
     view_expanded = BooleanField(_('Expand all the tree structure of posts'))
+
+
+class ProfileForm(FlaskForm):
     bio = TextAreaField(_('Bio'), description=_('A brief description of you.'))
+    location = StringField(
+        _('Location'),
+        validators = [Optional(), Length(max=64)],
+        description = _('Your geolocation.')
+    )
+    birth_year = IntegerField(
+        _('Birth Year'),
+        validators = [Optional(), NumberRange(min=1000)],
+        description = _('Your birth year, at least four digits.')
+    )
+    occupation = StringField(
+        _('Occupation'),
+        validators = [Optional(), Length(max=32)],
+        description = _('Your work.')
+    )
+    im_accounts = StringField(
+        _('IM Accounts'),
+        validators = [Optional(), Length(max=255)],
+        description = _('Your instant-messaging accounts.')
+    )

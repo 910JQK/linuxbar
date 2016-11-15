@@ -35,7 +35,6 @@ class User(UserMixin, BaseModel):
     unread_at = IntegerField(default=0)
     unread_pm = IntegerField(default=0)
     admin_level = SmallIntegerField(default=0)
-    bio = TextField(default='')
     is_active = BooleanField(default=False)
     activation_token_hash = FixedCharField(max_length=16, null=True)
     def set_activation_token(self, token):
@@ -61,6 +60,15 @@ class UserConfig(BaseModel):
     user = ForeignKeyField(User, related_name='config', primary_key=True)
     view_nested = BooleanField(default=True)
     view_expanded = BooleanField(default=True)
+
+
+class Profile(BaseModel):
+    user = ForeignKeyField(User, related_name='profile', primary_key=True)
+    bio = TextField(null=True)
+    location = CharField(max_length=64, null=True)
+    birth_year = SmallIntegerField(null=True)
+    occupation = CharField(max_length=32, null=True)
+    im_accounts = CharField(max_length=128, null=True)
 
 
 class PasswordResetToken(BaseModel):
@@ -155,7 +163,7 @@ class Image(BaseModel):
 
 
 tables = [
-    Config, User, UserConfig, PasswordResetToken, Ban,
+    Config, User, UserConfig, Profile, PasswordResetToken, Ban,
     Tag, Topic, TagRelation, Post,
     DeleteRecord, Message, Image
 ]
