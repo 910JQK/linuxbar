@@ -214,3 +214,25 @@ class ConfigEditForm(FlaskForm):
         _('Threshold number of posts for cutting a huge and nested post list.'),
         PositiveInteger()
     )
+
+
+class TagEditForm(FlaskForm):
+    slug = StringField(
+        _('Slug'),
+        validators = [
+            Required(),
+            SizeRange(1, 32),
+            Regexp(REGEX_SLUG, message=_('Invalid format.'))
+        ],
+        description = _('Name in URL. Only Latin, number and "-" are allowed.')
+    )
+    name = StringField(
+        _('Name'),
+        validators = [Required(), SizeRange(1, 64)],
+        description = _('Name that is displayed.')
+    )
+    description = TextAreaField(
+        _('Description'),
+        validators = [Required(), SizeRange(1, 255)],
+        description = _('Detailed description.')
+    )

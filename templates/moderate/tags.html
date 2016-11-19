@@ -1,0 +1,43 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import field, submit %}
+
+{% block title %}{{ _('Tag Management - %(site)s', site=get_config('site_name')) }}{% endblock %}
+{% block body_class %}box_horizontal_center{% endblock %}
+{% block form_title %}{{ _('Tag Management') }}{% endblock %}
+
+{% block style %}
+  td { text-align: left; }
+  td, th { padding: 0.1em 0.5em; }
+{% endblock %}
+
+{% block form %}
+  <div class="table_wrapper">
+    <table>
+      <tr>
+	<th>{{ _('Slug') }}</th>
+	<th>{{ _('Name') }}</th>
+	<th>{{ _('Operations') }}</th>
+      </tr>
+      {% for tag in all_tags %}
+	<tr>
+	  <td>{{ tag.slug }}</td>
+	  <td>{{ tag.name }}</td>
+	  <td>
+	    <a>Edit</a>
+	    <span> / </span>
+	    <a>Delete</a>
+	  </td>
+	</tr>
+      {% endfor %}
+    </table>
+  </div>
+  <hr/>
+  {{ field(form.slug) }}
+  {{ field(form.name) }}
+  {{ field(form.description) }}
+{% endblock %}
+
+
+{% block buttons %}
+  {{ submit(_('Add')) }}
+{% endblock %}

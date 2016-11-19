@@ -14,8 +14,9 @@ a {
 
 fieldset { border: none; }
 
-input[type="text"], input[type="password"] {
-    width: 20em;
+input[type="text"], input[type="password"], textarea {
+    box-sizing: border-box;
+    width: 21.55em;
 }
 
 input[type="checkbox"] {
