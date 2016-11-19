@@ -40,6 +40,8 @@ class User(UserMixin, BaseModel):
     def set_activation_token(self, token):
         self.activation_token_hash = sha256(token)
     def activate(self, token):
+        if self.is_active:
+            return True
         if self.activation_token_hash == sha256(token):
             self.activation_token_hash = None
             self.is_active = True
