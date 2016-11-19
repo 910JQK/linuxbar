@@ -3,7 +3,7 @@
 
 from getpass import getpass
 from app import run
-from models import User, init_db
+from models import User, UserConfig, Profile, init_db
 from utils import now
 from argparse import ArgumentParser
 
@@ -26,6 +26,8 @@ def create_administrator():
         )
         user.set_password(password)
         user.save(force_insert=True)
+        UserConfig.create(user=user)
+        Profile.create(user=user)
         print('New administrator created successfully.')
 
 
