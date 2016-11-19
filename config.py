@@ -9,6 +9,8 @@ DEFAULT_CONFIG = {
 }
 
 
+DEBUG = True
+SECRET_KEY = b'\xe9\xd3\x8fV0n\xcajX~P%*\xf1=O\xb7\xbc\xfa\xe5\xf5db'
 TOKEN_LIFETIME = 20 # minutes
 PINNED_TOPIC_MAX = 5
 BAN_DAYS = [1, 3, 10, 30, 100]

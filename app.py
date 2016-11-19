@@ -16,6 +16,7 @@ from utils import _
 from utils import *
 from models import Config
 from user import user, login_manager
+from config import DEBUG, SECRET_KEY
 
 
 app = Flask(__name__)
@@ -59,10 +60,10 @@ def get_captcha():
     return Response(image_data, mimetype='image/png')
 
 
-def main():
-    app.secret_key = b'\xe9\xd3\x8fV0n\xcajX~P%*\xf1=O\xb7\xbc\xfa\xe5\xf5db'
+def run():
+    app.secret_key = SECRET_KEY
     app.run(debug=DEBUG)
 
 
 if __name__ == '__main__':
-    main()
+    run()
