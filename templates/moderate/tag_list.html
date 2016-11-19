@@ -13,19 +13,21 @@
 {% block form %}
   <div class="table_wrapper">
     <table>
+      {% if all_tags %}
       <tr>
 	<th>{{ _('Slug') }}</th>
 	<th>{{ _('Name') }}</th>
 	<th>{{ _('Operations') }}</th>
       </tr>
+      {% endif %}
       {% for tag in all_tags %}
 	<tr>
 	  <td>{{ tag.slug }}</td>
 	  <td>{{ tag.name }}</td>
 	  <td>
-	    <a>Edit</a>
+	    <a href="{{ url_for('.tag_edit', tag_id=tag.id) }}">Edit</a>
 	    <span> / </span>
-	    <a>Delete</a>
+	    <a href="{{ url_for('.tag_remove', tag_id=tag.id) }}">Delete</a>
 	  </td>
 	</tr>
       {% endfor %}

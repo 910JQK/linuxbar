@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ _('Confirm Operation - %(site)s', site=get_config('site_name')) }}</title>
+    <link rel="stylesheet" href="/static/global.css" />
+    <style>
+      .btn_wrapper { display: flex; justify-content: space-around; }
+      .message_text { font-size: 115%; }
+    </style>
+  </head>
+  <body class="box_center">
+    <div id="container">
+      <p class="message_text">{{ text }}</p>
+      <div class="btn_wrapper">
+	<a href="{{ url_yes }}">
+	  <button>{{ _('Yes') }}</button>
+	</a>
+	<a href="{{ url_no }}">
+	  <button>{{ _('No') }}</button>
+	</a>
+      </div>
+    </div>
+  </body>
+</html>

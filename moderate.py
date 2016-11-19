@@ -38,9 +38,9 @@ def config():
     return render_template('moderate/config.html', form=form)
 
 
-@moderate.route('/tag/tags', methods=['GET', 'POST'])
+@moderate.route('/tag/list', methods=['GET', 'POST'])
 @privilege_required()
-def tags():
+def tag_list():
     all_tags = Tag.select()
     form = TagEditForm()
     if form.validate_on_submit():
@@ -52,7 +52,58 @@ def tags():
             form.populate_obj(tag)
             tag.save(force_insert=True)
             flash(_('Tag %s created successfully.') % tag.name, 'ok')
-            return redirect(url_for('.tags'))
         else:
             flash(_('Naming conflict detected.'), 'err')
-    return render_template('moderate/tags.html', form=form, all_tags=all_tags)
+        return redirect(url_for('.tag_list'))
+    return render_template(
+        'moderate/tag_list.html', form=form, all_tags=all_tags
+    )
+
+
+@moderate.route('/tag/edit/<int:tag_id>', methods=['GET', 'POST'])
+@privilege_required()
+def tag_edit(tag_id):
+    tag = find_record(Tag, id=tag_id)
+    if tag:
+        form = TagEditForm(obj=tag)
+        if form.validate_on_submit():
+            if (
+                    not Tag.select().where(
+                        (Tag.id != tag_id)
+                        & (
+                            (Tag.slug == form.slug.data)
+                            | (Tag.name == form.name.data)
+                        )
+                    )
+            ):
+                form.populate_obj(tag)
+                tag.save()
+                flash(_('Edit on tag %s saved successfully.') % tag.name, 'ok')
+                return redirect(url_for('.tag_list'))
+            else:
+                flash(_('Naming conflict detected.'), 'err')
+        return render_template('moderate/tag_edit.html', form=form)
+    else:
+        abort(404)
+
+
+@moderate.route('/tag/remove/<int:tag_id>')
+@privilege_required()
+def tag_remove(tag_id):
+    tag = find_record(Tag, id=tag_id)
+    if tag:
+        if request.args.get('confirmed'):
+            tag.delete_instance()
+            flash(_('Tag %s deleted successfully.') % tag.name, 'ok')
+            return redirect(url_for('.tag_list'))
+        else:
+            return render_template(
+                'confirm.html',
+                text = _('Are you sure to delete tag %s ?') % tag.name,
+                url_yes = url_for(
+                    '.tag_remove', tag_id=tag_id, confirmed='confirmed'
+                ),
+                url_no = url_for('.tag_list')
+            )
+    else:
+        abort(404)
