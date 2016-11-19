@@ -16,6 +16,7 @@ from utils import _
 from utils import *
 from models import Config
 from user import user, login_manager
+from moderate import moderate
 from config import DEBUG, SECRET_KEY
 
 
@@ -24,6 +25,7 @@ babel = Babel(app)
 login_manager.init_app(app)
 CsrfProtect(app)
 app.register_blueprint(user, url_prefix='/user')
+app.register_blueprint(moderate, url_prefix='/moderate')
 DEBUG = True
 
 

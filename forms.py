@@ -9,6 +9,14 @@ from config import TOKEN_LIFETIME, BAN_DAYS
 from captcha import CAPTCHA_REGEX
 
 
+def ConfigField(name, description, *validators):
+    return StringField(
+        name,
+        validators = [Required(), SizeRange(1, 255), *validators],
+        description = description
+    )
+
+
 def Required():
     return InputRequired(_('This field is required.'))
 
@@ -19,6 +27,10 @@ def Username():
 
 def PasswordConfirm():
     return EqualTo('password', message=_('Passwords are inconsistent.'))
+
+
+def PositiveInteger():
+    return Regexp(REGEX_PINT, message=_('Positive integer required'))
 
 
 class RegisterForm(FlaskForm):
@@ -166,4 +178,39 @@ class LevelChangeForm(FlaskForm):
             (0, _('None')), (1, _('Moderator')), (2, _('Administrator'))
         ],
         coerce = int
+    )
+
+
+class ConfigEditForm(FlaskForm):
+    site_name = ConfigField(
+        _('Site Name'),
+        _('Name of this site.')
+    )
+    site_url = ConfigField(
+        _('Site URL'),
+        _('URL of this site. Example: https://foobar.invalid')
+    )
+    mail_addr = ConfigField(
+        _('Email Address'),
+        _('Email address showed in mails sent by this site.')
+    )
+    count_topic = ConfigField(
+        _('Topics per page'),
+        _('The number of topics shown in one page in a topic list.'),
+        PositiveInteger()
+    )
+    count_post = ConfigField(
+        _('Posts per page'),
+        _('The number of posts shown in one page in a post list.'),
+        PositiveInteger()
+    )
+    count_item = ConfigField(
+        _('Items per page'),
+        _('The number of items shown in one page in a list'),
+        PositiveInteger()
+    )
+    count_cut = ConfigField(
+        _('Cut threshold'),
+        _('Threshold number of posts for cutting a huge and nested post list.'),
+        PositiveInteger()
     )

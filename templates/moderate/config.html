@@ -1,0 +1,21 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import field, submit %}
+
+{% block title %}{{ _('Configurations - %(site)s', site=get_config('site_name')) }}{% endblock %}
+{% block body_class %}box_horizontal_center{% endblock %}
+{% block form_title %}{{ _('Configurations') }}{% endblock %}
+
+{% block form %}
+  {{ field(form.site_name) }}
+  {{ field(form.site_url) }}
+  {{ field(form.mail_addr) }}
+  {{ field(form.count_topic) }}
+  {{ field(form.count_post) }}
+  {{ field(form.count_item) }}
+  {{ field(form.count_cut) }}
+{% endblock %}
+
+
+{% block buttons %}
+  {{ submit(_('Update')) }}
+{% endblock %}

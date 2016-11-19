@@ -2,12 +2,8 @@
 {% from 'macros.html' import field, submit %}
 
 {% block title %}{{ _('Edit Profile - %(site)s', site=get_config('site_name')) }}{% endblock %}
-{% block body_class %}box_center{% endblock %}
+{% block body_class %}box_horizontal_center{% endblock %}
 {% block form_title %}{{ _('Edit Profile') }}{% endblock %}
-
-{% block style %}
-  td { text-align: left; }
-{% endblock %}
 
 {% block form %}
   {{ field(form.location) }}
