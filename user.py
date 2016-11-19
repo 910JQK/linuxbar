@@ -14,7 +14,8 @@ from forms import (
     PasswordResetForm,
     UserConfigForm,
     ProfileForm,
-    BanForm
+    BanForm,
+    LevelChangeForm
 )
 from models import Config, User, PasswordResetToken, UserConfig, Profile, Ban
 
@@ -35,17 +36,23 @@ def load_user(uid):
     return User.get(User.id == int(uid))
 
 
-def admin_required(f, *args, **kwargs):
-    def wrapper(*args, **kwargs):
-        if current_user.is_authenticated:
-            if current_user.admin_level > 0:
-                return f(*args, **kwargs)
+def privilege_required(admin=False):
+    def decorator(f):
+        def wrapper(*args, **kwargs):
+            if current_user.is_authenticated:
+                if (
+                        (admin and current_user.level == 2)
+                        or (not admin and current_user.level != 0)
+                ):
+                    return f(*args, **kwargs)
+                else:
+                    abort(401)
             else:
-                abort(401)
-        else:
-            flash(login_manager.login_message)
-            return redirect(url_for('.login'))
-    return wrapper
+                flash(login_manager.login_message)
+                return redirect(url_for('.login'))
+        wrapper.__name__ = f.__name__
+        return wrapper
+    return decorator
 
 
 def send_token_activation(user, token):
@@ -133,6 +140,9 @@ def activate(uid, token):
 
 @user.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        flash(_('You have already signed in.'))
+        return redirect('index')
     form = LoginForm()
     if form.validate_on_submit():
         query = User.select().where(
@@ -222,7 +232,10 @@ def profile(uid):
         return render_template(
             'user/profile.html',
             user = user,
-            profile = user.profile[0]
+            profile = user.profile[0],
+            current_is_admin = (
+                current_user.is_authenticated and current_user.level == 2
+            )
         )
     else:
         abort(404)
@@ -241,7 +254,7 @@ def profile_edit():
 
 
 @user.route('/ban/<int:uid>', methods=['GET', 'POST'])
-@admin_required
+@privilege_required()
 def ban(uid):
     user = find_record(User, id=uid)
     if user:
@@ -257,6 +270,22 @@ def ban(uid):
             else:
                 flash(_('A ban with longer duration already exists.'), 'err')
         return render_template('user/ban.html', user=user, form=form, ok=ok)
+    else:
+        abort(404)
+
+
+@user.route('/change-level/<int:uid>', methods=['GET', 'POST'])
+@privilege_required(admin=True)
+def change_level(uid):
+    user = find_record(User, id=uid)
+    if user:
+        form = LevelChangeForm(obj=user)
+        if form.validate_on_submit():
+            form.populate_obj(user)
+            user.save()
+            flash(_('User privilege changed successfully.'), 'ok')
+            return redirect(url_for('.profile', uid=uid))
+        return render_template('user/change_level.html', form=form, user=user)
     else:
         abort(404)
 

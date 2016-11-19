@@ -3,22 +3,33 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>{{ _('User: %(name)s', name=user.name) ~ ' - ' ~ config['site_name'] }}</title>
+    <title>{{ _('User: %(name)s', name=user.name) ~ ' - ' ~ get_config('site_name') }}</title>
     <link rel="stylesheet" href="/static/global.css" />
     <style>
       header { display: flex; align-items: center; }
       header > .avatar { flex-shrink: 0; }
-      #name_title { flex-grow: 1; text-align: center; }
+      .name_title { flex-grow: 1; text-align: center; }
       td { padding: 0.15em 0.3em; }
       .icon { width: 0.75em; height: 0.75em; }
+      .role { color: gray; font-size: 80%; }
+      .btn_wrapper { text-align: center; margin-top: 0.4em; }
     </style>
   </head>
   <body class="box_center">
     <div id="container">
       <header>
 	{{ avatar(user.mail, size=4) }}
-	<h2 id="name_title">{{ user.name }}</h2>
+	<h2 class="name_title">{{ user.name }}</h2>
       </header>
+      <div id="top_right">
+	<span class="role">
+	  {% if user.level == 1 %}
+	    {{ _('Moderator') }}
+	  {% elif user.level == 2 %}
+	    {{ _('Administrator') }}
+	  {% endif %}
+	</span>
+      </div>
       <p id="bio">{{ profile.bio | d(_(''), true) }}</p>
       <div class="table_wrapper">
 	<table>
@@ -57,6 +68,13 @@
 	    <td>{{ profile.im_accounts | d(_('Unknown'), true) }}</td>
 	  </tr>
 	</table>
+      </div>
+      <div class="btn_wrapper">
+	{% if current_is_admin %}
+	  <a href="{{ url_for('.change_level', uid=user.id) }}">
+	     <button>{{ _('Change Privilege') }}</button>
+	  </a>
+	{% endif %}
       </div>
     </div>
   </body>

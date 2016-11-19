@@ -20,7 +20,7 @@ def create_administrator():
         user = User(
             mail = mail,
             name = name,
-            admin_level = 2,
+            level = 2,
             date_register = now(),
             is_active = True
         )

@@ -34,7 +34,7 @@ class User(UserMixin, BaseModel):
     unread_reply = IntegerField(default=0)
     unread_at = IntegerField(default=0)
     unread_pm = IntegerField(default=0)
-    admin_level = SmallIntegerField(default=0)
+    level = SmallIntegerField(default=0)
     is_active = BooleanField(default=False)
     activation_token_hash = FixedCharField(max_length=16, null=True)
     def set_activation_token(self, token):

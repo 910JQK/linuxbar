@@ -154,5 +154,16 @@ class BanForm(FlaskForm):
                 _('%d Day', '%d Days', days) % days
             )
             for days in BAN_DAYS
-        ]
+        ],
+        coerce = str
+    )
+
+
+class LevelChangeForm(FlaskForm):
+    level = SelectField(
+        _('Privilege'),
+        choices = [
+            (0, _('None')), (1, _('Moderator')), (2, _('Administrator'))
+        ],
+        coerce = int
     )

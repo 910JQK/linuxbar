@@ -1,0 +1,33 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import field, submit %}
+
+{% block title %}{{ _('Change Privilege of user %(user)s - %(site)s', user=user.name, site=get_config('site_name')) }}{% endblock %}
+{% block body_class %}box_center{% endblock %}
+{% block form_title %}{{ _('Change Privilege') }}{% endblock %}
+
+{% block style %}
+  #container { min-width: 15em; }
+  td { padding: 0.15em 0.3em; }
+  td:first-child { text-align: left; }
+  button { min-width: 4em; }
+{% endblock %}
+
+{% block form %}
+  <div class="table_wrapper">
+    <table>
+      <tr>
+	<td>{{ _('User') }}</td>
+	<td>{{ user.name }}</td>
+      </tr>
+      <tr>
+	<td>{{ _('Privilege') }}</td>
+	<td>{{ field(form.level) }}</td>
+      </tr>
+    </table>
+  </div>
+{% endblock %}
+
+
+{% block buttons %}
+  {{ submit(_('Confirm')) }}
+{% endblock %}
