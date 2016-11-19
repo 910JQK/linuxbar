@@ -19,7 +19,7 @@
 	{{ avatar(user.mail, size=4) }}
 	<h2 id="name_title">{{ user.name }}</h2>
       </header>
-      <p id="bio">{{ profile.bio }}</p>
+      <p id="bio">{{ profile.bio | d(_(''), true) }}</p>
       <div class="table_wrapper">
 	<table>
 	  <tr>
@@ -42,19 +42,19 @@
 	  </tr>
 	  <tr>
 	    <td>{{ _('Location') }}</td>
-	    <td>{{ profile.location }}</td>
+	    <td>{{ profile.location | d(_('Unknown'), true) }}</td>
 	  </tr>
 	  <tr>
 	    <td>{{ _('Birth Year') }}</td>
-	    <td>{{ profile.birth_year }}</td>	    
+	    <td>{{ profile.birth_year | d(_('Unknown'), true) }}</td>
 	  </tr>
 	  <tr>
 	    <td>{{ _('Occupation') }}</td>
-	    <td>{{ profile.occupation }}</td>
+	    <td>{{ profile.occupation | d(_('Unknown'), true) }}</td>
 	  </tr>
 	  <tr>
 	    <td>{{ _('IM Accounts') }}</td>
-	    <td>{{ profile.im_accounts }}</td>
+	    <td>{{ profile.im_accounts | d(_('Unknown'), true) }}</td>
 	  </tr>
 	</table>
       </div>
