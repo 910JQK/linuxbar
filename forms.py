@@ -13,7 +13,7 @@ from captcha import CAPTCHA_REGEX
 def ConfigField(name, description, *validators):
     return StringField(
         name,
-        validators = [Required(), SizeRange(1, 255), *validators],
+        validators = [Required(), SizeRange(1, 256), *validators],
         description = description
     )
 
@@ -138,7 +138,7 @@ class ProfileForm(FlaskForm):
     bio = TextAreaField(_('Bio'), description=_('A brief description of you.'))
     location = StringField(
         _('Location'),
-        validators = [Optional(), Length(max=64)],
+        validators = [Optional(), SizeRange(1, 64)],
         description = _('Your geolocation.')
     )
     birth_year = IntegerField(
@@ -148,12 +148,12 @@ class ProfileForm(FlaskForm):
     )
     occupation = StringField(
         _('Occupation'),
-        validators = [Optional(), Length(max=32)],
+        validators = [Optional(), SizeRange(1, 32)],
         description = _('Your work.')
     )
     im_accounts = StringField(
         _('IM Accounts'),
-        validators = [Optional(), Length(max=255)],
+        validators = [Optional(), SizeRange(1, 256)],
         description = _('Your instant-messaging accounts.')
     )
 
@@ -234,7 +234,7 @@ class TagEditForm(FlaskForm):
     )
     description = TextAreaField(
         _('Description'),
-        validators = [Required(), SizeRange(1, 255)],
+        validators = [Required(), SizeRange(1, 256)],
         description = _('Detailed description.')
     )
 

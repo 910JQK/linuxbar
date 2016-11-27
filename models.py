@@ -19,7 +19,7 @@ class BaseModel(Model):
 
 class Config(BaseModel):
     name = CharField(max_length=64, primary_key=True)
-    value = CharField(max_length=255)
+    value = CharField(max_length=256)
     @classmethod
     def Get(Config, name):
         return Config.get(Config.name == name).value
@@ -129,13 +129,13 @@ class Ban(BaseModel):
 class Tag(BaseModel):
     slug = CharField(max_length=32, unique=True, index=True)
     name = CharField(max_length=64, unique=True)
-    description = CharField(255)
+    description = CharField(256)
 
 
 class Topic(BaseModel):
     author = ForeignKeyField(User, related_name='topics')
     title = CharField(max_length=64)
-    summary = CharField(max_length=255)
+    summary = CharField(max_length=512)
     post_date = DateTimeField()
     reply_count = IntegerField(default=0)
     last_reply_date = DateTimeField()
