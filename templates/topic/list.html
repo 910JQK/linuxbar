@@ -49,13 +49,16 @@
      #add_topic_form {
 	 width: 45em;
      }
-     #add_topic_form > textarea {
+     #add_topic_form > * {
 	 display: block;
-	 margin-bottom: 1em;
+	 margin: 0.2em 0em;
      }
      #add_topic_form > [name="title"], #add_topic_form > [name="content"] {
 	 box-sizing: border-box;
 	 width: 100%;
+     }
+     #add_topic_form > [name="content"] {
+	 height: 15em;
      }
      .empty_notice {
 	 min-width: 45em;
