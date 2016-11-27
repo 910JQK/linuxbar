@@ -8,6 +8,7 @@
     <style>
       header { display: flex; align-items: center; }
       header > .avatar { flex-shrink: 0; }
+      header > h1 { font-size: 135%; font-weight: bold; }
       .name_title { flex-grow: 1; text-align: center; }
       td { padding: 0.15em 0.3em; }
       .icon { width: 0.75em; height: 0.75em; }
@@ -19,7 +20,7 @@
     <div id="container">
       <header>
 	{{ avatar(user.mail, size=4) }}
-	<h2 class="name_title">{{ user.name }}</h2>
+	<h1 class="name_title">{{ user.name }}</h1>
       </header>
       <div id="top_right">
 	<span class="role">
