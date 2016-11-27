@@ -10,6 +10,7 @@
   [name="image"] { margin-top: 0.35em; }
   [name="image"] + .field_desc { text-align: center; }
   td { padding: 0.15em 0.3em }
+  .file_name_col { text-align: left; }
 {% endblock %}
 
 {% block form %}
@@ -20,13 +21,27 @@
 	  <th>{{ _('File Name') }}</th>
 	  <th>{{ _('HASH') }}</th>
 	  <th>{{ _('Upload Date') }}</th>
+	  <th>{{ _('Operations') }}</th>
 	</tr>
       {% endif %}
       {% for img in img_list %}
 	<tr>
-	  <td title="{{ img.file_name }}">{{ img.file_name | truncate(40) }}</td>
-	  <td title="{{ img.sha256 }}"><a target="_blank" href="{{ url_for('.get', sha256part=img.sha256) }}">{{ img.sha256 | truncate(8, true, '') }}</a></td>
-	  <td>{{ img.date | date }}</td>
+	  <td class="file_name_col" title="{{ img.file_name }}">
+	    {{ img.file_name | truncate(40) }}
+	  </td>
+	  <td title="{{ img.sha256 }}">
+	    <a target="_blank" href="{{ url_for('.get', sha256part=img.sha256) }}">
+	      {{ img.sha256 | truncate(8, true, '') }}
+	    </a>
+	  </td>
+	  <td>
+	    {{ img.date | date }}
+	  </td>
+	  <td>
+	    <a href="{{ url_for('.remove', sha256=img.sha256) }}">
+	      {{ _('Delete') }}
+	    </a>
+	  </td>
 	</tr>
       {% endfor %}
     </table>

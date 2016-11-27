@@ -87,12 +87,12 @@ def tag_edit(tag_id):
         abort(404)
 
 
-@moderate.route('/tag/remove/<int:tag_id>')
+@moderate.route('/tag/remove/<int:tag_id>', methods=['GET', 'POST'])
 @privilege_required()
 def tag_remove(tag_id):
     tag = find_record(Tag, id=tag_id)
     if tag:
-        if request.args.get('confirmed'):
+        if request.form.get('confirmed'):
             tag.delete_instance()
             flash(_('Tag %s deleted successfully.') % tag.name, 'ok')
             return redirect(url_for('.tag_list'))
@@ -100,9 +100,6 @@ def tag_remove(tag_id):
             return render_template(
                 'confirm.html',
                 text = _('Are you sure to delete tag %s ?') % tag.name,
-                url_yes = url_for(
-                    '.tag_remove', tag_id=tag_id, confirmed='confirmed'
-                ),
                 url_no = url_for('.tag_list')
             )
     else:

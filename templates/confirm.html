@@ -13,9 +13,13 @@
     <div id="container">
       <p class="message_text">{{ text }}</p>
       <div class="btn_wrapper">
-	<a href="{{ url_yes }}">
-	  <button>{{ _('Yes') }}</button>
-	</a>
+	<span>
+	  <form method="post">
+	    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+	    <input type="hidden" name="confirmed" value="confirmed" />
+	    <button>{{ _('Yes') }}</button>
+	  </form>
+	</span>
 	<a href="{{ url_no }}">
 	  <button>{{ _('No') }}</button>
 	</a>

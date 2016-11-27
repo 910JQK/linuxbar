@@ -1,6 +1,15 @@
 import os
 import imghdr
-from flask import Blueprint, request, render_template, send_file, flash, abort
+from flask import (
+    Blueprint,
+    request,
+    render_template,
+    redirect,
+    send_file,
+    flash,
+    abort,
+    url_for
+)
 from flask_login import current_user, login_required
 
 
@@ -8,13 +17,18 @@ from utils import _
 from utils import *
 from models import Config, User, Image
 from forms import ImageUploadForm
-from validation import REGEX_SHA256_PART
+from validation import REGEX_SHA256, REGEX_SHA256_PART
 from config import IMAGE_MIME, UPLOAD_FOLDER
 
 
 image = Blueprint(
     'image', __name__, template_folder='templates', static_folder='static'
 )
+
+
+def get_image_path(sha256, img_type):
+    file_name = sha256 + '.' + img_type
+    return os.path.join(UPLOAD_FOLDER, file_name)
 
 
 @image.route('/get/<sha256part>')
@@ -24,9 +38,7 @@ def get(sha256part):
         if img_query:
             img = img_query.get()
             mime = IMAGE_MIME[img.img_type]
-            file_name = img.sha256 + '.' + img.img_type            
-            path = os.path.join(UPLOAD_FOLDER, file_name)
-            return send_file(path, mime)
+            return send_file(get_image_path(img.sha256, img.img_type), mime)
         else:
             abort(404)
     else:
@@ -53,22 +65,20 @@ def upload():
     )
     total = Image.select().where(Image.uploader == user).count()
     form = ImageUploadForm()
-    if form.validate():
+    if form.validate_on_submit():
         img = form.image.data
-        img_format = imghdr.what('', img.read(100))
-        if IMAGE_MIME.get(img_format):
+        img_type = imghdr.what('', img.read(100))
+        if IMAGE_MIME.get(img_type):
             img.seek(0)
             sha256 = sha256f(img)
             img.seek(0)
             if not find_record(Image, sha256=sha256):
-                file_name = sha256 + '.' + img_format
-                path = os.path.join(UPLOAD_FOLDER, file_name)
-                img.save(path)
+                img.save(get_image_path(sha256, img_type))
                 Image.create(
                     sha256 = sha256,
                     uploader_id = current_user.id,
                     file_name = form.image.data.filename,
-                    img_type = img_format,
+                    img_type = img_type,
                     date = now()
                 )
                 flash(_('Image uploaded successfully.'), 'ok')
@@ -84,3 +94,33 @@ def upload():
         count = count,
         total = total
     )
+
+
+@image.route('/remove/<sha256>', methods=['GET', 'POST'])
+def remove(sha256):
+    if REGEX_SHA256.fullmatch(sha256):
+        img = find_record(Image, sha256=sha256)
+        if img:
+            if request.form.get('confirmed'):
+                os.remove(get_image_path(img.sha256, img.img_type))
+                img.delete_instance()
+                flash(
+                    _('%s %s deleted successfully.')
+                    % (img.sha256[0:8], img.file_name),
+                    'ok'
+                )
+                return redirect(url_for('.upload'))
+            else:
+                return render_template(
+                    'confirm.html',
+                    text = (
+                        _('Are you sure to delete image %s %s ?')
+                        % (img.sha256[0:8], img.file_name)
+                    ),
+                    url_no = url_for('.upload')
+                )
+        else:
+            abort(404)
+    else:
+        abort(404)
+            
