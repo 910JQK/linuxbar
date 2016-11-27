@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/global.css" />
+    <style>
+      .message_list { margin: auto; padding: 0; max-width: 20em; }
+      .message_list > li { list-style-type: none; } 
+      .message { text-align: center; font-size: 115%; font-weight: bold; }
+    </style>
+    <title>{{ _('Message') ~ ' - ' ~ get_config('site_name') }}</title>
+  </head>
+  <body class="box_center">
+    <div id="container">
+      {% with messages = get_flashed_messages() %}
+	<ul class="message_list">
+	  {% if messages %}
+	    {% for message in messages %}
+	      <li class="message">{{ message }}</li>
+	    {% endfor %}
+	  {% endif %}
+	</ul>
+      {% endwith %}
+    </div>
+  </body>
+</html>

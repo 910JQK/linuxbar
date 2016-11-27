@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+{% from 'macros.html' import avatar %}
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ _('Image Info: %(hash)s', hash=sha256part) ~ ' - ' ~ get_config('site_name') }}</title>
+    <link rel="stylesheet" href="/static/global.css" />
+    <style>
+      h1 { text-align: center; }
+      td { padding: 0.15em 0.3em; }
+      .btn_wrapper { text-align: center; margin-top: 0.4em; }
+    </style>
+  </head>
+  <body class="box_center">
+    <div id="container">      
+      <h1 class="name_title">{{ sha256part }}</h1>
+      <div class="table_wrapper">
+	<table>
+	  <tr>
+	    <td>{{ _('HASH') }}</td>
+	    <td>
+	      <a target="_blank" href="{{ url_for('.get', sha256part=img.sha256) }}">
+		{{ sha256part }}
+	      </a>
+	    </td>
+	  </tr>
+	  <tr>
+	    <td>{{ _('Format') }}</td>
+	    <td>{{ img.img_type }}</td>
+	  </tr>
+	  <tr>
+	    <td>{{ _('Uploader') }}</td>
+	    <td>
+	      <a target="_blank" href="{{ url_for('user.profile', uid=img.uploader.id) }}">
+		{{ img.uploader.name }}
+	      </a>
+	    </td>
+	  </tr>
+	  <tr>
+	    <td>{{ _('Upload Date') }}</td>
+	    <td>{{ img.date | date }}</td>
+	  </tr>
+	  <tr>
+	    <td>{{ _('Full SHA256') }}</td>
+	    <td>{{ img.sha256 }}</td>
+	  </tr>
+	</table>
+      </div>
+      <div class="btn_wrapper">
+	{% if img.uploader.id == current_user.id and current_user.level > 0 %}
+	  <a href="{{ url_for('.remove', sha256=img.sha256, info_page=request.url) }}">
+	    <button>{{ _('Delete') }}</button>
+	  </a>
+	{% endif %}
+      </div>
+    </div>
+  </body>
+</html>

@@ -45,6 +45,23 @@ def get(sha256part):
         abort(404)
 
 
+@image.route('/info/<sha256part>')
+def info(sha256part):
+    if REGEX_SHA256_PART.fullmatch(sha256part):
+        img_query = Image.select().where(Image.sha256.startswith(sha256part))
+        if img_query:
+            img = img_query.get()
+            return render_template(
+                'image/info.html',
+                img = img,
+                sha256part = img.sha256[0:8]
+            )
+        else:
+            abort(404)
+    else:
+        abort(404)
+
+
 @image.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
@@ -97,27 +114,35 @@ def upload():
 
 
 @image.route('/remove/<sha256>', methods=['GET', 'POST'])
+@login_required
 def remove(sha256):
     if REGEX_SHA256.fullmatch(sha256):
-        img = find_record(Image, sha256=sha256)
-        if img:
+        img = find_record(Image, sha256=sha256)        
+        if (
+                img and (
+                    img.uploader.id == current_user.id
+                    or current_user.level > 0
+                )
+        ):
             if request.form.get('confirmed'):
                 os.remove(get_image_path(img.sha256, img.img_type))
                 img.delete_instance()
                 flash(
-                    _('%s %s deleted successfully.')
-                    % (img.sha256[0:8], img.file_name),
-                    'ok'
+                    _('Image %s deleted successfully.') % img.sha256[0:8], 'ok'
                 )
-                return redirect(url_for('.upload'))
+                # if request is from link in info page, just show a message
+                if request.args.get('info_page'):
+                    return render_template('message.html')
+                else:
+                    return redirect(url_for('.upload'))
             else:
                 return render_template(
                     'confirm.html',
                     text = (
-                        _('Are you sure to delete image %s %s ?')
-                        % (img.sha256[0:8], img.file_name)
+                        _('Are you sure to delete image %s ?')
+                        % img.sha256[0:8]
                     ),
-                    url_no = url_for('.upload')
+                    url_no = request.args.get('info_page') or url_for('.upload')
                 )
         else:
             abort(404)
