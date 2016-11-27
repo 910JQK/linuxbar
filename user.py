@@ -241,6 +241,15 @@ def profile(uid):
         abort(404)
 
 
+@user.route('/profile/name/<name>')
+def profile_by_name(name):
+    user = find_record(User, name=name)
+    if user:
+        return redirect(url_for('.profile', uid=user.id))
+    else:
+        abort(404)
+
+
 @user.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
 def profile_edit():

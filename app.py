@@ -17,7 +17,8 @@ from utils import *
 from models import Config
 from user import user, login_manager
 from moderate import moderate
-from config import DEBUG, SECRET_KEY
+from image import image
+from config import DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE
 
 
 app = Flask(__name__)
@@ -26,6 +27,7 @@ login_manager.init_app(app)
 CsrfProtect(app)
 app.register_blueprint(user, url_prefix='/user')
 app.register_blueprint(moderate, url_prefix='/moderate')
+app.register_blueprint(image, url_prefix='/image')
 DEBUG = True
 
 
@@ -64,6 +66,8 @@ def get_captcha():
 
 def run():
     app.secret_key = SECRET_KEY
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_SIZE
     app.run(debug=DEBUG)
 
 

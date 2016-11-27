@@ -1,6 +1,7 @@
-from flask_wtf import FlaskForm
 from wtforms import *
 from wtforms.validators import *
+from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired
 
 
 from utils import _
@@ -235,4 +236,12 @@ class TagEditForm(FlaskForm):
         _('Description'),
         validators = [Required(), SizeRange(1, 255)],
         description = _('Detailed description.')
+    )
+
+
+class ImageUploadForm(FlaskForm):
+    image = FileField(
+        _('Image'),
+        validators = [FileRequired()],
+        description = _('Image file to upload (PNG/JPG/GIF).')
     )

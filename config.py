@@ -19,8 +19,15 @@ BAN_DAYS = [1, 3, 10, 30, 100]
 CODE_BEGIN = '/***#'
 CODE_END = '#***/'
 INLINE_CODE_SIGN = '`' # a single char
+NOTIFICATION_SIGN = '@' # a single char
+IMAGE_SIGN = '%' # a single char
 FORMATS = {
     '*': 'b',
     '~': 'i'
     # a single char: tag name
 }
+
+
+UPLOAD_FOLDER = 'upload'
+MAX_UPLOAD_SIZE = 5 * 1024 * 1024
+IMAGE_MIME = {'png': 'image/png', 'jpeg': 'image/jpeg', 'gif': 'image/gif'}
