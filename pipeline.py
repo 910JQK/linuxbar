@@ -6,6 +6,7 @@ from flask import url_for
 
 
 from utils import *
+from validation import REGEX_SHA256_PART
 from config import (
     CODE_BEGIN, CODE_END, INLINE_CODE_SIGN, NOTIFICATION_SIGN, FORMATS
 )
@@ -66,8 +67,8 @@ def process_format(lines):
                 ),
                 tag
             )
-    def gen_image_html(sha256):
-        url = url_for('image.get', sha256=sha256)
+    def gen_image_html(sha256part):
+        url = url_for('image.get', sha256part=sha256part)
         return (
             '<a class="content_image_link" href="%s" target="_blank"><img class="content_image" src="%s"></img></a>' % (url, url)
         )
@@ -82,8 +83,9 @@ def process_format(lines):
                     target = '_blank'
                 )
             if segment.startswith(IMAGE_SIGN*2):
-                sha256 = segment[2:]
-                return gen_image_html(sha256)
+                sha256part = segment[2:]
+                if REGEX_SHA256_PART.fullmatch(sha256part):
+                    return gen_image_html(sha256)
             if (
                     segment.startswith(INLINE_CODE_SIGN)
                     and segment.endswith(INLINE_CODE_SIGN)

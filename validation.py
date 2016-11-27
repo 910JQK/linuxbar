@@ -8,6 +8,7 @@ from utils import _
 
 REGEX_USERNAME = re.compile('[^<>"\'/\\\*@]{3,32}')
 REGEX_SHA256 = re.compile('[0123456789abcdef]{64}')
+REGEX_SHA256_PART = re.compile('[0123456789abcdef]{8,64}')
 REGEX_SLUG = re.compile('[0-9A-Za-z-]{1,32}')
 REGEX_TOKEN = re.compile('[0-9A-Za-z]{16}')
 REGEX_UINT = re.compile('0|[1-9][0-9]*')

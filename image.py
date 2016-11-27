@@ -5,10 +5,9 @@ from flask_login import current_user, login_required
 
 
 from utils import _
-from utils import *
 from models import Image
 from forms import ImageUploadForm
-from validation import REGEX_SHA256
+from validation import REGEX_SHA256_PART
 from config import IMAGE_MIME, UPLOAD_FOLDER
 
 
@@ -17,19 +16,23 @@ image = Blueprint(
 )
 
 
-@image.route('/get/<sha256>')
-def get(sha256):
-    if REGEX_SHA256.fullmatch(sha256):
-        img = find_record(Image, sha256=sha256)
-        if img:
+@image.route('/get/<sha256part>')
+def get(sha256part):
+    if REGEX_SHA256_PART.fullmatch(sha256part):
+        img_query = Image.select().where(Image.sha256.startswith(sha256part))
+        if img_query:
+            img = img_query.get()
             mime = IMAGE_MIME[img.img_type]
-            file_name = sha256 + '.' + img.img_type            
+            file_name = img.sha256 + '.' + img.img_type            
             path = os.path.join(UPLOAD_FOLDER, file_name)
             return send_file(path, mime)
         else:
             abort(404)
     else:
         abort(404)
+
+
+@image.route('/list')
 
 
 @image.route('/upload', methods=['GET', 'POST'])
