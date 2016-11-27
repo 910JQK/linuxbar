@@ -5,7 +5,8 @@ from flask_login import current_user, login_required
 
 
 from utils import _
-from models import Image
+from utils import *
+from models import Config, User, Image
 from forms import ImageUploadForm
 from validation import REGEX_SHA256_PART
 from config import IMAGE_MIME, UPLOAD_FOLDER
@@ -32,9 +33,6 @@ def get(sha256part):
         abort(404)
 
 
-@image.route('/list')
-
-
 @image.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
@@ -43,6 +41,17 @@ def upload():
         for chunk in iter(lambda: f.read(4096), b''):
             hash_sha256.update(chunk)
         return hash_sha256.hexdigest()
+    pn = int(request.args.get('pn', '1'))
+    count = int(Config.Get('count_item'))
+    user = find_record(User, id=current_user.id)
+    img_list = (
+        Image
+        .select()
+        .where(Image.uploader == user)
+        .order_by(Image.date.desc())
+        .paginate(pn, count)
+    )
+    total = Image.select().where(Image.uploader == user).count()
     form = ImageUploadForm()
     if form.validate():
         img = form.image.data
@@ -67,4 +76,11 @@ def upload():
                 flash(_('An identical image already exists.'), 'err')
         else:
             flash(_('Invalid image format.'), 'err')
-    return render_template('image/upload.html', form=form)
+    return render_template(
+        'image/upload.html',
+        form = form,
+        img_list = img_list,
+        pn = pn,
+        count = count,
+        total = total
+    )
