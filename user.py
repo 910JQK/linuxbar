@@ -304,4 +304,4 @@ def change_level(uid):
 def logout():
     logout_user()
     flash(_('Signed out successfully.'), 'ok')
-    return redirect(url_for('index'))
+    return redirect(request.args.get('next') or url_for('index'))
