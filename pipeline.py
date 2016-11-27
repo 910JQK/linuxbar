@@ -2,10 +2,13 @@ from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.util import ClassNotFound
 from pygments.formatters import HtmlFormatter
+from flask import url_for
 
 
 from utils import *
-from config import CODE_BEGIN, CODE_END, INLINE_CODE_SIGN, FORMATS
+from config import (
+    CODE_BEGIN, CODE_END, INLINE_CODE_SIGN, NOTIFICATION_SIGN, FORMATS
+)
 
 
 class Code():    
@@ -50,10 +53,37 @@ def process_code_block(lines):
 
 
 def process_format(lines):
-    def gen_html_tag(tag, content):
-        return '<%s>%s</%s>' % (tag, escape(content),tag)
+    def gen_html_tag(tag, content, **attrs):
+        if not attrs:
+            return '<%s>%s</%s>' % (tag, escape(content), tag)
+        else:
+            return '<%s %s>%s</%s>' % (
+                tag,
+                escape(content),
+                ' '.join(
+                    '%s="%s"' % (key, value)
+                    for key, value in attr.items()
+                ),
+                tag
+            )
+    def gen_image_html(sha256):
+        url = url_for('image.get', sha256=sha256)
+        return (
+            '<a class="content_image_link" href="%s" target="_blank"><img class="content_image" src="%s"></img></a>' % (url, url)
+        )
     def process_line_str(line):
         def process_segment(segment):
+            if segment.startswith(NOTIFICATION_SIGN*2):
+                username = segment[2:]
+                return gen_html_tag(
+                    'a',
+                    username,
+                    href = url_for('user.profile_by_name', name=username),
+                    target = '_blank'
+                )
+            if segment.startswith(IMAGE_SIGN*2):
+                sha256 = segment[2:]
+                return gen_image_html(sha256)
             if (
                     segment.startswith(INLINE_CODE_SIGN)
                     and segment.endswith(INLINE_CODE_SIGN)
@@ -86,7 +116,7 @@ def pipeline(*processors):
     return process
 
 
-default_pipeline = pipeline(
+get_content_html = pipeline(
     split_lines,
     process_code_block,
     process_format,
