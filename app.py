@@ -18,6 +18,7 @@ from models import Config
 from user import user, login_manager
 from moderate import moderate
 from image import image
+from topic import topic, topic_list
 from config import DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE
 
 
@@ -28,6 +29,7 @@ CsrfProtect(app)
 app.register_blueprint(user, url_prefix='/user')
 app.register_blueprint(moderate, url_prefix='/moderate')
 app.register_blueprint(image, url_prefix='/image')
+app.register_blueprint(topic, url_prefix='/topic')
 DEBUG = True
 
 
@@ -40,17 +42,9 @@ app.add_template_filter(md5, 'md5')
 app.add_template_filter(format_date, 'date')
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    # just for testing
-    html = '<!DOCTYPE html><title>Test</title><h1>It just works, but very ugly.</h1>'
-    if current_user.is_authenticated:
-        html += '<div><span>%d</span><span> / </span><span>%s</span></div><div><a href="/user/logout">Logout</a></div>' % (current_user.id, current_user.name)
-    else:
-        html += '<div><a target="_blank" href="/user/register">Register</a></div>'
-        html += '<div><a target="_blank" href="/user/login">Sign in</a></div>'
-        html += '<div><a target="_blank" href="/user/get-token">Reset Password</a></div>'
-    return html
+    return topic_list(tag_slug='')
 
 
 @app.route('/get-captcha')

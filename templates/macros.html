@@ -40,6 +40,35 @@
 {% endmacro %}
 
 
+{% macro user_toolbar(user) %}
+  <div class="user_toolbar" id="top_right">
+    {% if user.is_authenticated %}
+      {{ avatar(user.mail) }}
+      <span class="name">{{ user.name }}</span>
+      <span class="separator">|</span>
+      <a class="link_logout" href="{{ url_for('user.logout', next=request.url) }}">
+	{{ _('Logout') }}
+      </a>
+    {% else %}
+      <a class="link_register" href="{{ url_for('user.register') }}">
+	{{ _('Register') }}
+      </a>
+      <span class="separator">|</span>
+      <a class="link_login" href="{{ url_for('user.login', next=request.url) }}">
+	{{ _('Login') }}
+      </a>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+
+{% macro empty_notice() %}
+  <div class="empty_notice box_center">
+    <span>{{ _('Empty') }}</span>
+  </div>
+{% endmacro %}
+
+
 {% macro pager(pn, items_per_page, total, ajax=False) %}
   {% set pages = (total / items_per_page) | round(0, 'ceil') | int %}
   {% if pn <= 4 %}

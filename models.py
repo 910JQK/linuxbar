@@ -152,7 +152,6 @@ class TagRelation(BaseModel):
 
 class Post(BaseModel):
     topic = ForeignKeyField(Topic, related_name='posts', null=True)
-    topic_author = ForeignKeyField(User)
     ordinal = IntegerField()
     content = TextField()
     date = DateTimeField()

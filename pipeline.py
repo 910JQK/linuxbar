@@ -98,7 +98,7 @@ def process_format(lines):
         for char in FORMATS:
             if line.startswith(char*3):
                 return gen_html_tag(FORMATS[char], line[3:])
-        return ' '.join(process_segment(seg) for seg in line.split())
+        return ' '.join(process_segment(seg) for seg in line.split(' '))
     for line in lines:
         if isinstance(line, str):
             yield process_line_str(line)

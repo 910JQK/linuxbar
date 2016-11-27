@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+{% from 'macros.html' import avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar %}
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    {% if is_index %}
+      <title>{{ get_config('site_name') }}</title>
+    {% else %}
+      <title>{{ tag ~ ' - ' ~ get_config('site_name') }}</title>
+    {% endif %}
+    <link rel="stylesheet" href="/static/global.css" />
+    <style>
+     li { list-style-type: none; }
+     #topic_list { padding: 0em; margin: 0em 0em 2em 0em; }
+     .topic {
+	 display: flex;
+	 justify-content: space-between;
+	 border-bottom: 1px solid hsl(0, 0%, 93%);
+	 padding: 0.5em 0em;
+     }
+     .reply_count {
+	 box-sizing: border-box;
+	 text-align: center;
+	 padding: 0.1em 0em;
+	 width: 4.5em;
+	 border: 1px solid hsl(0, 0%, 80%);
+	 border-radius: 3px;
+	 background-color: hsl(0, 0%, 97%);
+     }
+     .container_middle { padding: 0em 1.2em; width: 35em; }
+     .title { margin-bottom: 0.25em; font-size: 115%; }
+     .topic.pinned .title::before {
+	 content: "{{ _('[Pinned]') }}";
+	 color: hsl(0, 75%, 50%);
+	 margin-right: 0.25em;
+     }
+     .container_right { width: 13.5em; }
+     .container_right .avatar, .container_right .name {
+	 vertical-align: middle;
+     }
+     .info { display: flex; justify-content: space-between; }
+     .author { flex-shrink: 1; }
+     .date { flex-shrink: 0; margin-left: 1em; }
+     .title, .summary, .author {
+	 overflow: hidden;
+	 text-overflow: ellipsis;
+	 white-space: nowrap;
+     }
+     #add_topic_form {
+	 width: 45em;
+     }
+     #add_topic_form > textarea {
+	 display: block;
+	 margin-bottom: 1em;
+     }
+     #add_topic_form > [name="title"], #add_topic_form > [name="content"] {
+	 box-sizing: border-box;
+	 width: 100%;
+     }
+     .empty_notice {
+	 min-width: 45em;
+	 min-height: 20em;
+     }
+    </style>
+  </head>
+  <body class="box_horizontal_center">
+    <div id="container">
+      {{ user_toolbar(current_user) }}
+      <header>
+	{% if index %}
+	  <h1>{{ get_config('site_name') }}</h1>
+	{% else %}
+	  <h1>{{ tag }}</h1>
+	{% endif %}
+      </header>
+      <hr/>
+      <ul id="topic_list">
+	{% if total == 0 %}
+	  {{ empty_notice() }}
+	{% endif %}
+	{% for topic in topic_list %}
+	  <li class="topic{% if topic.is_pinned and not index %} pinned{% endif %}" data-tid="{{ topic.id }}">
+	    <div class="container_left">
+	      <div class="reply_count">{{ topic.reply_count }}</div>
+	    </div>
+	    <div class="container_middle">
+	      <div class="title">
+		<a target="_blank" href="{{ url_for('topic.content', tid=topic.id) }}">{{ topic.title }}</a>
+	      </div>
+	      <div class="summary">{{ topic.summary }}</div>
+	    </div>
+	    <div class="container_right">
+	      <div class="info info_topic">
+		<span class="author" data-uid="{{ topic.author.id }}">
+		  {{ avatar(topic.author.mail) }}
+		  <span class="name">{{ topic.author.name }}</span>
+		</span>
+		<span class="date">{{ topic.post_date | date }}</span>
+	      </div>
+	      <div class="info info_last_post">
+		<span class="author" data-uid="{{ topic.last_reply_author.id }}">
+		  {{ avatar(topic.last_reply_author.mail) }}
+		  <span class="name">{{ topic.last_reply_author.name }}</span>
+		</span>
+		<span class="date">{{ topic.last_reply_date | date }}</span>
+	      </div>
+	    </div>
+	  </li>
+	{% endfor %}
+      </ul>
+      {{ pager(pn, count, total) }}
+      {% if current_user.is_authenticated %}
+	<p class="bold">Publish a new topic</p>
+	<form id="add_topic_form" method="post">
+	  {{ form.csrf_token }}
+	  {{ field(form.title) }}
+	  {{ field(form.content) }}
+	  {{ field(form.tags) }}
+	  {{ submit(_('Publish')) }}
+	</form>
+      {% endif %}
+    </div>
+  </body>
+</html>

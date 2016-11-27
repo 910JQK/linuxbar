@@ -245,3 +245,9 @@ class ImageUploadForm(FlaskForm):
         validators = [FileRequired()],
         description = _('Image file to upload (PNG/JPG/GIF).')
     )
+
+
+class TopicAddForm(FlaskForm):
+    title = StringField(_('Title'), validators=[Required(), SizeRange(1, 64)])
+    content = TextAreaField(_('Content'), validators=[Required()])
+    tags = SelectMultipleField(_('Tags'), validators=[Optional()], coerce=str)
