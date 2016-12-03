@@ -69,6 +69,40 @@
 {% endmacro %}
 
 
+{% macro topic_manage_menu(topic, current_user_level) %}
+  <div id="topic_manage_menu" class="menu">
+    {% if current_user_level > 0 %}
+      {% if current_user_level == 2 %}
+	{% if not topic.is_pinned %}
+	  <div class="menu_item" title="{{ _('pin this topic') }}">
+	    {{ _('Pin') }}
+	  </div>
+	{% else %}
+	  <div class="menu_item" title="{{ _('unpin this topic') }}">
+	    {{ _('Unpin') }}
+	  </div>
+	{% endif %}
+	{% if not topic.is_distillate %}
+	  <div class="menu_item" title="{{ _('add this topic to distillate') }}">
+	    {{ _('Dist') }}
+	  </div>
+	{% else %}
+	  <div class="menu_item" title="{{ _('unset distillate for this topic') }}">
+	    {{ _('Unset') }}
+	  </div>
+	{% endif %}
+      {% endif %}
+      <div class="menu_item" title="{{ _('move this topic to another board') }}">
+	{{ _('Move') }}
+      </div>
+      <div class="menu_item" title="{{ _('delete this topic') }}">
+	{{ _('Delete') }}
+      </div>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+
 {% macro pager(pn, items_per_page, total, ajax=False) %}
   {% set pages = (total / items_per_page) | round(0, 'ceil') | int %}
   {% if pn <= 4 %}

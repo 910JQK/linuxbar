@@ -1,0 +1,41 @@
+{% from 'macros.html' import avatar, pager %}
+{% macro subpost_list(list, current_user) %}
+  {% for subpost in list %}
+    <li class="subpost" id="p{{ subpost.id }}" style="padding-left: {{ 0.2*(subpost.path|get_level) }}em">
+      <div class="subpost_left_container">
+	{{ avatar(subpost.author.mail, 2) }}
+      </div>
+      <div class="subpost_right_container">
+	<div class="subpost_body">
+	  <span class="subpost_author_name">{{ subpost.author.name }}</span>
+	  <span class="subpost_content content">{{ subpost.content | get_html | safe }}</span>
+	</div>
+	<div class="subpost_footer">
+	  <div>
+	  </div>
+	  <div class="info subpost_info">
+	    {% if current_user.level > 0 %}
+	      <img class="icon btn subpost_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this subpost') }}" />
+	      <img class="icon btn subpost_ban_icon" src="/static/icons/ban.svg" aria-label="ban" alt="ban" title="{{ _('ban this user') }}" />
+	    {% endif %}
+	    {% if current_user.is_authenticated and current_user.id == subpost.author.id %}
+	      <img class="icon btn subpost_edit_btn" src="/static/icons/pencil.svg" aria-label="edit" alt="edit" title="{{ _('edit this subpost') }}" />
+	    {% endif %}
+	    {% if current_user.is_authenticated %}
+	      <img class="icon btn subpost_reply_btn" src="/static/icons/share.svg" aria-label="reply" alt="reply" />
+	    {% endif %}
+	    {% if subpost.edit_date %}
+	      <span class="edited_mark" title="{{ subpost.edit_date | date }}">
+		{{ _('[Edited]') }}
+	      </span>
+	    {% endif %}
+	    <span class="date">
+	      {{ subpost.date | date }}
+	    </span>
+	    <span class="ordinal">#{{ subpost.ordinal }}</span>
+	  </div>
+	</div>
+      </div>
+    </li>
+  {% endfor %}
+{% endmacro %}

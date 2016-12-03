@@ -59,6 +59,10 @@ def find_record(table, *args, **kwargs):
         return None
 
 
+def path_get_level(path):
+    return (len(path.split('/')) - 1)
+
+
 def format_date(date, detailed=False):
     # behaviour of this function must be consistent with the front-end
     if detailed:

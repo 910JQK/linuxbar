@@ -152,12 +152,14 @@ class TagRelation(BaseModel):
 
 class Post(BaseModel):
     topic = ForeignKeyField(Topic, related_name='posts', null=True)
+    parent = ForeignKeyField('self', related_name='replies', null=True)
     ordinal = IntegerField()
     content = TextField()
     date = DateTimeField()
     last_edit_date = DateTimeField(null=True)
     author = ForeignKeyField(User, related_name='posts')
-    path = TextField(default='/')
+    path = TextField(default='/', index=True)
+    sort_path = TextField(default='/', index=True)
     is_deleted = BooleanField(default=False)
 
 

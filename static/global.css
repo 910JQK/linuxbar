@@ -117,7 +117,7 @@ span.separator {
     margin: 0em 0.1em;
 }
 
-code, .code_block {
+code, .highlight {
     background-color: hsl(0, 0%, 93%);
     border-radius: 0.4em;
 }
@@ -126,9 +126,13 @@ code {
     padding: 0.2em;
 }
 
-.code_block {
+.highlight {
     margin: 0.2em 0em;
     padding: 0.2em;
+}
+
+.highlight > pre {
+    margin: 0em;
 }
 
 .page_link {
@@ -162,7 +166,12 @@ code {
     font-size: 1.5em;
 }
 
+.menu_wrapper:hover > .menu {
+    display: inherit;
+}
+
 .menu {
+    display: none;
     border: 1px solid gray;
     border-top: none;
 }

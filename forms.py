@@ -251,3 +251,7 @@ class TopicAddForm(FlaskForm):
     title = StringField(_('Title'), validators=[Required(), SizeRange(1, 64)])
     content = TextAreaField(_('Content'), validators=[Required()])
     tags = SelectMultipleField(_('Tags'), validators=[Optional()], coerce=str)
+
+
+class PostAddForm(FlaskForm):
+    content = TextAreaField(_('Content'), validators=[Required()])

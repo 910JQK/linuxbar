@@ -15,10 +15,11 @@ import captcha
 from utils import _
 from utils import *
 from models import Config
+from pipeline import get_content_html
 from user import user, login_manager
 from moderate import moderate
 from image import image
-from topic import topic, topic_list
+from forum import forum, topic_list
 from config import DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE
 
 
@@ -29,7 +30,7 @@ CsrfProtect(app)
 app.register_blueprint(user, url_prefix='/user')
 app.register_blueprint(moderate, url_prefix='/moderate')
 app.register_blueprint(image, url_prefix='/image')
-app.register_blueprint(topic, url_prefix='/topic')
+app.register_blueprint(forum, url_prefix='/forum')
 DEBUG = True
 
 
@@ -40,6 +41,8 @@ def inject_data():
 
 app.add_template_filter(md5, 'md5')
 app.add_template_filter(format_date, 'date')
+app.add_template_filter(path_get_level, 'get_level')
+app.add_template_filter(get_content_html, 'get_html')
 
 
 @app.route('/', methods=['GET', 'POST'])

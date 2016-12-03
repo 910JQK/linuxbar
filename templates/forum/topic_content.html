@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+{% from 'macros.html' import avatar, user_toolbar, topic_manage_menu, pager, field, submit %}
+{% from 'forum/subpost_list.html' import subpost_list %}
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ topic.title ~ ' - ' ~ get_config('site_name') }}</title>
+    <link rel="stylesheet" href="/static/global.css" />
+    <link rel="stylesheet" href="/static/highlight.css" />
+    <style>
+     ol { list-style-type: none; padding: 0; }
+     h1 { font-size: 1.5em; }
+     header + hr { margin-bottom: 0; }
+     #post_list { margin-top: 0; }
+     .float_right_box { display: flex; justify-content: flex-end; }
+     .btn { cursor: pointer; }
+     .info > * {
+	 margin-left: 0.25em;
+     }
+     .info > img, .info > a, .btn_container > img, .btn_container > a {
+	 margin-left: 0.5em;
+     }
+     .info > span {
+	 font-size: 85%;
+	 color: hsl(0, 0%, 57%);
+     }
+     .icon {
+	 width: 0.75em;
+	 height: 0.75em;
+	 vertical-align: sub;
+     }
+     .btn_container .icon {
+	 width: 1em;
+	 height: 1em;
+	 vertical-align: middle;
+     }
+     .content_image {
+	 max-width: 100%;
+     }
+     .post {
+	 display: flex;
+	 width: 55em;
+	 word-wrap: break-word;
+	 border-bottom: 1px solid hsl(0, 0%, 75%);
+     }
+     .content.deleted {
+	 color: hsl(0, 90%, 45%);
+     }
+     .container_left {
+	 flex-shrink: 0;
+	 width: 10em;
+	 display: flex;	 
+	 flex-direction: column;
+	 align-items: center;
+	 /*	 background-color: hsl(0, 0%, 97%);*/
+	 border-right: 1px solid hsl(0, 0%, 93%);
+     }
+     .container_left > :first-child {
+	 margin-top: 1.5em;
+	 margin-bottom: 0.2em;
+     }
+     .user_info_link { color: black; }
+     .container_right {
+	 position: relative;
+	 flex-grow: 1;
+	 padding: 1.85em 1.5em 0.55em 1.5em;
+	 min-width: 0;
+     }
+     #topic_manage_menu_wrapper {
+	 position: absolute;
+	 top: 0em;
+	 right: 2em;
+     }
+     #topic_manage_btn {
+	 padding: 0em 0.2em 0.1em 0.2em;
+	 background-color: hsl(0, 0%, 93%);
+	 background-image: linear-gradient(to bottom, hsl(0, 0%, 98%), hsl(0, 0%, 90%));
+	 border: 2px solid hsl(0, 0%, 60%);
+	 border-top: none;
+	 border-bottom-left-radius: 3px;
+	 border-bottom-right-radius: 3px;
+	 cursor: pointer;
+     }
+     .post_body { min-height: 16em; white-space: pre-wrap; }
+     .post_footer .icon { vertical-align: middle;  }
+     .post_subpost_list {
+	 margin: 0.5em 0em;
+	 border: 1px solid hsl(0, 0%, 93%);
+	 background-color: hsl(0, 0%, 97%);
+     }
+     .post_subpost_list.empty > .subpost_list_footer {
+	 border-top: none;
+     }
+     .post_subpost_list.cut > .subpost_list_footer {
+	 padding: 0;
+	 border-top: none;
+     }
+     /* .expanded: reply form is visible */
+     .post_subpost_list.empty:not(.expanded) {
+	 border: none;
+	 background-color: hsla(0, 0%, 0%, 0);
+     }
+     .post_subpost_list.empty:not(.expanded) > .subpost_list_footer {
+	 padding: 0;
+     }
+     .subpost {
+	 display: flex;
+	 align-items: flex-start;
+	 padding: 0.8em 1em 0.6em 1em;
+     }
+     .subpost:not(:last-child) {
+	 border-bottom: 1px dotted hsl(0, 0%, 85%);
+     }
+     .subpost_author_name::after { content: ":"; }
+     .subpost_content { white-space: pre-wrap; }
+     .subpost_left_container { flex-shrink: 0; margin-right: 0.8em; }
+     .subpost_right_container { flex-grow: 1; min-width: 0; }
+     .subpost_footer {
+	 display: flex;
+	 justify-content: space-between;
+     }
+     .subpost_reply_to > .icon { vertical-align: middle; }
+     .reply_author_name { font-size: 85%; }
+     .subpost_list_footer {
+	 padding: 0.5em 1em;
+	 border-top: 1px dotted hsl(0, 0%, 85%);
+     }
+     .subpost_list_footer.empty {
+	 padding: 0;
+	 border-top: none;
+     }
+     .subpost_list_footer .pager > .page_link {
+	 font-size: 100%;
+	 border: none;
+	 padding: 0;
+	 margin: 0em 0.25em;
+     }
+     .pager_and_reply_btn_wrapper {
+	 display: flex;
+	 justify-content: space-between;
+     }
+     .reply_submit_btn_wrapper {
+	 display: flex;
+	 justify-content: space-between;
+     }
+     .reply_submit_btn_wrapper > .message {
+	 white-space: nowrap;
+	 overflow: hidden;
+	 text-overflow: ellipsis;
+     }
+     .reply_form > [name="content"] {
+	 box-sizing: border-box;
+	 width: 100%;
+	 margin: 0.5em 0em;
+     }
+     .reply_form_header {
+	 display: flex;
+	 justify-content: space-between;
+	 align-items: center;
+	 color: gray;
+	 font-size: 85%;
+     }
+     .reply_cancel_btn {
+	 width: 0.85em;
+	 height: 0.85em
+     }
+     .expand_all_btn {
+	 text-align: center;
+	 padding: 0.5em 0em;
+	 color: gray;
+     }
+     #add_post_form { width: 45em; }
+     #add_post_form > [name="content"] { box-sizing: border-box; width: 100%; }
+    </style>
+  </head>
+  <body class="box_horizontal_center">
+    <div id="container">
+      {{ user_toolbar(current_user) }}
+      <header>
+	<h1>{{ topic.title }}</h1>
+      </header>
+      <hr/>
+      <ol id="post_list">
+	{% for post in post_list %}
+	  <li class="post" id="p{{ post.id }}">
+	    <div class="container_left">
+	      {{ avatar(post.author.mail, 6) }}
+	      <a class="user_info_link" href="{{ url_for('user.profile', uid=post.author.id) }}" target="_blank">
+		<span class="name">{{ post.author.name }}</span>
+	      </a>
+	    </div>
+	    <div class="container_right">
+	      {% if loop.index0 == 0 and is_admin %}
+		<div class="menu_wrapper" id="topic_manage_menu_wrapper">
+		  <div class="menu_label" id="topic_manage_btn">
+		    {{ _('Manage') }}
+		  </div>
+		  {{ topic_manage_menu(topic, current_user.level) }}
+		</div>
+	      {% endif %}
+	      <div class="post_body content">{{ post.content | get_html | safe }}</div>
+	      <div class="post_footer float_right_box" id="f{{ post.id }}">
+		<div class="info post_info">
+		  {% if current_user.level > 0 %}
+		    <img class="icon btn post_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" />
+		    <img class="icon btn post_ban_icon" src="/static/icons/ban.svg" aria-label="ban" alt="ban" title="{{ _('ban this user') }}" />
+		  {% endif %}
+		  {% if current_user.is_authenticated and post.author.id == current_user.id %}
+		    <a href="{{ url_for('forum.post_edit', pid=post.id) }}" target="_blank">
+		      <img class="icon btn post_edit_btn" src="/static/icons/pencil.svg" aria-label="edit" alt="edit" title="{{ _('edit this post') }}" />
+		    </a>
+		  {% endif %}
+		  {% if post.edit_date %}
+		    <span class="edited_mark" title="{{ post.edit_date | date }}">{{ _('[Edited]') }}</span>
+		  {% endif %}
+		  <span class="date">{{ post.date | date }}</span>
+		  <span class="ordinal">#{{ post.ordinal }}</span>
+		</div>
+	      </div>
+	      <div class="post_subpost_list">
+		<ol class="subpost_list">
+		  {{ subpost_list(gen_subpost_list(post), current_user) }}
+		</ol>
+		<div class="subpost_list_footer">
+		  {% if cut %}
+		    <div class="btn expand_all_btn">{{ _('click to expand remaining posts') }}</div>
+		  {% endif %}
+		  <div class="pager_and_reply_btn_wrapper">
+		    <div class="subpost_list_pager">
+		    </div>
+		    {% if current_user.is_authenticated %}
+		      <a class="reply_btn">{{ _('Reply') }}</a>
+		    {% endif %}
+		  </div>
+		</div>
+	      </div>
+	    </div>
+	  </li>
+	{% endfor %}
+      </ol>
+      {{ pager(pn, count, total) }}
+      {% if current_user.is_authenticated %}
+	<p class="bold">Reply this topic</p>
+	<form id="add_post_form" method="post">
+	  {{ form.csrf_token }}
+	  {{ field(form.content) }}
+          {{ submit(_('Reply')) }}
+	</form>
+      {% endif %}
+    </div>
+  </body>
+</html>

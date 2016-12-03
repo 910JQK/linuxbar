@@ -8,38 +8,64 @@ from flask import url_for
 from utils import *
 from validation import REGEX_SHA256_PART
 from config import (
-    CODE_BEGIN, CODE_END, INLINE_CODE_SIGN, NOTIFICATION_SIGN, FORMATS
+    CODE_BEGIN,
+    CODE_END,
+    INLINE_CODE_SIGN,
+    NOTIFICATION_SIGN,
+    IMAGE_SIGN,
+    FORMATS
 )
 
 
 class Code():    
     text = ''
     lang = ''
-    def __init__(self, text, lang='text'):
+    highlight = True
+    def __init__(self, text, lang='text', highlight=True):
         self.text = text
         self.lang = lang
+        self.highlight = highlight
     def __str__(self):
-        try:
-            lexer = get_lexer_by_name(self.lang)
-        except ClassNotFound:
-            lexer = get_lexer_by_name('text')
-        return highlight(self.text, lexer, HtmlFormatter())
+        if self.highlight:
+            try:
+                lexer = get_lexer_by_name(self.lang)
+            except ClassNotFound:
+                lexer = get_lexer_by_name('text')
+            return highlight(self.text, lexer, HtmlFormatter())
+        else:
+            return (
+                '%s %s\n%s\n%s' % (
+                    CODE_BEGIN,
+                    self.lang,
+                    self.text, # no escape: storage stage
+                    CODE_END
+                )
+            )
+
+
+class CodeInline():
+    text = ''
+    def __init__(self, text):
+        self.text = text
+    def __str__(self):
+        return '<code>%s</code>' % escape(self.text) # escape: view stage
 
 
 def split_lines(text):
     return text.splitlines()
 
 
-def process_code_block(lines):
+def process_code_block_raw(lines, highlight=False):
     in_code_block = False
     lang = ''
     code_lines = []
     for line in lines:
         if line.strip().endswith(CODE_END):
-            yield Code('\n'.join(code_lines), lang)
+            code_lines.append(line[0:line.rfind(CODE_END)])
+            yield Code('\n'.join(code_lines), lang, highlight=highlight)
             lang = ''
             code_lines = []
-            code_block_count = False
+            in_code_block = False
         elif in_code_block:
             code_lines.append(line)
         elif line.strip().startswith(CODE_BEGIN):
@@ -51,6 +77,17 @@ def process_code_block(lines):
             in_code_block = True
         else:
             yield line
+    if in_code_block:
+        yield Code('\n'.join(code_lines), lang, highlight=highlight)    
+
+
+def process_code_block(lines):
+    # tip: no escape !!!
+    return process_code_block_raw(lines, highlight=False)
+
+
+def process_code_block_with_highlight(lines):
+    return process_code_block_raw(lines, highlight=True)
 
 
 def process_format(lines):
@@ -60,11 +97,11 @@ def process_format(lines):
         else:
             return '<%s %s>%s</%s>' % (
                 tag,
-                escape(content),
                 ' '.join(
                     '%s="%s"' % (key, value)
-                    for key, value in attr.items()
+                    for key, value in attrs.items()
                 ),
+                escape(content),
                 tag
             )
     def gen_image_html(sha256part):
@@ -73,12 +110,35 @@ def process_format(lines):
             '<a class="content_image_link" href="%s" target="_blank"><img class="content_image" src="%s"></img></a>' % (url, url)
         )
     def process_line_str(line):
+        def process_inline_code():
+            in_code_block = False
+            code_segments = []
+            for segment in line.split(' '):
+                if not in_code_block and len(segment) <= 1:
+                    yield segment
+                    continue
+                if segment.endswith(INLINE_CODE_SIGN):
+                    code_segments.append(segment[0:-1])
+                    yield CodeInline(' '.join(code_segments))
+                    code_segments = []
+                    in_code_block = False
+                elif in_code_block:
+                    code_segments.append(segment)
+                elif segment.startswith(INLINE_CODE_SIGN):
+                    code_segments.append(segment[1:])
+                    in_code_block = True
+                else:
+                    yield segment
+            if in_code_block:
+                yield CodeInline(' '.join(code_segments))
         def process_segment(segment):
+            if not isinstance(segment, str):
+                return str(segment)
             if segment.startswith(NOTIFICATION_SIGN*2):
                 username = segment[2:]
                 return gen_html_tag(
                     'a',
-                    username,
+                    NOTIFICATION_SIGN + username,
                     href = url_for('user.profile_by_name', name=username),
                     target = '_blank'
                 )
@@ -98,7 +158,7 @@ def process_format(lines):
         for char in FORMATS:
             if line.startswith(char*3):
                 return gen_html_tag(FORMATS[char], line[3:])
-        return ' '.join(process_segment(seg) for seg in line.split(' '))
+        return ' '.join(process_segment(seg) for seg in process_inline_code())
     for line in lines:
         if isinstance(line, str):
             yield process_line_str(line)
@@ -120,7 +180,7 @@ def pipeline(*processors):
 
 get_content_html = pipeline(
     split_lines,
-    process_code_block,
+    process_code_block_with_highlight,
     process_format,
     join_lines
 )
