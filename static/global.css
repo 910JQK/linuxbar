@@ -104,11 +104,11 @@ body.box_horizontal_center {
     right: 1em;
 }
 
-#container > #top_right * {
+#container > #top_right *, #container > #top_left * {
     vertical-align: middle;
 }
 
-#container > #top_right a {
+#container > #top_right a, #container > #top_left a {
     color: hsl(0, 0%, 48%);
 }
 

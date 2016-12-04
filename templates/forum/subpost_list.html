@@ -32,8 +32,8 @@
 		 <img class="icon btn subpost_reply_btn" src="/static/icons/share.svg" aria-label="reply" alt="reply" />
 	      </a>
 	    {% endif %}
-	    {% if subpost.edit_date %}
-	      <span class="edited_mark" title="{{ subpost.edit_date | date }}">
+	    {% if subpost.last_edit_date %}
+	      <span class="edited_mark" title="{{ subpost.last_edit_date | date }}">
 		{{ _('[Edited]') }}
 	      </span>
 	    {% endif %}
