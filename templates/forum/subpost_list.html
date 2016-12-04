@@ -15,11 +15,17 @@
 	  </div>
 	  <div class="info subpost_info">
 	    {% if current_user.level > 0 %}
-	      <img class="icon btn subpost_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this subpost') }}" />
-	      <img class="icon btn subpost_ban_icon" src="/static/icons/ban.svg" aria-label="ban" alt="ban" title="{{ _('ban this user') }}" />
+	      <a href="{{ url_for('forum.post_remove', pid=subpost.id, next=request.url) }}">
+		<img class="icon btn subpost_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this subpost') }}" />
+	      </a>
+	      <a href="{{ url_for('user.ban', uid=subpost.author.id) }}" target="_blank">
+		<img class="icon btn subpost_ban_icon" src="/static/icons/ban.svg" aria-label="ban" alt="ban" title="{{ _('ban this user') }}" />
+	      </a>
 	    {% endif %}
 	    {% if current_user.is_authenticated and current_user.id == subpost.author.id %}
-	      <img class="icon btn subpost_edit_btn" src="/static/icons/pencil.svg" aria-label="edit" alt="edit" title="{{ _('edit this subpost') }}" />
+	      <a href="{{ url_for('forum.post_edit', pid=subpost.id, next=request.url) }}">
+		<img class="icon btn subpost_edit_btn" src="/static/icons/pencil.svg" aria-label="edit" alt="edit" title="{{ _('edit this subpost') }}" />
+	      </a>
 	    {% endif %}
 	    {% if current_user.is_authenticated %}
 	      <img class="icon btn subpost_reply_btn" src="/static/icons/share.svg" aria-label="reply" alt="reply" />

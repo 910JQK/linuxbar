@@ -190,3 +190,43 @@ code {
 
 .message.ok { color: hsl(100, 80%, 45%); }
 .message.err { color: hsl(0, 90%, 45%); }
+
+
+@keyframes show_message {
+    from {top: 0em;}
+    to {top: -3em;}
+}
+
+
+#messager {
+    box-sizing: border-box;    
+    position: fixed;
+    top: 0em;
+    left: 0%;
+    right: 0%;
+    height: 2.5em;
+    width: 30%;
+    margin: auto;
+    padding: 0.3em 1em;
+    text-align: center;
+    background-color: hsl(0, 0%, 98%);
+    font-weight: bold;
+    box-shadow: 0 3px 5px hsla(0, 0%, 40%, 0.3);
+    animation-name: show_message;
+    animation-delay: 2s;
+    animation-duration: 0.8s;
+    animation-fill-mode: forwards;
+    animation-timing-function: linear;
+}
+
+
+#messager.empty {
+    animation-play-state: paused;
+}
+
+
+#messager > .message_list {
+    margin: 0em;
+    padding: 0em;
+    list-style-type: none;
+}

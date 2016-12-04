@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar %}
+{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -68,6 +68,7 @@
   </head>
   <body class="box_horizontal_center">
     <div id="container">
+      {{ messager() }}
       {{ user_toolbar(current_user) }}
       <header>
 	{% if index %}

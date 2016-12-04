@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import avatar, user_toolbar, topic_manage_menu, pager, field, submit %}
+{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit %}
 {% from 'forum/subpost_list.html' import subpost_list %}
 <html>
   <head>
@@ -175,6 +175,7 @@
   </head>
   <body class="box_horizontal_center">
     <div id="container">
+      {{ messager() }}
       {{ user_toolbar(current_user) }}
       <header>
 	<h1>{{ topic.title }}</h1>
@@ -195,29 +196,34 @@
 		  <div class="menu_label" id="topic_manage_btn">
 		    {{ _('Manage') }}
 		  </div>
-		  {{ topic_manage_menu(topic, current_user.level) }}
+		  {{ topic_manage_menu(topic, current_user) }}
 		</div>
 	      {% endif %}
 	      <div class="post_body content">{{ post.content | get_html | safe }}</div>
 	      <div class="post_footer float_right_box" id="f{{ post.id }}">
 		<div class="info post_info">
-		  {% if current_user.level > 0 %}
-		    <img class="icon btn post_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" />
-		    <img class="icon btn post_ban_icon" src="/static/icons/ban.svg" aria-label="ban" alt="ban" title="{{ _('ban this user') }}" />
+		  {% if current_user.level and current_user.level > 0 %}
+		    <a href="{{ url_for('forum.post_remove', pid=post.id, next=request.url) }}">
+		      <img class="icon btn post_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" />
+		    </a>
+		    <a href="{{ url_for('user.ban', uid=post.author.id) }}" target="_blank">
+		      <img class="icon btn post_ban_icon" src="/static/icons/ban.svg" aria-label="ban" alt="ban" title="{{ _('ban this user') }}" />
+		    </a>
 		  {% endif %}
 		  {% if current_user.is_authenticated and post.author.id == current_user.id %}
-		    <a href="{{ url_for('forum.post_edit', pid=post.id) }}" target="_blank">
+		    <a href="{{ url_for('forum.post_edit', pid=post.id, next=request.url) }}">
 		      <img class="icon btn post_edit_btn" src="/static/icons/pencil.svg" aria-label="edit" alt="edit" title="{{ _('edit this post') }}" />
 		    </a>
 		  {% endif %}
-		  {% if post.edit_date %}
-		    <span class="edited_mark" title="{{ post.edit_date | date }}">{{ _('[Edited]') }}</span>
+		  {% if post.last_edit_date %}
+		    <span class="edited_mark" title="{{ post.last_edit_date | date }}">{{ _('[Edited]') }}</span>
 		  {% endif %}
 		  <span class="date">{{ post.date | date }}</span>
 		  <span class="ordinal">#{{ post.ordinal }}</span>
 		</div>
 	      </div>
-	      <div class="post_subpost_list">
+	      {% set subpost_count = get_subpost_count(post) %}
+	      <div class="post_subpost_list{% if subpost_count == 0 and not current_user.is_authenticated %} empty{% endif %}">
 		<ol class="subpost_list">
 		  {{ subpost_list(gen_subpost_list(post), current_user) }}
 		</ol>

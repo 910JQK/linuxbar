@@ -36,7 +36,22 @@
 
 
 {% macro avatar(mail, size=1) %}
-<img class="avatar" src="https://www.gravatar.com/avatar/{{ mail | md5 }}?d=mm&s={{ size*FONT_SIZE }}" />
+  <img class="avatar" src="https://www.gravatar.com/avatar/{{ mail | md5 }}?d=mm&s={{ size*FONT_SIZE }}" />
+{% endmacro %}
+
+
+{% macro messager() %}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    <div id="messager{% if not messages %} empty{% endif %}">
+      <ul class="message_list">
+	{% if messages %}
+	  {% for category, message in messages %}
+	    <li class="message{% if category != 'ok' %} {{ category }}{% endif %}">{{ message }}</li>
+	  {% endfor %}
+	{% endif %}
+      </ul>
+    </div>
+  {% endwith %}
 {% endmacro %}
 
 
@@ -69,10 +84,10 @@
 {% endmacro %}
 
 
-{% macro topic_manage_menu(topic, current_user_level) %}
+{% macro topic_manage_menu(topic, current_user) %}
   <div id="topic_manage_menu" class="menu">
-    {% if current_user_level > 0 %}
-      {% if current_user_level == 2 %}
+    {% if current_user.level > 0 %}
+    {% if current_user.level == 2 %}
 	{% if not topic.is_pinned %}
 	  <div class="menu_item" title="{{ _('pin this topic') }}">
 	    {{ _('Pin') }}
