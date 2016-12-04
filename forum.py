@@ -108,21 +108,23 @@ def topic_list(tag_slug):
     distillate_condition = (not distillate_only or Topic.distillate == True)
     if not tag_slug:
         is_index = True
+        tag_record = None
     else:
         is_index = False
+        tag_record = find_record(Tag, slug=tag_slug)
     if is_index:
         pinned_topics = (
             Topic
             .select(Topic, User)
             .join(User)
-            .where(Topic.is_pinned==True, distillate_condition)
+            .where((Topic.is_pinned==True) & distillate_condition)
             .order_by(Topic.post_date)
         )
         topics = (
             Topic
             .select(Topic, User)
             .join(User)
-            .where(Topic.is_pinned==False, distillate_condition)
+            .where((Topic.is_pinned==False) & distillate_condition)
         )
         total = topics.count()
         topics = (
@@ -144,7 +146,7 @@ def topic_list(tag_slug):
             .switch(TagRelation)
             .join(Topic)
             .join(User)
-            .where(Tag.slug == tag_slug, distillate_condition)
+            .where((Tag.slug == tag_slug) & distillate_condition)
         )
         total = relation_list.count()
         relation_list = (
@@ -190,6 +192,7 @@ def topic_list(tag_slug):
         'forum/topic_list.html',
         form = form,
         is_index = is_index,
+        tag = tag_record,
         topic_list = topic_list,
         pn = pn,
         count = count,

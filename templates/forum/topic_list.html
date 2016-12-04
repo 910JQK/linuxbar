@@ -6,7 +6,7 @@
     {% if is_index %}
       <title>{{ get_config('site_name') }}</title>
     {% else %}
-      <title>{{ tag ~ ' - ' ~ get_config('site_name') }}</title>
+      <title>{{ tag.name ~ ' - ' ~ get_config('site_name') }}</title>
     {% endif %}
     <link rel="stylesheet" href="/static/global.css" />
     <style>
@@ -71,10 +71,10 @@
       {{ messager() }}
       {{ user_toolbar(current_user) }}
       <header>
-	{% if index %}
+	{% if is_index %}
 	  <h1>{{ get_config('site_name') }}</h1>
 	{% else %}
-	  <h1>{{ tag }}</h1>
+	  <h1>{{ tag.name }}</h1>
 	{% endif %}
       </header>
       <hr/>
