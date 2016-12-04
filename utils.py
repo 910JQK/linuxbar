@@ -60,7 +60,20 @@ def find_record(table, *args, **kwargs):
 
 
 def path_get_level(path):
-    return (len(path.split('/')) - 1)
+    return (len(path.split('/')) - 2)
+
+
+def path_get_padding(level):
+    x = level-1
+    if x == -1:
+        return 0
+    elif x <= 5:
+        # current = 1 - 0.1*x (x >= 0)
+        return (x+1)*(2-x/10)/2
+    elif x > 5 and x < 28:
+        return 4.5 + 0.25*(x-5)
+    else:
+        return 10
 
 
 def format_date(date, detailed=False):

@@ -42,6 +42,7 @@ def inject_data():
 app.add_template_filter(md5, 'md5')
 app.add_template_filter(format_date, 'date')
 app.add_template_filter(path_get_level, 'get_level')
+app.add_template_filter(path_get_padding, 'get_padding')
 app.add_template_filter(get_content_html, 'get_html')
 
 

@@ -19,7 +19,7 @@ from models import (
     db, Config, User, Topic, TagRelation, Tag, Post, DeleteRecord, Message
 )
 from pipeline import pipeline, split_lines, process_code_block, join_lines
-from config import NOTIFICATION_SIGN, SUMMARY_LENGTH
+from config import NOTIFICATION_SIGN, SUMMARY_LENGTH, DB_WILDCARD
 
 
 forum = Blueprint(
@@ -47,7 +47,6 @@ def filter_at_messages(lines, callees):
             yield str(line)
 
 
-@db.atomic()
 def create_post(topic, parent, content):
     callees = []
     def process_at(lines):
@@ -56,21 +55,25 @@ def create_post(topic, parent, content):
         split_lines, process_code_block, process_at, join_lines
     )
     content = content_processor(content)
-    total = Post.select().where(Post.topic == topic).count()
-    new_post = Post.create(
-        topic = topic,
-        parent = parent,
-        ordinal = (total + 1),        
-        content = content,
-        date = now(),
-        author_id = current_user.id
-    )
     if parent:
         parent_path = parent.path
         parent_sort_path = parent.sort_path
     else:
         parent_path = ''
         parent_sort_path = ''
+    with db.atomic():
+        total = Post.select().where(
+            Post.topic == topic,
+            Post.path % (parent_path + '/' + DB_WILDCARD)
+        ).count()
+        new_post = Post.create(
+            topic = topic,
+            parent = parent,
+            ordinal = (total + 1),
+            content = content,
+            date = now(),
+            author_id = current_user.id
+        )
     new_post.path = '%s/%d' % (parent_path, new_post.id)
     new_post.sort_path = (
         '%s/%s-%d' % (
@@ -189,14 +192,20 @@ def topic_content(tid):
         return (
             Post
             .select()
-            .where(Post.path % (post.path+'/%'), Post.is_deleted == False)
+            .where(
+                Post.path % (post.path+'/'+DB_WILDCARD),
+                Post.is_deleted == False
+            )
         ).count()
     def gen_subpost_list(post):
         return (
             Post
             .select(Post, User)
             .join(User)
-            .where(Post.path % (post.path+'/%'), Post.is_deleted == False)
+            .where(
+                Post.path % (post.path+'/'+DB_WILDCARD),
+                Post.is_deleted == False
+            )
             .order_by(Post.sort_path)
         )
     topic = find_record(Topic, id=tid)
@@ -236,9 +245,35 @@ def topic_content(tid):
         abort(404)
 
 
-@forum.route('/post/<int:pid>')
+@forum.route('/post/<int:pid>', methods=['GET', 'POST'])
 def post(pid):
-    pass
+    post = find_record(Post, id=pid)
+    if post:
+        form = PostAddForm()
+        if form.validate_on_submit():
+            create_post(post.topic, post, form.content.data)
+            flash(_('Reply published successfully.'))
+            return redirect(url_for('.post', pid=pid))
+        post_list = (
+            Post
+            .select(Post, User)
+            .join(User)
+            .where(
+                (
+                    (Post.path % (post.path+'/'+DB_WILDCARD))
+                    | (Post.id == pid)
+                ) & (Post.is_deleted == False)
+            )
+            .order_by(Post.sort_path)
+        )
+        return render_template(
+            'forum/post_content.html',
+            post = post,
+            form = form,
+            post_list = post_list
+        )
+    else:
+        abort(404)
 
 
 @forum.route('/post/edit/<int:pid>', methods=['GET', 'POST'])

@@ -1,7 +1,7 @@
 {% from 'macros.html' import avatar, pager %}
-{% macro subpost_list(list, current_user) %}
+{% macro subpost_list(list, current_user, base_level=0) %}
   {% for subpost in list %}
-    <li class="subpost" id="p{{ subpost.id }}" style="padding-left: {{ 0.2*(subpost.path|get_level) }}em">
+    <li class="subpost" id="p{{ subpost.id }}" style="padding-left: {{ ((subpost.path | get_level) - base_level) | get_padding }}em">
       <div class="subpost_left_container">
 	{{ avatar(subpost.author.mail, 2) }}
       </div>
@@ -28,7 +28,9 @@
 	      </a>
 	    {% endif %}
 	    {% if current_user.is_authenticated %}
-	      <img class="icon btn subpost_reply_btn" src="/static/icons/share.svg" aria-label="reply" alt="reply" />
+	      <a href="{{ url_for('.post', pid=subpost.id) }}" target="_blank">
+		 <img class="icon btn subpost_reply_btn" src="/static/icons/share.svg" aria-label="reply" alt="reply" />
+	      </a>
 	    {% endif %}
 	    {% if subpost.edit_date %}
 	      <span class="edited_mark" title="{{ subpost.edit_date | date }}">
