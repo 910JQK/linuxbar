@@ -47,7 +47,7 @@ def filter_at_messages(lines, callees):
             yield str(line)
 
 
-def create_post(topic, parent, content):
+def create_post(topic, parent, content, add_reply_count=True):
     callees = []
     def process_at(lines):
         return filter_at_messages(lines, callees)
@@ -85,6 +85,12 @@ def create_post(topic, parent, content):
     new_post.save()
     topic.last_reply_date = new_post.date
     topic.save()
+    if add_reply_count:
+        (
+            Topic
+            .update(reply_count = Topic.reply_count+1)
+            .where(Topic.id == topic.id)
+        ).execute()
     for callee in callees:
         Message.create(
             post = new_post,
@@ -175,8 +181,11 @@ def topic_list(tag_slug):
         )
         for tag in tags:
             TagRelation.create(topic=new_topic, tag=find_record(Tag, slug=tag))
-        first_post = create_post(new_topic, None, content)
+        first_post = create_post(
+            new_topic, None, content, add_reply_count=False
+        )
         flash(_('Topic published successfully.'), 'ok')
+        return redirect(request.url)
     return render_template(
         'forum/topic_list.html',
         form = form,
