@@ -35,5 +35,5 @@ Run it:
     $ pip install -r requirements.txt # install dependencies
     $ ./manage.py init-db # create database data.db (sqlite3)
     $ ./manage.py create-admin # create an administrator account
-    $ ./manage.py # run app, then goto http://localhost:5000
+    $ ./manage.py run # run app, then goto http://localhost:5000
 
