@@ -68,15 +68,17 @@
       </div>
       {{ user_toolbar(current_user) }}
       <ul class="list">
-	{{ subpost_list(post_list, current_user, post.path|get_level) }}
+	{{ subpost_list(post_list, current_user, post.path|get_level, True) }}
       </ul>
-      <hr/>
-      <p class="bold">{{ _('Reply this post') }}</p>
-      <form id="add_post_form" method="post">
-	{{ form.csrf_token }}
-	{{ field(form.content) }}
-	{{ submit('Reply') }}
-      </form>
+      {% if current_user.is_authenticated %}
+	<hr/>
+        <p class="bold">{{ _('Reply this post') }}</p>
+        <form id="add_post_form" method="post">
+	  {{ form.csrf_token }}
+	  {{ field(form.content) }}
+	  {{ submit('Reply') }}
+        </form>
+      {% endif %}
     </div>
   </body>
 </html>

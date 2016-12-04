@@ -241,9 +241,7 @@
 		  <div class="pager_and_reply_btn_wrapper">
 		    <div class="subpost_list_pager">
 		    </div>
-		    {% if current_user.is_authenticated %}
-		      <a class="reply_btn" href="{{ url_for('.post', pid=post.id) }}" target="_blank">{{ _('Reply') }}</a>
-		    {% endif %}
+		    <a class="reply_btn" href="{{ url_for('.post', pid=post.id) }}" target="_blank">{{ _('Reply') }}</a>
 		  </div>
 		</div>
 	      </div>

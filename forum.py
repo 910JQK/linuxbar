@@ -83,6 +83,8 @@ def create_post(topic, parent, content):
         )
     )
     new_post.save()
+    topic.last_reply_date = new_post.date
+    topic.save()
     for callee in callees:
         Message.create(
             post = new_post,
@@ -173,7 +175,7 @@ def topic_list(tag_slug):
         )
         for tag in tags:
             TagRelation.create(topic=new_topic, tag=find_record(Tag, slug=tag))
-        first_post = create_post(topic, None, content)
+        first_post = create_post(new_topic, None, content)
         flash(_('Topic published successfully.'), 'ok')
     return render_template(
         'forum/topic_list.html',
@@ -214,6 +216,9 @@ def topic_content(tid):
     form = PostAddForm()
     if topic:
         if form.validate_on_submit():
+            if not current_user.is_authenticated:
+                flash(_('Please sign in before publishing a post.'), 'err')
+                return redirect(url_for('user.login', next=request.url))
             create_post(topic, None, form.content.data)
             flash(_('Post published successfully.'), 'ok')
             return redirect(url_for('.topic_content', tid=tid))
@@ -251,6 +256,9 @@ def post(pid):
     if post:
         form = PostAddForm()
         if form.validate_on_submit():
+            if not current_user.is_authenticated:
+                flash(_('Please sign in before publishing a post.'), 'err')
+                return redirect(url_for('user.login', next=request.url))
             create_post(post.topic, post, form.content.data)
             flash(_('Reply published successfully.'))
             return redirect(url_for('.post', pid=pid))
@@ -282,6 +290,11 @@ def post_edit(pid):
     if post:
         form = PostAddForm(obj=post)
         if form.validate_on_submit():
+            if not current_user.is_authenticated:
+                flash(_('Please sign in before editing a post.'), 'err')
+                return redirect(url_for('user.login', next=request.url))
+            if current_user.id != post.author.id:
+                abort(401)
             form.populate_obj(post)
             post.last_edit_date = now()
             post.save()

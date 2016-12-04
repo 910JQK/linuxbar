@@ -1,5 +1,5 @@
 {% from 'macros.html' import avatar, pager %}
-{% macro subpost_list(list, current_user, base_level=0) %}
+{% macro subpost_list(list, current_user, base_level=0, first_no_reply_btn=False) %}
   {% for subpost in list %}
     <li class="subpost" id="p{{ subpost.id }}" style="padding-left: {{ ((subpost.path | get_level) - base_level) | get_padding }}em">
       <div class="subpost_left_container">
@@ -14,7 +14,7 @@
 	  <div>
 	  </div>
 	  <div class="info subpost_info">
-	    {% if current_user.level > 0 %}
+	    {% if current_user.is_authenticated and current_user.level > 0 %}
 	      <a href="{{ url_for('forum.post_remove', pid=subpost.id, next=request.url) }}">
 		<img class="icon btn subpost_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this subpost') }}" />
 	      </a>
@@ -27,9 +27,9 @@
 		<img class="icon btn subpost_edit_btn" src="/static/icons/pencil.svg" aria-label="edit" alt="edit" title="{{ _('edit this subpost') }}" />
 	      </a>
 	    {% endif %}
-	    {% if current_user.is_authenticated %}
+	    {% if not (first_no_reply_btn and loop.index0 == 0) %}
 	      <a href="{{ url_for('.post', pid=subpost.id) }}" target="_blank">
-		 <img class="icon btn subpost_reply_btn" src="/static/icons/share.svg" aria-label="reply" alt="reply" />
+		<img class="icon btn subpost_reply_btn" src="/static/icons/share.svg" aria-label="reply" alt="reply" />
 	      </a>
 	    {% endif %}
 	    {% if subpost.last_edit_date %}
