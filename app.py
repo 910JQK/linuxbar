@@ -19,7 +19,7 @@ from pipeline import get_content_html
 from user import user, login_manager
 from moderate import moderate
 from image import image
-from forum import forum, topic_list
+from forum import forum, topic_list, filter_deleted_post
 from config import DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE
 
 
@@ -44,6 +44,7 @@ app.add_template_filter(format_date, 'date')
 app.add_template_filter(path_get_level, 'get_level')
 app.add_template_filter(path_get_padding, 'get_padding')
 app.add_template_filter(get_content_html, 'get_html')
+app.add_template_filter(filter_deleted_post, 'filter_deleted_post')
 
 
 @app.route('/', methods=['GET', 'POST'])

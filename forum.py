@@ -200,25 +200,38 @@ def topic_list(tag_slug):
     )
 
 
+def filter_deleted_post(post_list):
+    deleted_id = -1
+    for post in post_list:
+        if deleted_id != -1 and post.path.find('/%d/' % deleted_id) != -1:
+            continue
+        else:
+            if post.is_deleted:
+                deleted_id = post.id
+                continue
+            else:
+                yield post
+
+
 @forum.route('/topic/<int:tid>', methods=['GET', 'POST'])
 def topic_content(tid):
     def get_subpost_count(post):
+        # only count direct child node
         return (
             Post
             .select()
             .where(
-                Post.path % (post.path+'/'+DB_WILDCARD),
+                Post.parent == post,
                 Post.is_deleted == False
             )
         ).count()
     def gen_subpost_list(post):
-        return (
+        return filter_deleted_post(
             Post
             .select(Post, User)
             .join(User)
             .where(
-                Post.path % (post.path+'/'+DB_WILDCARD),
-                Post.is_deleted == False
+                Post.path % (post.path+'/'+DB_WILDCARD)
             )
             .order_by(Post.sort_path)
         )
@@ -274,7 +287,7 @@ def post(pid):
             create_post(post.topic, post, form.content.data)
             flash(_('Reply published successfully.'))
             return redirect(url_for('.post', pid=pid))
-        post_list = (
+        posts = (
             Post
             .select(Post, User)
             .join(User)
@@ -282,10 +295,11 @@ def post(pid):
                 (
                     (Post.path % (post.path+'/'+DB_WILDCARD))
                     | (Post.id == pid)
-                ) & (Post.is_deleted == False)
+                )
             )
             .order_by(Post.sort_path)
         )
+        post_list = filter_deleted_post(posts)
         return render_template(
             'forum/post_content.html',
             post = post,

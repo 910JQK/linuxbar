@@ -198,7 +198,7 @@
 	      </a>
 	    </div>
 	    <div class="container_right">
-	      {% if loop.index0 == 0 and is_admin %}
+	      {% if loop.index0 == 0 and current_user.is_authenticated and current_user.level > 0 %}
 		<div class="menu_wrapper" id="topic_manage_menu_wrapper">
 		  <div class="menu_label" id="topic_manage_btn">
 		    {{ _('Manage') }}
@@ -230,6 +230,7 @@
 		</div>
 	      </div>
 	      {% set subpost_count = get_subpost_count(post) %}
+	      {# `subpost count` is the total count of its *direct* subposts #}
 	      <div class="post_subpost_list{% if subpost_count == 0 %} empty{% endif %}">
 		<ol class="subpost_list">
 		  {{ subpost_list(gen_subpost_list(post), current_user) }}
