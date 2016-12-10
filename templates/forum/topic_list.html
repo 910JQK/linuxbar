@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar %}
+{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar, ban_tip %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -49,15 +49,15 @@
      #add_topic_form {
 	 width: 45em;
      }
-     #add_topic_form > * {
+     #add_topic_form > fieldset > * {
 	 display: block;
 	 margin: 0.2em 0em;
      }
-     #add_topic_form > [name="title"], #add_topic_form > [name="content"] {
+     #add_topic_form [name="title"], #add_topic_form [name="content"] {
 	 box-sizing: border-box;
 	 width: 100%;
      }
-     #add_topic_form > [name="content"] {
+     #add_topic_form [name="content"] {
 	 height: 15em;
      }
      .empty_notice {
@@ -114,14 +114,18 @@
       </ul>
       {{ pager(pn, count, total) }}
       {% if current_user.is_authenticated %}
+	{% set is_banned = current_user.is_banned %}
 	<p class="bold">Publish a new topic</p>
 	<form id="add_topic_form" method="post">
-	  {{ form.csrf_token }}
-	  {{ field(form.title) }}
-	  {{ field(form.content) }}
-	  {{ field(form.tags) }}
-	  {{ submit(_('Publish')) }}
+	  <fieldset{% if is_banned %} disabled="disabled"{% endif %}>
+	    {{ form.csrf_token }}
+	    {{ field(form.title) }}
+	    {{ field(form.content) }}
+	    {{ field(form.tags) }}
+	    {{ submit(_('Publish')) }}
+	  </fieldset>	  
 	</form>
+	{% if is_banned %}{{ ban_tip(current_user) }}{% endif %}
       {% endif %}
     </div>
   </body>

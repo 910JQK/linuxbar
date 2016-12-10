@@ -35,6 +35,19 @@
 {% endmacro %}
 
 
+{% macro ban_tip(user) %}
+  {# please check if banned before invoking this macro #}
+  <div class="ban_tip">
+    <p>
+      {{ _('You are currently being banned.') }}
+    </p>
+    <p>
+      {{ _('Expire date: ') ~ user.banned[0].expire_date.isoformat(' ')[:19] }}
+    </p>
+  </div>
+{% endmacro %}
+
+
 {% macro avatar(mail, size=1) %}
   <img class="avatar" src="https://www.gravatar.com/avatar/{{ mail | md5 }}?d=mm&s={{ size*FONT_SIZE }}" />
 {% endmacro %}
@@ -108,7 +121,7 @@
 	{% endif %}
       {% endif %}
       <div class="menu_item" title="{{ _('manage tags') }}">
-	{{ _('Manage Tags') }}
+	{{ _('Tags') }}
       </div>
       <div class="menu_item" title="{{ _('delete this topic') }}">
 	{{ _('Delete') }}

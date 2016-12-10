@@ -56,6 +56,9 @@ class User(UserMixin, BaseModel):
         self.password_hash = generate_password_hash(password)
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    @property
+    def is_banned(self):
+        return (self.banned and self.banned[0].is_valid)
 
 
 class UserConfig(BaseModel):
@@ -99,10 +102,17 @@ class Ban(BaseModel):
     operator = ForeignKeyField(User, related_name='banning')
     date = DateTimeField()
     days = SmallIntegerField(default=1)
+    @property
+    def expire_date(self):
+        return self.date + datetime.timedelta(days=self.days)
+    @property
     def is_valid(self):
-        return (
-            now() < self.date + datetime.timedelta(days=self.days)
+        valid = (
+            now() < self.expire_date
         )
+        if not valid:
+            self.delete_instance()
+        return valid
     @classmethod
     def try_to_create(Ban, user, days, operator):
         query = Ban.select().where(Ban.user == user)

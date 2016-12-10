@@ -164,6 +164,9 @@ def topic_list(tag_slug):
         if not current_user.is_authenticated:
             flash(_('Please sign in before publishing a topic.'), 'err')
             return redirect(url_for('user.login', next=request.url))
+        if current_user.is_banned:
+            flash(_('You are being banned.'), 'err')
+            return redirect(request.url)
         title = form.title.data
         content = form.content.data
         tags = form.tags.data
@@ -244,6 +247,9 @@ def topic_content(tid):
             if not current_user.is_authenticated:
                 flash(_('Please sign in before publishing a post.'), 'err')
                 return redirect(url_for('user.login', next=request.url))
+            if current_user.is_banned:
+                flash(_('You are being banned.'), 'err')
+                return redirect(request.url)
             create_post(topic, None, form.content.data)
             flash(_('Post published successfully.'), 'ok')
             return redirect(url_for('.topic_content', tid=tid))
@@ -283,7 +289,10 @@ def post(pid):
         if form.validate_on_submit():
             if not current_user.is_authenticated:
                 flash(_('Please sign in before publishing a post.'), 'err')
-                return redirect(url_for('user.login', next=request.url))
+                return redirect(url_for('user.login', next=request.url)) 
+            if current_user.is_banned:
+                flash(_('You are being banned.'), 'err')
+                return redirect(request.url)           
             create_post(post.topic, post, form.content.data)
             flash(_('Reply published successfully.'))
             return redirect(url_for('.post', pid=pid))

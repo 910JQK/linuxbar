@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit %}
+{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit, ban_tip %}
 {% from 'forum/subpost_list.html' import subpost_list %}
 <html>
   <head>
@@ -172,7 +172,7 @@
      #add_post_form {
 	 width: 45em;
      }
-     #add_post_form > [name="content"] {
+     #add_post_form [name="content"] {
 	 box-sizing: border-box;
 	 width: 100%;
 	 height: 20em;
@@ -252,12 +252,16 @@
       </ol>
       {{ pager(pn, count, total) }}
       {% if current_user.is_authenticated %}
+	{% set is_banned = current_user.is_banned %}
 	<p class="bold">Reply this topic</p>
 	<form id="add_post_form" method="post">
-	  {{ form.csrf_token }}
-	  {{ field(form.content) }}
-          {{ submit(_('Reply')) }}
+	  <fieldset{% if is_banned %} disabled="disabled"{% endif %}>
+	    {{ form.csrf_token }}
+	    {{ field(form.content) }}
+            {{ submit(_('Reply')) }}
+	  </fieldset>
 	</form>
+	{% if is_banned %}{{ ban_tip(current_user) }}{% endif %}
       {% endif %}
     </div>
   </body>
