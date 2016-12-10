@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import empty_notice, messager %}
+{% from 'macros.html' import empty_notice, messager, pager %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -38,7 +38,7 @@
 	      <td>{{ ban.operator.name }}</td>
 	      <td>
 		{% if ban.is_valid %}
-		  <a href="{{ url_for('.ban_remove', ban_id=ban.id) }}">Revert</a>
+		  <a href="{{ url_for('.ban_remove', ban_id=ban.id) }}">{{ _('Revert') }}</a>
 		{% else %}
 		  {{ _('(Expired)') }}
 		{% endif %}
@@ -47,6 +47,7 @@
 	  {% endfor %}
 	</table>
       </div>
+      {{ pager(pn, count, total) }}
     </div>
   </body>
 </html>

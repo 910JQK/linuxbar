@@ -117,14 +117,22 @@ def topic_list(tag_slug):
             Topic
             .select(Topic, User)
             .join(User)
-            .where((Topic.is_pinned==True) & distillate_condition)
+            .where(
+                (Topic.is_pinned == True)
+                & (Topic.is_deleted == False)
+                & distillate_condition
+            )
             .order_by(Topic.post_date)
         )
         topics = (
             Topic
             .select(Topic, User)
             .join(User)
-            .where((Topic.is_pinned==False) & distillate_condition)
+            .where(
+                (Topic.is_pinned == False)
+                & (Topic.is_deleted == False)
+                & distillate_condition
+            )
         )
         total = topics.count()
         topics = (
@@ -146,7 +154,11 @@ def topic_list(tag_slug):
             .switch(TagRelation)
             .join(Topic)
             .join(User)
-            .where((Tag.slug == tag_slug) & distillate_condition)
+            .where(
+                (Tag.slug == tag_slug)
+                & (Topic.is_deleted == False)
+                & distillate_condition
+            )
         )
         total = relation_list.count()
         relation_list = (
@@ -281,10 +293,90 @@ def topic_content(tid):
         abort(404)
 
 
+@forum.route('/topic/set/pin/<int:tid>')
+@privilege_required()
+def topic_pin(tid):
+    revert = bool(request.args.get('revert'))
+    topic = find_record(Topic, id=tid)
+    if topic and not topic.is_deleted:
+        if not revert:
+            topic.is_pinned = True
+            topic.save()
+            flash(_('Topic pinned successfully.'), 'ok')
+        else:
+            topic.is_pinned = False
+            topic.save()
+            flash(_('Topic unpinned successfully.'), 'err')
+        return redirect(url_for('.topic', tid=tid))
+    else:
+        abort(404)
+
+
+@forum.route('/topic/set/distillate/<int:tid>')
+@privilege_required()
+def topic_distillate(tid):
+    revert = bool(request.args.get('revert'))
+    topic = find_record(Topic, id=tid)
+    if topic and not topic.is_deleted:
+        if not revert:
+            topic.is_distillate = True
+            topic.save()
+            flash(_('Distillate added successfully.'), 'ok')
+        else:
+            topic.is_distillate = False
+            topic.save()
+            flash(_('Distillate removed successfully.'), 'err')
+        return redirect(url_for('.topic', tid=tid))
+    else:
+        abort(404)
+
+
+@forum.route('/topic/remove/<int:tid>', methods=['GET', 'POST'])
+@privilege_required()
+def topic_remove(tid):
+    topic = find_record(Topic, id=tid)
+    if topic and not topic.is_deleted:
+        if request.form.get('confirmed'):
+            topic.is_deleted = True
+            topic.save()
+            DeleteRecord.create(
+                topic=topic, date=now(), operator_id=current_user.id
+            )
+            flash(_('Topic deleted successfully.'), 'ok')
+            return redirect(url_for('index'))
+        else:
+            return render_template(
+                'confirm.html',
+                text = _('Are you sure to delete this topic?'),
+                url_no = url_for('.topic_content', tid=tid)
+            )
+    else:
+        abort(404)
+
+
+@forum.route('/topic/revert/<int:tid>')
+@privilege_required()
+def topic_revert(tid):
+    topic = find_record(Topic, id=tid)
+    if topic and topic.is_deleted:
+        topic.is_deleted = False
+        topic.save()
+        DeleteRecord.create(
+            topic=topic,
+            date=now(),
+            is_revert=True,
+            operator_id=current_user.id
+        )
+        flash(_('Topic reverted successfully.'), 'ok')
+        return redirect(url_for('moderate.delete_record'))
+    else:
+        abort(404)
+
+
 @forum.route('/post/<int:pid>', methods=['GET', 'POST'])
 def post(pid):
     post = find_record(Post, id=pid)
-    if post:
+    if post and post.is_available:
         form = PostAddForm()
         if form.validate_on_submit():
             if not current_user.is_authenticated:
@@ -322,7 +414,7 @@ def post(pid):
 @forum.route('/post/edit/<int:pid>', methods=['GET', 'POST'])
 def post_edit(pid):
     post = find_record(Post, id=pid)
-    if post:
+    if post and post.is_available:
         form = PostAddForm(obj=post)
         if form.validate_on_submit():
             if not current_user.is_authenticated:
@@ -346,7 +438,7 @@ def post_edit(pid):
 @privilege_required()
 def post_remove(pid):
     post = find_record(Post, id=pid)
-    if post and not post.is_deleted:
+    if post and post.is_available:
         cancel_url = request.args.get('prev') or url_for('.post', pid=pid)
         if cancel_url.find(url_for('.post', pid=pid)) != -1: 
             if post.parent:
@@ -384,6 +476,6 @@ def post_revert(pid):
             post=post, date=now(), is_revert=True, operator_id=current_user.id
         )
         flash(_('Post reverted successfully.'), 'ok')
-        render_template('message.html')
+        return redirect(url_for('moderate.delete_record'))
     else:
         abort(404)

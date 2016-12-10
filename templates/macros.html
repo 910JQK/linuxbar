@@ -103,20 +103,28 @@
     {% if current_user.level == 2 %}
 	{% if not topic.is_pinned %}
 	  <div class="menu_item" title="{{ _('pin this topic') }}">
-	    {{ _('Pin') }}
+	    <a href="{{ url_for('.topic_pin', tid=topic.id) }}">
+	      {{ _('Pin') }}
+	    </a>
 	  </div>
 	{% else %}
 	  <div class="menu_item" title="{{ _('unpin this topic') }}">
-	    {{ _('Unpin') }}
+	    <a href="{{ url_for('.topic_pin', tid=topic.id, revert='revert')}}">
+	      {{ _('Unpin') }}
+	    </a>
 	  </div>
 	{% endif %}
 	{% if not topic.is_distillate %}
 	  <div class="menu_item" title="{{ _('add this topic to distillate') }}">
-	    {{ _('Dist') }}
+	    <a href="{{ url_for('.topic_distillate', tid=topic.id) }}">
+	      {{ _('Dist') }}
+	    </a>
 	  </div>
 	{% else %}
 	  <div class="menu_item" title="{{ _('unset distillate for this topic') }}">
-	    {{ _('Unset') }}
+	    <a href="{{ url_for('.topic_distillate', tid=topic.id, revert='revert')}}">
+	      {{ _('Unset') }}
+	    </a>
 	  </div>
 	{% endif %}
       {% endif %}
@@ -124,7 +132,9 @@
 	{{ _('Tags') }}
       </div>
       <div class="menu_item" title="{{ _('delete this topic') }}">
-	{{ _('Delete') }}
+	<a href="{{ url_for('forum.topic_remove', tid=topic.id) }}">
+	  {{ _('Delete') }}
+	</a>
       </div>
     {% endif %}
   </div>

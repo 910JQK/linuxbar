@@ -9,7 +9,7 @@ from utils import _
 from utils import *
 from user import privilege_required
 from forms import ConfigEditForm, TagEditForm
-from models import Config, Tag, Ban, User, DeleteRecord
+from models import Config, Tag, Ban, User, DeleteRecord, Topic, Post
 
 
 moderate = Blueprint(
@@ -152,3 +152,27 @@ def ban_remove(ban_id):
     else:
         flash(_('No such ban record.'))
         return redirect(url_for('.ban_list'))
+
+
+@moderate.route('/delete-record')
+@privilege_required()
+def delete_record():
+    pn = int(request.args.get('pn', '1'))
+    count = int(Config.Get('count_item'))
+    records = (
+        DeleteRecord
+        .select(DeleteRecord, User)
+        .join(User)
+        # query problem: foreign key with value NULL will be ignored
+        # when joining, so that joining Topic and Post there will
+        # finally get an empty list
+    )
+    total = records.count()
+    rec_list = records.order_by(DeleteRecord.date.desc()).paginate(pn, count)
+    return render_template(
+        'moderate/delete_record.html',
+        pn = pn,
+        count = count,
+        total = total,
+        rec_list = rec_list
+    )

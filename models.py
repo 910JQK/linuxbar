@@ -168,6 +168,17 @@ class Post(BaseModel):
     path = TextField(default='/', index=True)
     sort_path = TextField(default='/', index=True)
     is_deleted = BooleanField(default=False)
+    @property
+    def is_available(self):
+        if self.is_deleted:
+            return False
+        else:
+            p = self.parent
+            while p:
+                if p.is_deleted:
+                    return False
+                p = p.parent
+        return True
 
 
 class DeleteRecord(BaseModel):
