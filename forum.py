@@ -64,7 +64,7 @@ def create_post(topic, parent, content, add_reply_count=True):
     with db.atomic():
         total = Post.select().where(
             Post.topic == topic,
-            Post.path % (parent_path + '/' + DB_WILDCARD)
+            Post.parent == parent
         ).count()
         new_post = Post.create(
             topic = topic,
@@ -347,7 +347,11 @@ def post_edit(pid):
 def post_remove(pid):
     post = find_record(Post, id=pid)
     if post and not post.is_deleted:
-        next_url = request.args.get('next') or url_for('.post', pid=pid)
+        cancel_url = request.args.get('prev') or url_for('.post', pid=pid)
+        if post.parent:
+            parent_url = url_for('.post', pid=post.parent.id)
+        else:
+            parent_url = url_for('.topic_content', tid=post.topic.id)
         if request.form.get('confirmed'):
             post.is_deleted = True
             post.save()
@@ -355,12 +359,12 @@ def post_remove(pid):
                 post=post, date=now(), operator_id=current_user.id
             )
             flash(_('Post deleted successfully.'), 'ok')
-            return redirect(next_url)
+            return redirect(parent_url)
         else:
             return render_template(
                 'confirm.html',
                 text = _('Are you sure to delete this post?'),
-                url_no = next_url
+                url_no = cancel_url
             )
     else:
         abort(404)

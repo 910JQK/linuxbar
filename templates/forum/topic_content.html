@@ -210,7 +210,7 @@
 	      <div class="post_footer float_right_box" id="f{{ post.id }}">
 		<div class="info post_info">
 		  {% if current_user.level and current_user.level > 0 %}
-		    <a href="{{ url_for('forum.post_remove', pid=post.id, next=request.url) }}">
+		    <a href="{{ url_for('forum.post_remove', pid=post.id, prev=request.url) }}">
 		      <img class="icon btn post_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" />
 		    </a>
 		    <a href="{{ url_for('user.ban', uid=post.author.id) }}" target="_blank">
