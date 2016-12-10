@@ -34,6 +34,11 @@
 	 color: hsl(0, 75%, 50%);
 	 margin-right: 0.25em;
      }
+     .topic.distillate:not(.pinned) .title::before {
+	 content: "{{ _('[Dist]') }}";
+	 color: hsl(0, 75%, 50%);
+	 margin-right: 0.25em;
+     }
      .container_right { width: 13.5em; }
      .container_right .avatar, .container_right .name {
 	 vertical-align: middle;
@@ -83,7 +88,7 @@
 	  {{ empty_notice() }}
 	{% endif %}
 	{% for topic in topic_list %}
-	  <li class="topic{% if topic.is_pinned and not index %} pinned{% endif %}" data-tid="{{ topic.id }}">
+	  <li class="topic{% if topic.is_pinned and not index %} pinned{% endif %}{% if topic.is_distillate and not distillate_only %} distillate{% endif %}" data-tid="{{ topic.id }}">
 	    <div class="container_left">
 	      <div class="reply_count">{{ topic.reply_count }}</div>
 	    </div>

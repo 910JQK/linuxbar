@@ -207,6 +207,7 @@ def topic_list(tag_slug):
         'forum/topic_list.html',
         form = form,
         is_index = is_index,
+        distillate_only = distillate_only,
         tag = tag_record,
         topic_list = topic_list,
         pn = pn,
@@ -294,7 +295,7 @@ def topic_content(tid):
 
 
 @forum.route('/topic/set/pin/<int:tid>')
-@privilege_required()
+@privilege_required(admin=True)
 def topic_pin(tid):
     revert = bool(request.args.get('revert'))
     topic = find_record(Topic, id=tid)
@@ -307,13 +308,13 @@ def topic_pin(tid):
             topic.is_pinned = False
             topic.save()
             flash(_('Topic unpinned successfully.'), 'err')
-        return redirect(url_for('.topic', tid=tid))
+        return redirect(url_for('.topic_content', tid=tid))
     else:
         abort(404)
 
 
 @forum.route('/topic/set/distillate/<int:tid>')
-@privilege_required()
+@privilege_required(admin=True)
 def topic_distillate(tid):
     revert = bool(request.args.get('revert'))
     topic = find_record(Topic, id=tid)
@@ -326,7 +327,7 @@ def topic_distillate(tid):
             topic.is_distillate = False
             topic.save()
             flash(_('Distillate removed successfully.'), 'err')
-        return redirect(url_for('.topic', tid=tid))
+        return redirect(url_for('.topic_content', tid=tid))
     else:
         abort(404)
 
