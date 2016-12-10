@@ -348,10 +348,13 @@ def post_remove(pid):
     post = find_record(Post, id=pid)
     if post and not post.is_deleted:
         cancel_url = request.args.get('prev') or url_for('.post', pid=pid)
-        if post.parent:
-            parent_url = url_for('.post', pid=post.parent.id)
+        if cancel_url.find(url_for('.post', pid=pid)) != -1: 
+            if post.parent:
+                ok_url = url_for('.post', pid=post.parent.id)
+            else:
+                ok_url = url_for('.topic_content', tid=post.topic.id)
         else:
-            parent_url = url_for('.topic_content', tid=post.topic.id)
+            ok_url = cancel_url
         if request.form.get('confirmed'):
             post.is_deleted = True
             post.save()
@@ -359,7 +362,7 @@ def post_remove(pid):
                 post=post, date=now(), operator_id=current_user.id
             )
             flash(_('Post deleted successfully.'), 'ok')
-            return redirect(parent_url)
+            return redirect(ok_url)
         else:
             return render_template(
                 'confirm.html',
