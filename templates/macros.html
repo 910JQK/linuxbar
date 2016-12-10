@@ -128,8 +128,10 @@
 	  </div>
 	{% endif %}
       {% endif %}
-      <div class="menu_item" title="{{ _('manage tags') }}">
-	{{ _('Tags') }}
+      <div class="menu_item" title="{{ _('change tags') }}">
+	<a href="{{ url_for('.topic_tag_manage', tid=topic.id) }}">
+	   {{ _('Tags') }}
+	</a>
       </div>
       <div class="menu_item" title="{{ _('delete this topic') }}">
 	<a href="{{ url_for('forum.topic_remove', tid=topic.id) }}">

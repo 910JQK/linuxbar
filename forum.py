@@ -14,7 +14,7 @@ from flask_login import current_user, login_required
 from utils import _
 from utils import *
 from user import privilege_required
-from forms import TopicAddForm, PostAddForm
+from forms import TopicAddForm, TopicTagManageForm, PostAddForm
 from models import (
     db, Config, User, Topic, TagRelation, Tag, Post, DeleteRecord, Message
 )
@@ -196,8 +196,11 @@ def topic_list(tag_slug):
             last_reply_date = date_now,
             last_reply_author_id = current_user.id
         )
-        for tag in tags:
-            TagRelation.create(topic=new_topic, tag=find_record(Tag, slug=tag))
+        with db.atomic():
+            for tag in tags:
+                TagRelation.create(
+                    topic=new_topic, tag=find_record(Tag, slug=tag)
+                )
         first_post = create_post(
             new_topic, None, content, add_reply_count=False
         )
@@ -290,6 +293,28 @@ def topic_content(tid):
             get_subpost_count = get_subpost_count,
             gen_subpost_list = gen_subpost_list
         )
+    else:
+        abort(404)
+
+
+@forum.route('/topic/tag-manage/<int:tid>', methods=['GET', 'POST'])
+@privilege_required()
+def topic_tag_manage(tid):
+    topic = find_record(Topic, id=tid)
+    if topic and not topic.is_deleted:
+        form = TopicTagManageForm()
+        form.tags.choices = [(tag.slug, tag.name) for tag in Tag.select()]
+        if form.validate_on_submit():
+            with db.atomic():
+                for rel in find_record_all(TagRelation, topic=topic):
+                    rel.delete_instance()
+                for tag in form.tags.data:
+                    TagRelation.create(
+                        topic=topic, tag=find_record(Tag, slug=tag)
+                    )
+            flash(_('Tags changed successfully.'))
+            return redirect(url_for('.topic_content', tid=tid))
+        return render_template('forum/topic_tag_manage.html', form=form)
     else:
         abort(404)
 

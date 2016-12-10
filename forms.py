@@ -255,3 +255,8 @@ class TopicAddForm(FlaskForm):
 
 class PostAddForm(FlaskForm):
     content = TextAreaField(_('Content'), validators=[Required()])
+
+
+class TopicTagManageForm(FlaskForm):
+    tags = SelectMultipleField(_('Tags'), validators=[Optional()], coerce=str)
+
