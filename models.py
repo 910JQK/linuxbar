@@ -107,12 +107,9 @@ class Ban(BaseModel):
         return self.date + datetime.timedelta(days=self.days)
     @property
     def is_valid(self):
-        valid = (
+        return (
             now() < self.expire_date
         )
-        if not valid:
-            self.delete_instance()
-        return valid
     @classmethod
     def try_to_create(Ban, user, days, operator):
         query = Ban.select().where(Ban.user == user)

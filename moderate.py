@@ -2,13 +2,14 @@ from flask import Blueprint, session, request, flash, redirect, render_template,
 from flask_login import current_user
 from werkzeug.datastructures import MultiDict
 from collections import namedtuple
+import datetime
 
 
 from utils import _
 from utils import *
 from user import privilege_required
 from forms import ConfigEditForm, TagEditForm
-from models import Config, Tag
+from models import Config, Tag, Ban, User, DeleteRecord
 
 
 moderate = Blueprint(
@@ -104,3 +105,50 @@ def tag_remove(tag_id):
             )
     else:
         abort(404)
+
+
+@moderate.route('/ban/list')
+@privilege_required()
+def ban_list():
+    pn = int(request.args.get('pn', '1'))
+    count = int(Config.Get('count_item'))
+    bans = (
+        Ban
+        .select(Ban, User)
+        .join(User)
+    )
+    total = bans.count()
+    ban_list = bans.order_by(Ban.date.desc()).paginate(pn, count)
+    return render_template(
+        'moderate/ban_list.html',
+        pn = pn,
+        count = count,
+        total = total,
+        ban_list = ban_list
+    )
+
+
+@moderate.route('/ban/revert/<int:ban_id>', methods=['GET', 'POST'])
+@privilege_required()
+def ban_remove(ban_id):
+    ban = find_record(Ban, id=ban_id)
+    if ban and ban.is_valid:
+        if request.form.get('confirmed'):
+            ban.delete_instance()
+            flash(
+                _('Ban on user %s reverted successfully.') % ban.user.name,
+                'ok'
+            )
+            return redirect(url_for('.ban_list'))
+        else:
+            return render_template(
+                'confirm.html',
+                text = (
+                    _('Are you sure to revert ban on user %s ?')
+                    % ban.user.name
+                ),
+                url_no = url_for('.ban_list')
+            )
+    else:
+        flash(_('No such ban record.'))
+        return redirect(url_for('.ban_list'))
