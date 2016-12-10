@@ -307,7 +307,7 @@ def topic_pin(tid):
         else:
             topic.is_pinned = False
             topic.save()
-            flash(_('Topic unpinned successfully.'), 'err')
+            flash(_('Topic unpinned successfully.'), 'ok')
         return redirect(url_for('.topic_content', tid=tid))
     else:
         abort(404)
@@ -326,7 +326,7 @@ def topic_distillate(tid):
         else:
             topic.is_distillate = False
             topic.save()
-            flash(_('Distillate removed successfully.'), 'err')
+            flash(_('Distillate removed successfully.'), 'ok')
         return redirect(url_for('.topic_content', tid=tid))
     else:
         abort(404)
