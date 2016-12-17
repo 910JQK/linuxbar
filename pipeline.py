@@ -92,6 +92,24 @@ def process_code_block_with_highlight(lines):
     return process_code_block_raw(lines, highlight=True)
 
 
+def process_line_without_format(line, process_segment):
+    i = 0
+    for snippet in line.split(INLINE_CODE_SIGN):
+        if i % 2 == 1:
+            yield INLINE_CODE_SIGN + snippet + INLINE_CODE_SIGN
+        else:
+            j = 0
+            for sub_snippet in snippet.split(FORMAT_SIGN):
+                if j % 2 == 1:
+                    yield FORMAT_SIGN + sub_snippet + FORMAT_SIGN
+                else:
+                    yield ' '.join(
+                        process_segment(seg) for seg in sub_snippet.split(' ')
+                    )
+                j += 1
+        i += 1
+
+
 def process_format(lines):
     def gen_html_tag(tag, content, **attrs):
         if not attrs:

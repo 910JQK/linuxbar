@@ -18,7 +18,10 @@ from forms import TopicAddForm, TopicTagManageForm, PostAddForm
 from models import (
     db, Config, User, Topic, TagRelation, Tag, Post, DeleteRecord, Message
 )
-from pipeline import pipeline, split_lines, process_code_block, join_lines
+from pipeline import (
+    pipeline, split_lines, process_code_block, process_line_without_format,
+    join_lines
+)
 from config import NOTIFICATION_SIGN, SUMMARY_LENGTH, DB_WILDCARD
 
 
@@ -28,21 +31,30 @@ forum = Blueprint(
 
 
 def filter_at_messages(lines, callees):
+    called = {}
+    def process_segment(segment):
+        if segment.startswith(NOTIFICATION_SIGN):
+            callee_name = segment[1:]
+            callee = find_record(User, name=callee_name)
+            if (
+                    callee
+                    and callee.id != current_user.id
+                    and not called.get(callee.id)
+            ):
+                callees.append(callee)
+                called[callee.id] = True
+                # use "@@" to indicate this call is valid
+                return NOTIFICATION_SIGN + segment
+        return segment
     text = ''
     for line in lines:
         if isinstance(line, str):
-            arr = line.split(' ')
-            index = 0
-            for segment in arr:
-                if segment.startswith(NOTIFICATION_SIGN):
-                    callee_name = segment[1:]
-                    callee = find_record(User, name=callee_name)
-                    if callee and callee.id != current_user.id:
-                        callees.append(callee)
-                        # use "@@" to indicate this call is valid
-                        arr[index] = NOTIFICATION_SIGN + segment
-                index += 1
-            yield ' '.join(arr)
+            yield ''.join(
+                snippet
+                for snippet in process_line_without_format(
+                        line, process_segment
+                )
+            )
         else:
             yield str(line)
 
