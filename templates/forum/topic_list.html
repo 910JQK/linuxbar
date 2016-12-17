@@ -51,15 +51,29 @@
 	 text-overflow: ellipsis;
 	 white-space: nowrap;
      }
-     #moderate_menu_wrapper > .menu_label {
+     #top_left {
+	 display: flex;
+	 justify-content: space-between;
+     }
+     #top_left .separator {
+	 margin: 0em 0.2em;
+     }
+     .menu_label {
 	 color: gray;
 	 cursor: pointer;
      }
-     #moderate_menu_wrapper > #moderate_menu > .menu_item > a {
+     .menu_item > a {
 	 color: black;
      }
-     #moderate_menu {
+     .menu {
 	 border: 1px solid gray;
+     }
+     #tag_menu_wrapper {
+	 position: relative;
+     }
+     #tag_menu {
+	 position: absolute;
+	 top: 100%;
      }
      #add_topic_form {
 	 width: 45em;
@@ -87,13 +101,37 @@
       {{ user_toolbar(current_user) }}
       <div id="top_left">
 	<span>
-	    <div id="moderate_menu_wrapper" class="menu_wrapper">
+	  <div id="tag_menu_wrapper" class="menu_wrapper">
 	    <span class="menu_label">
-	      {{ _('Moderate') }}
+	      {{ _('Tags') }}
 	    </span>
-	    {{ moderate_menu(current_user) }}
+	    <div id="tag_menu" class="menu">
+	      <div class="menu_item">
+		<a href="{{ url_for('index') }}">
+		  {{ _('Home') }}
+		</a>
+	      </div>
+	      {% for tag in tag_list %}
+		<div class="menu_item">
+		  <a href="{{ url_for('forum.topic_list', tag_slug=tag.slug) }}" title="{{ tag.description }}">
+		    {{ tag.name }}
+		  </a>
+		</div>
+	      {% endfor %}
+	    </div>
 	  </div>
 	</span>
+	{% if current_user.level > 0 %}
+	<span class="separator">|</span>
+	<span>
+	    <div id="moderate_menu_wrapper" class="menu_wrapper">
+	      <span class="menu_label">
+		{{ _('Moderate') }}
+	      </span>
+	      {{ moderate_menu(current_user) }}
+	  </div>
+	</span>
+	{% endif %}
       </div>
       <header>
 	{% if is_index %}

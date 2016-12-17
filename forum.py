@@ -243,6 +243,7 @@ def topic_list(tag_slug):
         is_index = is_index,
         distillate_only = distillate_only,
         tag = tag_record,
+        tag_list = Tag.select(),
         topic_list = topic_list,
         pn = pn,
         count = count,

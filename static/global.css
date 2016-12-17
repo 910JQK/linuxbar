@@ -108,10 +108,6 @@ body.box_horizontal_center {
     vertical-align: middle;
 }
 
-#container > #top_right a, #container > #top_left a {
-    color: hsl(0, 0%, 48%);
-}
-
 span.separator {
     color: hsl(0, 0%, 60%);
     margin: 0em 0.1em;
