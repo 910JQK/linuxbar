@@ -24,9 +24,12 @@ CODE_END = '#***/'
 INLINE_CODE_SIGN = '`' # a single char
 NOTIFICATION_SIGN = '@' # a single char
 IMAGE_SIGN = '%' # a single char
+FORMAT_SIGN = '**'
+FORMAT_DEFAULT = '*'
 FORMATS = {
     '*': 'b',
-    '~': 'i'
+    '~': 'i',
+    '!': 'del'
     # a single char: tag name
 }
 

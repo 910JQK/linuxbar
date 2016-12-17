@@ -13,6 +13,8 @@ from config import (
     INLINE_CODE_SIGN,
     NOTIFICATION_SIGN,
     IMAGE_SIGN,
+    FORMAT_SIGN,
+    FORMAT_DEFAULT,
     FORMATS
 )
 
@@ -43,12 +45,12 @@ class Code():
             )
 
 
-class CodeInline():
+class FormattedText():
     text = ''
     def __init__(self, text):
         self.text = text
     def __str__(self):
-        return '<code>%s</code>' % escape(self.text) # escape: view stage
+        return self.text
 
 
 def split_lines(text):
@@ -110,18 +112,22 @@ def process_format(lines):
             '<a class="content_image_link" href="%s" target="_blank"><img class="content_image" src="%s"></img></a>' % (url, url)
         )
     def process_line_str(line):
-        def process_inline_code():
+        def process_formats(text):
             i = 0
-            for snippet in line.split(INLINE_CODE_SIGN):
-                if i % 2 == 1:
-                    yield CodeInline(snippet)
+            for snippet in text.split(FORMAT_SIGN):
+                if i % 2 == 1 and snippet:
+                    if FORMATS.get(snippet[0]):
+                        yield FormattedText(
+                            gen_html_tag(FORMATS[snippet[0]], snippet[1:])
+                        )
+                    else:
+                        yield FormattedText(
+                            gen_html_tag(FORMATS[FORMAT_DEFAULT], snippet)
+                        )
                 else:
-                    for segment in snippet.split(' '):
-                        yield segment
+                    yield escape(snippet)
                 i += 1
         def process_segment(segment):
-            if not isinstance(segment, str):
-                return str(segment)
             if segment.startswith(NOTIFICATION_SIGN*2):
                 username = segment[2:]
                 return gen_html_tag(
@@ -134,19 +140,25 @@ def process_format(lines):
                 sha256part = segment[2:]
                 if REGEX_SHA256_PART.fullmatch(sha256part):
                     return gen_image_html(sha256part)
-            if (
-                    segment.startswith(INLINE_CODE_SIGN)
-                    and segment.endswith(INLINE_CODE_SIGN)
-            ):
-                return gen_html_tag('code', segment[1:-1])
-            for char in FORMATS:
-                if segment.startswith(char*2):
-                    return gen_html_tag(FORMATS[char], segment[2:])
             return escape(segment)
-        for char in FORMATS:
-            if line.startswith(char*3):
-                return gen_html_tag(FORMATS[char], line[3:])
-        return ' '.join(process_segment(seg) for seg in process_inline_code())
+        def process():
+            i = 0
+            for snippet in line.split(INLINE_CODE_SIGN):
+                if i % 2 == 1:
+                    yield '<code>%s</code>' % escape(snippet)
+                else:
+                    for sub_snippet in process_formats(snippet):
+                        if not isinstance(sub_snippet, str):
+                            yield str(sub_snippet)
+                        else:
+                            yield (
+                                ' '.join(
+                                    process_segment(seg)
+                                    for seg in sub_snippet.split(' ')
+                                )
+                            )
+                i += 1
+        return ''.join(snippet for snippet in process())
     for line in lines:
         if isinstance(line, str):
             yield process_line_str(line)
