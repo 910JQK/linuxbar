@@ -143,7 +143,8 @@ def process_format(lines):
                             gen_html_tag(FORMATS[FORMAT_DEFAULT], snippet)
                         )
                 else:
-                    yield escape(snippet)
+                    # escape in next stage
+                    yield snippet
                 i += 1
         def process_segment(segment):
             if segment.startswith(NOTIFICATION_SIGN*2):
