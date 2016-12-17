@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit, ban_tip %}
+{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit, ban_tip, editor_toolbar %}
 {% from 'forum/subpost_list.html' import subpost_list %}
 <html>
   <head>
@@ -257,6 +257,7 @@
 	<form id="add_post_form" method="post">
 	  <fieldset{% if is_banned %} disabled="disabled"{% endif %}>
 	    {{ form.csrf_token }}
+	    {{ editor_toolbar() }}
 	    {{ field(form.content) }}
             {{ submit(_('Reply')) }}
 	  </fieldset>

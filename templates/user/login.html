@@ -5,12 +5,23 @@
 {% block body_class %}box_center{% endblock %}
 {% block form_title %}{{ _('Sign in') }}{% endblock %}
 
+{% block style %}
+  .reset_link { font-size: 80%; }
+{% endblock %}
+
+{% block container %}
+  <div id="top_right">
+    <a class="reset_link" href="{{ url_for('.get_token') }}">
+      {{ _('Reset Password') }}
+    </a>
+  </div>
+{% endblock %}
+
 {% block form %}
   {{ field(form.login_name) }}
   {{ field(form.password) }}
   {{ field(form.remember_me) }}
 {% endblock %}
-
 
 {% block buttons %}
   {{ submit(_('Sign in')) }}

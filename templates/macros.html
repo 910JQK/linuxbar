@@ -86,12 +86,12 @@
 	{{ _('Logout') }}
       </a>
     {% else %}
-      <a class="link_register" href="{{ url_for('user.register') }}">
-	{{ _('Register') }}
-      </a>
-      <span class="separator">|</span>
       <a class="link_login" href="{{ url_for('user.login', next=request.url) }}">
 	{{ _('Login') }}
+      </a>
+      <span class="separator">|</span>
+      <a class="link_register" href="{{ url_for('user.register') }}">
+	{{ _('Register') }}
       </a>
     {% endif %}
   </div>
@@ -147,6 +147,15 @@
 	</a>
       </div>
     {% endif %}
+  </div>
+{% endmacro %}
+
+
+{% macro editor_toolbar() %}
+  <div class="editor_toolbar">
+    <a href="{{ url_for('image.upload') }}" target="_blank" aria-label="add an image" title="add an image">
+      <img class="icon" src="/static/icons/image.svg" alt="Add Image" />
+    </a>
   </div>
 {% endmacro %}
 

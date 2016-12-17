@@ -27,6 +27,7 @@
   </head>
   <body class="{% block body_class %}{% endblock %}">
     <div id="container">
+      {% block container %}{% endblock %}
       <h1 class="form_title">{% block form_title %}{% endblock %}</h1>
       <form id="form" method="post"{% block form_options %}{% endblock %}>
 	{{ form.csrf_token() }}

@@ -125,6 +125,7 @@
 	  <fieldset{% if is_banned %} disabled="disabled"{% endif %}>
 	    {{ form.csrf_token }}
 	    {{ field(form.title) }}
+	    {{ editor_toolbar() }}
 	    {{ field(form.content) }}
 	    {{ field(form.tags) }}
 	    {{ submit(_('Publish')) }}
