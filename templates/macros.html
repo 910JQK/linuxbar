@@ -74,6 +74,14 @@
       {{ avatar(user.mail) }}
       <span class="name">{{ user.name }}</span>
       <span class="separator">|</span>
+      <a id="replyme_link" href="{{ url_for('user.notifications', n_type='reply') }}" target="_blank" data-content="{{ _('Reply') }}">
+	{{ _('Reply(%(n)d)', n=user.unread_reply) }}
+      </a>
+      <span class="separator">|</span>
+      <a id="atme_link" href="{{ url_for('user.notifications', n_type='at') }}" target="_blank" data-content="{{ _('At') }}">
+	{{ _('At(%(n)d)', n=user.unread_at) }}
+      </a>
+      <span class="separator">|</span>
       <a class="link_logout" href="{{ url_for('user.logout', next=request.url) }}">
 	{{ _('Logout') }}
       </a>

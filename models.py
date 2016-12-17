@@ -190,10 +190,39 @@ class DeleteRecord(BaseModel):
 
 
 class Message(BaseModel):
+    msg_type = CharField(max_length=8, default='reply', index=True)
     post = ForeignKeyField(Post, related_name='msg')
-    caller = ForeignKeyField(User, related_name='msg_calling')
+    caller = ForeignKeyField(User, related_name='msg_calling', null=True)
     callee = ForeignKeyField(User, related_name='msg_called')
-    is_system_message = BooleanField(default=False)
+    @classmethod
+    def try_to_create(Message, msg_type, post, caller, callee):
+        if caller.id == callee.id:
+            return
+        query = Message.select().where(
+            Message.msg_type == msg_type,
+            Message.post == post,
+            Message.caller == caller,
+            Message.callee == callee
+        )
+        if not query:
+            Message.create(
+                msg_type = msg_type,
+                post = post,
+                caller = caller,
+                callee = callee
+            )
+            if msg_type == 'reply':
+                (
+                    User
+                    .update(unread_reply = User.unread_reply+1)
+                    .where(User.id == callee.id)
+                ).execute()
+            elif msg_type == 'at':
+                (
+                    User
+                    .update(unread_at = User.unread_at+1)
+                    .where(User.id == callee.id)
+                ).execute()                
 
 
 class Image(BaseModel):

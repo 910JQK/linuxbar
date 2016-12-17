@@ -48,6 +48,7 @@ def filter_at_messages(lines, callees):
 
 
 def create_post(topic, parent, content, add_reply_count=True):
+    author = find_record(User, id=current_user.id)
     callees = []
     def process_at(lines):
         return filter_at_messages(lines, callees)
@@ -72,7 +73,7 @@ def create_post(topic, parent, content, add_reply_count=True):
             ordinal = (total + 1),
             content = content,
             date = now(),
-            author_id = current_user.id
+            author = author
         )
     new_post.path = '%s/%d' % (parent_path, new_post.id)
     new_post.sort_path = (
@@ -92,11 +93,29 @@ def create_post(topic, parent, content, add_reply_count=True):
             .where(Topic.id == topic.id)
         ).execute()
     for callee in callees:
-        Message.create(
+        # self-to-self already filtered
+        # use try_to_create() to update unread count
+        Message.try_to_create(
+            msg_type = 'at',
             post = new_post,
-            caller_id = current_user.id,
-            callee = callee,                
-        )            
+            caller = author,
+            callee = callee       
+        )
+    p = parent
+    while p:
+        Message.try_to_create(
+            msg_type = 'reply',
+            post = new_post,
+            caller = author,
+            callee = p.author
+        )
+        p = p.parent
+    Message.try_to_create(
+        msg_type = 'reply',
+        post = new_post,
+        caller = author,
+        callee = topic.author
+    )
     return new_post
 
 

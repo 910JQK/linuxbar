@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+{% from 'macros.html' import pager, user_toolbar, messager %}
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% if n_type == 'reply' %}{{ _('Reply me - ') ~ get_config('site_name') }}{% else %}{{ _('At me - ') ~ get_config('site_name') }}{% endif %}</title>
+    <link rel="stylesheet" href="/static/global.css" />
+    <style>
+     ol, ul {
+	 list-style-type: none; padding: 0; margin: 0px;
+     }
+     nav + hr {
+	 margin-bottom: 0;
+     }
+     #nav_list {
+	 display: flex;	 
+     }
+     #nav_list > li {
+	 box-sizing: border-box;
+	 width: 50%;
+	 text-align: center;
+	 font-weight: bold;	
+     }
+     #notification_list {
+	 width: 50em;
+     }
+     .entry {
+	 padding: 1em 0em;
+	 border-bottom: 1px solid hsl(0, 0%, 93%);
+     }
+     .entry.deleted a {
+	 color: gray;
+     }
+     .container_top {
+	 display: flex;
+	 justify-content: flex-start;
+	 align-items: flex-start;
+	 font-size: 115%;
+	 margin: 0.25em 0em;
+     }
+     .container_bottom {
+	 display: flex;
+	 justify-content: space-between;
+	 font-size: 85%;
+	 margin: 0.25em 0em;
+     }
+     .user_label {
+	 flex-shrink: 0;
+	 margin-right: 0.35em;
+     }
+     .user_label::after {
+	 content: ":";
+     }
+     .topic_label {
+	 color: black;
+     }
+     .content {
+	 flex-grow: 1;
+     }
+     .info > * {	 
+	 margin-left: 0.25em;
+	 color: gray;
+     }
+     .pager {
+	 margin-top: 0.25em;
+     }
+    </style>
+  </head>
+  <body class="box_horizontal_center">
+    <div id="container">
+      {{ messager() }}
+      {{ user_toolbar(current_user) }}
+      <nav>
+	<ul id="nav_list">
+	  <li>
+	    {% if n_type == 'reply' %}
+	      <span>{{ _('Reply me') }}</span>
+	    {% else %}
+	      <a href="{{ url_for('.notifications', n_type='reply') }}">{{ _('Reply me') }}</a>
+	    {% endif %}
+	  </li>
+	  <li>
+	    {% if n_type == 'at' %}
+	      <span>{{ _('At me') }}</span>
+	    {% else %}
+	      <a href="{{ url_for('.notifications', n_type='at') }}">{{ _('At me') }}</a>
+	    {% endif %}
+	  </li>
+	</ul>
+      </nav>
+      <hr/>
+      <ol id="notification_list">
+	{% for message in message_list %}
+	  <li class="entry{% if not message.post.is_available %} deleted{% endif %}">
+	      <div class="container_top">
+		<a class="user_label" target="_blank" href="{{ url_for('.profile', uid=message.caller.id) }}">{{ message.caller.name }}</a>
+		<div class="content_wrapper">
+		  <a class="content" target="_blank" href="{{ url_for('forum.post', pid=message.post.id) }}">
+		    {{ message.post.content | truncate(60) }}
+		  </a>
+		</div>
+	      </div>
+	      <div class="container_bottom">
+		<div class="topic_info_wrapper">
+		  <img class="topic_icon" src="/static/icons/share.svg" />
+		  <a class="topic_label" target="_blank" href="{{ url_for('forum.topic_content', tid=message.post.topic.id) }}">{{ message.post.topic.title }}</a>
+		</div>
+		<div class="additional_info_wrapper info">
+		  {% if message.post.last_edit_date %}
+		    <span class="edited_mark" title="{{ message.post.last_edit_date | date }}">{{ _('[Edited]') }}</span>
+		  {% endif %}
+		  <span class="date">
+		    {{ message.post.date | date }}
+		  </span>
+		</div>
+	      </div>
+	    </li>
+	{% endfor %}
+      </ol>
+      {{ pager(pn, count, total) }}
+    </div>
+  </body>
+</html>

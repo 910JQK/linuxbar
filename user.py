@@ -6,6 +6,7 @@ from flask_login import (
 
 from utils import _
 from utils import *
+from config import DB_WILDCARD
 from validation import REGEX_TOKEN
 from forms import (
     LoginForm,
@@ -17,7 +18,10 @@ from forms import (
     BanForm,
     LevelChangeForm
 )
-from models import Config, User, PasswordResetToken, UserConfig, Profile, Ban
+from models import (
+    Config, User, PasswordResetToken, UserConfig, Profile, Ban,
+    Message, Post, Topic
+)
 
 
 user = Blueprint(
@@ -305,3 +309,47 @@ def logout():
     logout_user()
     flash(_('Signed out successfully.'), 'ok')
     return redirect(request.args.get('next') or url_for('index'))
+
+
+@user.route('/notifications/<n_type>')
+@login_required
+def notifications(n_type):
+    if n_type not in ['reply', 'at']:
+        abort(404)
+    user = find_record(User, id=current_user.id)
+    if n_type == 'reply':
+        (
+            User
+            .update(unread_reply = 0)
+            .where(User.id == user.id)
+        ).execute()
+    elif n_type == 'at':
+        (
+            User
+            .update(unread_at = 0)
+            .where(User.id == user.id)
+        ).execute()
+    pn = int(request.args.get('pn', '1'))
+    count = int(Config.Get('count_item'))
+    messages = (
+        Message
+        .select(Message, User, Post, Topic)
+        .join(User)
+        .switch(Message)
+        .join(Post)
+        .join(Topic)
+        .where(
+            Message.msg_type == n_type,
+            Message.callee == user
+        )
+    )
+    total = messages.count()
+    message_list = messages.order_by(Post.date.desc()).paginate(pn, count)
+    return render_template(
+        'user/notification.html',
+        n_type = n_type,
+        pn = pn,
+        count = count,
+        total = total,
+        message_list = message_list
+    )
