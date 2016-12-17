@@ -176,3 +176,28 @@ def delete_record():
         total = total,
         rec_list = rec_list
     )
+
+
+@moderate.route('/moderator-list')
+@privilege_required()
+def moderator_list():
+    pn = int(request.args.get('pn', '1'))
+    count = int(Config.Get('count_item'))
+    moderators = (
+        User
+        .select()
+        .where(User.level > 0)
+    )
+    total = moderators.count()
+    moderator_list = (
+        moderators.order_by(User.date_register.desc()).paginate(pn, count)
+    )
+    return render_template(
+        'moderate/moderator_list.html',
+        pn = pn,
+        count = count,
+        total = total,
+        moderator_list = moderator_list
+    )
+
+

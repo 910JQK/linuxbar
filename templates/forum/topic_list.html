@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar, ban_tip %}
+{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar, ban_tip, moderate_menu %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -51,6 +51,16 @@
 	 text-overflow: ellipsis;
 	 white-space: nowrap;
      }
+     #moderate_menu_wrapper > .menu_label {
+	 color: gray;
+	 cursor: pointer;
+     }
+     #moderate_menu_wrapper > #moderate_menu > .menu_item > a {
+	 color: black;
+     }
+     #moderate_menu {
+	 border: 1px solid gray;
+     }
      #add_topic_form {
 	 width: 45em;
      }
@@ -75,6 +85,16 @@
     <div id="container">
       {{ messager() }}
       {{ user_toolbar(current_user) }}
+      <div id="top_left">
+	<span>
+	    <div id="moderate_menu_wrapper" class="menu_wrapper">
+	    <span class="menu_label">
+	      {{ _('Moderate') }}
+	    </span>
+	    {{ moderate_menu(current_user) }}
+	  </div>
+	</span>
+      </div>
       <header>
 	{% if is_index %}
 	  <h1>{{ get_config('site_name') }}</h1>

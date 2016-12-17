@@ -108,7 +108,7 @@
 {% macro topic_manage_menu(topic, current_user) %}
   <div id="topic_manage_menu" class="menu">
     {% if current_user.level > 0 %}
-    {% if current_user.level == 2 %}
+      {% if current_user.level == 2 %}
 	{% if not topic.is_pinned %}
 	  <div class="menu_item" title="{{ _('pin this topic') }}">
 	    <a href="{{ url_for('.topic_pin', tid=topic.id) }}">
@@ -144,6 +144,41 @@
       <div class="menu_item" title="{{ _('delete this topic') }}">
 	<a href="{{ url_for('forum.topic_remove', tid=topic.id) }}">
 	  {{ _('Delete') }}
+	</a>
+      </div>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+
+{% macro moderate_menu(current_user) %}
+  <div id="moderate_menu" class="menu">
+    {% if current_user.level > 0 %}
+      {% if current_user.level == 2 %}
+	<div class="menu_item">
+	  <a href="{{ url_for('moderate.config') }}" target="_blank">
+	    {{ _('Config') }}
+	  </a>
+	</div>
+	<div class="menu_item">
+	  <a href="{{ url_for('moderate.moderator_list') }}" target="_blank">
+	    {{ _('Moderator List') }}
+	  </a>
+	</div>
+      {% endif %}
+      <div class="menu_item">
+	<a href="{{ url_for('moderate.delete_record') }}" target="_blank">
+	  {{ _('Delete Record') }}
+	</a>
+      </div>
+      <div class="menu_item">
+	<a href="{{ url_for('moderate.ban_list') }}" target="_blank">
+	  {{ _('Ban List') }}
+	</a>
+      </div>
+      <div class="menu_item">
+	<a href="{{ url_for('moderate.tag_list') }}" target="_blank">
+	  {{ _('Tag Management') }}
 	</a>
       </div>
     {% endif %}

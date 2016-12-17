@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+{% from 'macros.html' import empty_notice, messager, pager %}
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ _('Moderator List - %(site)s', site=get_config('site_name')) }}</title>
+    <link rel="stylesheet" href="/static/global.css" />
+    <style>
+      #container > h1 { margin-top: 0px; text-align: center; }
+      .empty_notice { min-width: 30em; min-height: 20em; }
+      td { text-align: left; }
+      td, th { padding: 0.1em 0.5em; }
+    </style>
+  </head>
+  <body class="box_horizontal_center">
+    <div id="container">
+      {{ messager() }}
+      <h1>{{ _('Moderator List') }}</h1>
+      <hr/>
+      <div class="table_wrapper">
+	<table>
+	  {% if moderator_list %}
+	    <tr>
+	      <th>{{ _('UID') }}</th>
+	      <th>{{ _('Name') }}</th>
+	      <th>{{ _('Role') }}</th>
+	    </tr>
+	  {% else %}
+	    {{ empty_notice() }}
+	  {% endif %}
+	  {% for moderator in moderator_list %}
+	    <tr>
+	      <td>{{ moderator.id }}</td>
+	      <td>
+		<a href="{{ url_for('user.profile', uid=moderator.id) }}" target="_blank">
+		  {{ moderator.name }}
+		</a>
+	      </td>
+	      <td>
+		{% if moderator.level == 2 %}
+		  {{ _('Administrator') }}
+		{% else %}
+		  {{ _('Ordinary Moderator') }}
+		{% endif %}
+	      </td>
+	    </tr>
+	  {% endfor %}
+	</table>
+      </div>
+      {{ pager(pn, count, total) }}
+    </div>
+  </body>
+</html>
