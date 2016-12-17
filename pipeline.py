@@ -8,6 +8,7 @@ from flask import url_for
 from utils import *
 from validation import REGEX_SHA256_PART
 from config import (
+    LINK_PROTOCOLS,
     CODE_BEGIN,
     CODE_END,
     INLINE_CODE_SIGN,
@@ -147,6 +148,18 @@ def process_format(lines):
                     yield snippet
                 i += 1
         def process_segment(segment):
+            for protocol in LINK_PROTOCOLS:
+                head = protocol + '://'
+                if (
+                        segment.startswith(head)
+                        and len(segment) > len(head)
+                ):
+                    return gen_html_tag(
+                        'a',
+                        segment,
+                        href = head + url_quote(segment[len(head):]),
+                        target = '_blank'
+                    )
             if segment.startswith(NOTIFICATION_SIGN*2):
                 username = segment[2:]
                 return gen_html_tag(

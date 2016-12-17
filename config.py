@@ -19,6 +19,7 @@ SUMMARY_LENGTH = 60 # in [4, 128] (128 = Topic.summary.max_length / 4)
 BAN_DAYS = [1, 3, 10, 30, 100]
 
 
+LINK_PROTOCOLS = ['http', 'https', 'ftp']
 CODE_BEGIN = '/***#'
 CODE_END = '#***/'
 INLINE_CODE_SIGN = '`' # a single char
