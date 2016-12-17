@@ -111,26 +111,14 @@ def process_format(lines):
         )
     def process_line_str(line):
         def process_inline_code():
-            in_code_block = False
-            code_segments = []
-            for segment in line.split(' '):
-                if not in_code_block and len(segment) <= 1:
-                    yield segment
-                    continue
-                if segment.endswith(INLINE_CODE_SIGN):
-                    code_segments.append(segment[0:-1])
-                    yield CodeInline(' '.join(code_segments))
-                    code_segments = []
-                    in_code_block = False
-                elif in_code_block:
-                    code_segments.append(segment)
-                elif segment.startswith(INLINE_CODE_SIGN):
-                    code_segments.append(segment[1:])
-                    in_code_block = True
+            i = 0
+            for snippet in line.split(INLINE_CODE_SIGN):
+                if i % 2 == 1:
+                    yield CodeInline(snippet)
                 else:
-                    yield segment
-            if in_code_block:
-                yield CodeInline(' '.join(code_segments))
+                    for segment in snippet.split(' '):
+                        yield segment
+                i += 1
         def process_segment(segment):
             if not isinstance(segment, str):
                 return str(segment)
@@ -145,7 +133,7 @@ def process_format(lines):
             if segment.startswith(IMAGE_SIGN*2):
                 sha256part = segment[2:]
                 if REGEX_SHA256_PART.fullmatch(sha256part):
-                    return gen_image_html(sha256)
+                    return gen_image_html(sha256part)
             if (
                     segment.startswith(INLINE_CODE_SIGN)
                     and segment.endswith(INLINE_CODE_SIGN)
