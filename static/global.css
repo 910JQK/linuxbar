@@ -38,6 +38,7 @@ button, input[type="submit"] {
     border: 1px solid hsl(0, 0%, 80%);
     border-radius: 3px;
     box-shadow: 0 1px 2px hsla(0, 0%, 40%, 0.3);
+    font-size: 125%;
 }
 
 button:hover:enabled, input[type="submit"]:hover:enabled {
@@ -106,6 +107,10 @@ body.box_horizontal_center {
 
 #container > #top_right *, #container > #top_left * {
     vertical-align: middle;
+}
+
+.user_toolbar .name a {
+    color: black;
 }
 
 span.separator {

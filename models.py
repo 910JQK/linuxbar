@@ -61,12 +61,6 @@ class User(UserMixin, BaseModel):
         return (self.banned and self.banned[0].is_valid)
 
 
-class UserConfig(BaseModel):
-    user = ForeignKeyField(User, related_name='config', primary_key=True)
-    view_nested = BooleanField(default=True)
-    view_expanded = BooleanField(default=True)
-
-
 class Profile(BaseModel):
     user = ForeignKeyField(User, related_name='profile', primary_key=True)
     bio = TextField(null=True)
@@ -234,7 +228,7 @@ class Image(BaseModel):
 
 
 tables = [
-    Config, User, UserConfig, Profile, PasswordResetToken, Ban,
+    Config, User, Profile, PasswordResetToken, Ban,
     Tag, Topic, TagRelation, Post,
     DeleteRecord, Message, Image
 ]

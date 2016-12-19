@@ -13,13 +13,12 @@ from forms import (
     RegisterForm,
     GetTokenForm,
     PasswordResetForm,
-    UserConfigForm,
     ProfileForm,
     BanForm,
     LevelChangeForm
 )
 from models import (
-    Config, User, PasswordResetToken, UserConfig, Profile, Ban,
+    Config, User, PasswordResetToken, Profile, Ban,
     Message, Post, Topic
 )
 
@@ -110,7 +109,6 @@ def register():
                 user.set_activation_token(token)
                 user.set_password(form.password.data)
                 user.save()
-                UserConfig.create(user=user)
                 Profile.create(user=user)
                 send_token_activation(user, token)
                 flash(_('Signed up successfully. Activation mail has been sent to you. Please login after activation.'), 'ok')
@@ -217,18 +215,6 @@ def password_reset(uid):
     return render_template('user/password_reset.html', form=form)
 
 
-@user.route('/config', methods=['GET', 'POST'])
-@login_required
-def config():
-    user_config = current_user.config[0]
-    form = UserConfigForm(obj=user_config)
-    if form.validate_on_submit():
-        form.populate_obj(user_config)
-        user_config.save()
-        flash(_('Configurations updated successfully.'), 'ok')
-    return render_template('user/config.html', form=form)
-
-
 @user.route('/profile/<int:uid>')
 def profile(uid):
     user = find_record(User, id=uid)
@@ -236,10 +222,7 @@ def profile(uid):
         return render_template(
             'user/profile.html',
             user = user,
-            profile = user.profile[0],
-            current_is_admin = (
-                current_user.is_authenticated and current_user.level == 2
-            )
+            profile = user.profile[0]
         )
     else:
         abort(404)
@@ -263,6 +246,7 @@ def profile_edit():
         form.populate_obj(profile)
         profile.save()
         flash(_('Profile updated successfully.'), 'ok')
+        return redirect(url_for('.profile', uid=current_user.id))
     return render_template('user/profile_edit.html', form=form)
 
 

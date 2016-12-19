@@ -72,7 +72,11 @@
   <div class="user_toolbar" id="top_right">
     {% if user.is_authenticated %}
       {{ avatar(user.mail) }}
-      <span class="name">{{ user.name }}</span>
+      <span class="name">
+	<a href="{{ url_for('user.profile', uid=user.id) }}" target="_blank">
+	   {{ user.name }}
+	</a>
+      </span>
       <span class="separator">|</span>
       <a id="replyme_link" href="{{ url_for('user.notifications', n_type='reply') }}" target="_blank" data-content="{{ _('Reply') }}">
 	{{ _('Reply(%(n)d)', n=user.unread_reply) }}
@@ -107,7 +111,7 @@
 
 {% macro topic_manage_menu(topic, current_user) %}
   <div id="topic_manage_menu" class="menu">
-    {% if current_user.level > 0 %}
+    {% if current_user.is_authenticated and current_user.level > 0 %}
       {% if current_user.level == 2 %}
 	{% if not topic.is_pinned %}
 	  <div class="menu_item" title="{{ _('pin this topic') }}">

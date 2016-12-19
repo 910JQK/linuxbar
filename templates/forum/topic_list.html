@@ -121,7 +121,7 @@
 	    </div>
 	  </div>
 	</span>
-	{% if current_user.level > 0 %}
+	{% if current_user.is_authenticated and current_user.level > 0 %}
 	<span class="separator">|</span>
 	<span>
 	    <div id="moderate_menu_wrapper" class="menu_wrapper">
