@@ -20,7 +20,9 @@ from user import user, login_manager
 from moderate import moderate
 from image import image
 from forum import forum, topic_list, filter_deleted_post
-from config import DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE
+from config import (
+    DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE, assert_config
+)
 
 
 app = Flask(__name__)
@@ -64,6 +66,7 @@ def get_captcha():
 
 
 def run():
+    assert_config()
     app.secret_key = SECRET_KEY
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_SIZE

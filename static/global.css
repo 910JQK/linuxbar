@@ -189,6 +189,11 @@ code {
 }
 
 
+.menu_item > a {
+    display: block;
+}
+
+
 .message.ok { color: hsl(100, 80%, 45%); }
 .message.err { color: hsl(0, 90%, 45%); }
 

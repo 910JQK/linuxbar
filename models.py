@@ -34,6 +34,7 @@ class User(UserMixin, BaseModel):
     unread_reply = IntegerField(default=0)
     unread_at = IntegerField(default=0)
     unread_pm = IntegerField(default=0)
+    unread_sys = IntegerField(default=0)
     level = SmallIntegerField(default=0)
     is_active = BooleanField(default=False)
     activation_token_hash = FixedCharField(max_length=16, null=True)
@@ -109,7 +110,7 @@ class Ban(BaseModel):
         query = Ban.select().where(Ban.user == user)
         if query:
             ban = query.get()
-            if ban.is_valid() and ban.days > days:
+            if ban.is_valid and ban.days > days:
                 return False
             else:
                 ban.date = now()
@@ -158,7 +159,7 @@ class Post(BaseModel):
     content = TextField()
     date = DateTimeField()
     last_edit_date = DateTimeField(null=True)
-    author = ForeignKeyField(User, related_name='posts')
+    author = ForeignKeyField(User, related_name='posts', null=True)
     path = TextField(default='/', index=True)
     sort_path = TextField(default='/', index=True)
     is_deleted = BooleanField(default=False)

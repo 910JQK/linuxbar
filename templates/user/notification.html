@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import pager, user_toolbar, messager %}
+{% from 'macros.html' import pager, user_toolbar, messager, empty_notice %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -48,7 +48,7 @@
 	 flex-shrink: 0;
 	 margin-right: 0.35em;
      }
-     .user_label::after {
+     .user_label:not(.sys_msg_label)::after {
 	 content: ":";
      }
      .topic_label {
@@ -63,6 +63,9 @@
      }
      .pager {
 	 margin-top: 0.25em;
+     }
+     .empty_notice {
+	 min-height: 30em;
      }
     </style>
   </head>
@@ -86,14 +89,28 @@
 	      <a href="{{ url_for('.notifications', n_type='at') }}">{{ _('At me') }}</a>
 	    {% endif %}
 	  </li>
+	  <li>
+	    {% if n_type == 'sys' %}
+	      <span>{{ _('System Message') }}</span>
+	    {% else %}
+	      <a href="{{ url_for('.notifications', n_type='sys') }}">{{ _('System Message') }}</a>
+	    {% endif %}
+	  </li>
 	</ul>
       </nav>
       <hr/>
+      {% if total == 0 %}
+	{{ empty_notice() }}
+      {% endif %}
       <ol id="notification_list">
 	{% for message in message_list %}
 	  <li class="entry{% if not message.post.is_available %} deleted{% endif %}">
-	      <div class="container_top">
+	    <div class="container_top">
+	      {% if n_type != 'sys' %}
 		<a class="user_label" target="_blank" href="{{ url_for('.profile', uid=message.caller.id) }}">{{ message.caller.name }}</a>
+	      {% else %}
+		<span class="user_label sys_msg_label">{{ _('[System]') }}</span>
+	      {% endif %}
 		<div class="content_wrapper">
 		  <a class="content" target="_blank" href="{{ url_for('forum.post', pid=message.post.id) }}">
 		    {{ message.post.content | truncate(60) }}
@@ -102,8 +119,10 @@
 	      </div>
 	      <div class="container_bottom">
 		<div class="topic_info_wrapper">
-		  <img class="topic_icon" src="/static/icons/share.svg" />
-		  <a class="topic_label" target="_blank" href="{{ url_for('forum.topic_content', tid=message.post.topic.id) }}">{{ message.post.topic.title }}</a>
+		  {% if n_type != 'sys' %}
+		    <img class="topic_icon" src="/static/icons/share.svg" />
+		    <a class="topic_label" target="_blank" href="{{ url_for('forum.topic_content', tid=message.post.topic.id) }}">{{ message.post.topic.title }}</a>
+		  {% endif %}
 		</div>
 		<div class="additional_info_wrapper info">
 		  {% if message.post.last_edit_date %}

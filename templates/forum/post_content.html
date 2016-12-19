@@ -55,22 +55,24 @@
   <body class="box_horizontal_center">
     <div id="container">
       {{ messager() }}
-      <div id="top_left">
-	<a href={{ url_for('.topic_content', tid=post.topic.id) }}>
-	  {{ _('Topic') }}
-	</a>
-	{% if post.parent %}
-	  <span class="separator">|</span>
-	  <a href="{{ url_for('.post', pid=post.parent.id) }}">
-	    {{ _('Upper') }}
+      {% if post.author %}
+	<div id="top_left">
+	  <a href={{ url_for('.topic_content', tid=post.topic.id) }}>
+	    {{ _('Topic') }}
 	  </a>
-	{% endif %}
-      </div>
+	  {% if post.parent %}
+	    <span class="separator">|</span>
+	    <a href="{{ url_for('.post', pid=post.parent.id) }}">
+	      {{ _('Upper') }}
+	    </a>
+	  {% endif %}
+	</div>
+      {% endif %}
       {{ user_toolbar(current_user) }}
       <ul class="list">
 	{{ subpost_list(post_list, current_user, post.path|get_level, True) }}
       </ul>
-      {% if current_user.is_authenticated %}
+      {% if post.author and current_user.is_authenticated %}
 	{% set is_banned = current_user.is_banned %}
 	<hr/>
         <p class="bold">{{ _('Reply this post') }}</p>

@@ -8,6 +8,7 @@ import datetime
 from utils import _
 from utils import *
 from user import privilege_required
+from post import create_system_message
 from forms import ConfigEditForm, TagEditForm
 from models import Config, Tag, Ban, User, DeleteRecord, Topic, Post
 
@@ -135,6 +136,13 @@ def ban_remove(ban_id):
     if ban and ban.is_valid:
         if request.form.get('confirmed'):
             ban.delete_instance()
+            create_system_message(
+                (
+                    _('The ban on you has been cancelled by moderator {0}')
+                    .format(current_user.name)
+                ),
+                ban.user
+            )
             flash(
                 _('Ban on user %s reverted successfully.') % ban.user.name,
                 'ok'

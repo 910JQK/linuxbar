@@ -1,3 +1,6 @@
+import os
+
+
 DB_WILDCARD = '*' # SQLite = *, others = %
 
 
@@ -7,7 +10,6 @@ DEFAULT_CONFIG = {
     'mail_addr': 'no_reply@foo.bar',
     'count_topic': '30',
     'count_post': '25',
-    'count_cut': '4',
     'count_item': '15'
 }
 
@@ -22,11 +24,13 @@ BAN_DAYS = [1, 3, 10, 30, 100]
 LINK_PROTOCOLS = ['http', 'https', 'ftp']
 CODE_BEGIN = '/***#'
 CODE_END = '#***/'
+PID_SIGN = 'p#'
+TID_SIGN = 't#'
 INLINE_CODE_SIGN = '`' # a single char
 NOTIFICATION_SIGN = '@' # a single char
 IMAGE_SIGN = '%' # a single char
 FORMAT_SIGN = '**'
-FORMAT_DEFAULT = '*'
+FORMAT_DEFAULT = '*' # a single char
 FORMATS = {
     '*': 'b',
     '~': 'i',
@@ -38,3 +42,14 @@ FORMATS = {
 UPLOAD_FOLDER = 'upload'
 MAX_UPLOAD_SIZE = 5 * 1024 * 1024
 IMAGE_MIME = {'png': 'image/png', 'jpeg': 'image/jpeg', 'gif': 'image/gif'}
+
+
+def assert_config():
+    assert os.path.isdir(UPLOAD_FOLDER)
+    assert SUMMARY_LENGTH in range(4, 128+1)
+    assert len(INLINE_CODE_SIGN) == 1
+    assert len(NOTIFICATION_SIGN) == 1
+    assert len(IMAGE_SIGN) == 1
+    assert len(FORMAT_DEFAULT) == 1
+    for sign in FORMATS:
+        assert len(sign) == 1    

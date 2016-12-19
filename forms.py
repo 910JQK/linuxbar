@@ -205,11 +205,6 @@ class ConfigEditForm(FlaskForm):
         _('The number of items shown in one page in a list'),
         PositiveInteger()
     )
-    count_cut = ConfigField(
-        _('Cut threshold'),
-        _('Threshold number of posts for cutting a huge and nested post list.'),
-        PositiveInteger()
-    )
 
 
 class TagEditForm(FlaskForm):

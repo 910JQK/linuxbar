@@ -1,25 +1,24 @@
 {% extends 'form.html' %}
-{% from 'macros.html' import field, submit %}
+1;4601;0c{% from 'macros.html' import field, submit %}
 
 {% block title %}{{ _('Sign in - %(site)s', site=get_config('site_name')) }}{% endblock %}
 {% block body_class %}box_center{% endblock %}
 {% block form_title %}{{ _('Sign in') }}{% endblock %}
 
 {% block style %}
-  .reset_link { font-size: 80%; }
-{% endblock %}
-
-{% block container %}
-  <div id="top_right">
-    <a class="reset_link" href="{{ url_for('.get_token') }}">
-      {{ _('Reset Password') }}
-    </a>
-  </div>
+  [name="password"] + .field_desc { margin-bottom: 0.15em; }
+  .reset_link_wrapper { margin-bottom: 1em; }
+  .reset_link { font-size: 75%; }
 {% endblock %}
 
 {% block form %}
   {{ field(form.login_name) }}
   {{ field(form.password) }}
+  <div class="reset_link_wrapper">
+    <a class="reset_link" href="{{ url_for('.get_token') }}">
+      {{ _('Forgot your password? Click here to reset it.') }}
+    </a>
+  </div>
   {{ field(form.remember_me) }}
 {% endblock %}
 

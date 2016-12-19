@@ -14,121 +14,17 @@ from flask_login import current_user, login_required
 from utils import _
 from utils import *
 from user import privilege_required
+from post import create_post, create_system_message
 from forms import TopicAddForm, TopicTagManageForm, PostAddForm
 from models import (
     db, Config, User, Topic, TagRelation, Tag, Post, DeleteRecord, Message
 )
-from pipeline import (
-    pipeline, split_lines, process_code_block, process_line_without_format,
-    join_lines
-)
-from config import NOTIFICATION_SIGN, SUMMARY_LENGTH, DB_WILDCARD
+from config import SUMMARY_LENGTH, DB_WILDCARD, PID_SIGN, TID_SIGN
 
 
 forum = Blueprint(
     'forum', __name__, template_folder='templates', static_folder='static'
 )
-
-
-def filter_at_messages(lines, callees):
-    called = {}
-    def process_segment(segment):
-        if segment.startswith(NOTIFICATION_SIGN):
-            callee_name = segment[1:]
-            callee = find_record(User, name=callee_name)
-            if (
-                    callee
-                    and callee.id != current_user.id
-                    and not called.get(callee.id)
-            ):
-                callees.append(callee)
-                called[callee.id] = True
-                # use "@@" to indicate this call is valid
-                return NOTIFICATION_SIGN + segment
-        return segment
-    text = ''
-    for line in lines:
-        if isinstance(line, str):
-            yield ''.join(
-                snippet
-                for snippet in process_line_without_format(
-                        line, process_segment
-                )
-            )
-        else:
-            yield str(line)
-
-
-def create_post(topic, parent, content, add_reply_count=True):
-    author = find_record(User, id=current_user.id)
-    callees = []
-    def process_at(lines):
-        return filter_at_messages(lines, callees)
-    content_processor = pipeline(
-        split_lines, process_code_block, process_at, join_lines
-    )
-    content = content_processor(content)
-    if parent:
-        parent_path = parent.path
-        parent_sort_path = parent.sort_path
-    else:
-        parent_path = ''
-        parent_sort_path = ''
-    with db.atomic():
-        total = Post.select().where(
-            Post.topic == topic,
-            Post.parent == parent
-        ).count()
-        new_post = Post.create(
-            topic = topic,
-            parent = parent,
-            ordinal = (total + 1),
-            content = content,
-            date = now(),
-            author = author
-        )
-    new_post.path = '%s/%d' % (parent_path, new_post.id)
-    new_post.sort_path = (
-        '%s/%s-%d' % (
-            parent_sort_path,
-            new_post.date.isoformat(),
-            random.randrange(0, 10)
-        )
-    )
-    new_post.save()
-    topic.last_reply_date = new_post.date
-    topic.save()
-    if add_reply_count:
-        (
-            Topic
-            .update(reply_count = Topic.reply_count+1)
-            .where(Topic.id == topic.id)
-        ).execute()
-    for callee in callees:
-        # self-to-self already filtered
-        # use try_to_create() to update unread count
-        Message.try_to_create(
-            msg_type = 'at',
-            post = new_post,
-            caller = author,
-            callee = callee       
-        )
-    p = parent
-    while p:
-        Message.try_to_create(
-            msg_type = 'reply',
-            post = new_post,
-            caller = author,
-            callee = p.author
-        )
-        p = p.parent
-    Message.try_to_create(
-        msg_type = 'reply',
-        post = new_post,
-        caller = author,
-        callee = topic.author
-    )
-    return new_post
 
 
 @forum.route('/topic/list/<tag_slug>', methods=['GET', 'POST'])
@@ -400,7 +296,14 @@ def topic_remove(tid):
             DeleteRecord.create(
                 topic=topic, date=now(), operator_id=current_user.id
             )
-            flash(_('Topic deleted successfully.'), 'ok')
+            create_system_message(
+                (
+                    _('Your topic {0} has been deleted by moderator {1}.\nThe title of your topic is {2}.')
+                    .format(tid, current_user.name, topic.title)
+                ),
+                topic.author
+            )
+            flash(_('Topic deleted successfully.'), 'ok')            
             return redirect(url_for('index'))
         else:
             return render_template(
@@ -425,6 +328,15 @@ def topic_revert(tid):
             is_revert=True,
             operator_id=current_user.id
         )
+        create_system_message(
+            (
+                _('Your deleted topic {0} has been reverted by moderator {1}.\n{2}')
+                .format(
+                    tid, current_user.name, TID_SIGN + str(tid)
+                )
+            ),
+            topic.author
+        )
         flash(_('Topic reverted successfully.'), 'ok')
         return redirect(url_for('moderate.delete_record'))
     else:
@@ -436,7 +348,7 @@ def post(pid):
     post = find_record(Post, id=pid)
     if post and post.is_available:
         form = PostAddForm()
-        if form.validate_on_submit():
+        if form.validate_on_submit() and post.author:
             if not current_user.is_authenticated:
                 flash(_('Please sign in before publishing a post.'), 'err')
                 return redirect(url_for('user.login', next=request.url)) 
@@ -446,19 +358,22 @@ def post(pid):
             create_post(post.topic, post, form.content.data)
             flash(_('Reply published successfully.'))
             return redirect(url_for('.post', pid=pid))
-        posts = (
-            Post
-            .select(Post, User)
-            .join(User)
-            .where(
-                (
-                    (Post.path % (post.path+'/'+DB_WILDCARD))
-                    | (Post.id == pid)
+        if post.author:
+            posts = (
+                Post
+                .select(Post, User)
+                .join(User)
+                .where(
+                    (
+                        (Post.path % (post.path+'/'+DB_WILDCARD))
+                        | (Post.id == pid)
+                    )
                 )
+                .order_by(Post.sort_path)
             )
-            .order_by(Post.sort_path)
-        )
-        post_list = filter_deleted_post(posts)
+            post_list = filter_deleted_post(posts)
+        else:
+            post_list = [post]
         return render_template(
             'forum/post_content.html',
             post = post,
@@ -472,7 +387,7 @@ def post(pid):
 @forum.route('/post/edit/<int:pid>', methods=['GET', 'POST'])
 def post_edit(pid):
     post = find_record(Post, id=pid)
-    if post and post.is_available:
+    if post and post.is_available and post.author:
         form = PostAddForm(obj=post)
         if form.validate_on_submit():
             if not current_user.is_authenticated:
@@ -496,7 +411,7 @@ def post_edit(pid):
 @privilege_required()
 def post_remove(pid):
     post = find_record(Post, id=pid)
-    if post and post.is_available:
+    if post and post.is_available and post.author:
         cancel_url = request.args.get('prev') or url_for('.post', pid=pid)
         if cancel_url.find(url_for('.post', pid=pid)) != -1: 
             if post.parent:
@@ -510,6 +425,13 @@ def post_remove(pid):
             post.save()
             DeleteRecord.create(
                 post=post, date=now(), operator_id=current_user.id
+            )
+            create_system_message(
+                (
+                    _('Your post {0} has been deleted by moderator {1}.\nThe content of your post is shown below:\n\n{2}')
+                    .format(pid, current_user.name, post.content)
+                ),
+                post.author
             )
             flash(_('Post deleted successfully.'), 'ok')
             return redirect(ok_url)
@@ -527,11 +449,20 @@ def post_remove(pid):
 @privilege_required()
 def post_revert(pid):
     post = find_record(Post, id=pid)
-    if post and post.is_deleted:
+    if post and post.is_deleted and post.author:
         post.is_deleted = False
         post.save()
         DeleteRecord.create(
             post=post, date=now(), is_revert=True, operator_id=current_user.id
+        )
+        create_system_message(
+            (
+                _('Your deleted post {0} has been reverted by moderator {1}.\n{2}')
+                .format(
+                    pid, current_user.name, PID_SIGN + str(pid)
+                )
+            ),
+            post.author
         )
         flash(_('Post reverted successfully.'), 'ok')
         return redirect(url_for('moderate.delete_record'))

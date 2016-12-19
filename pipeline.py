@@ -5,12 +5,15 @@ from pygments.formatters import HtmlFormatter
 from flask import url_for
 
 
+from utils import _
 from utils import *
-from validation import REGEX_SHA256_PART
+from validation import REGEX_SHA256_PART, REGEX_PINT
 from config import (
     LINK_PROTOCOLS,
     CODE_BEGIN,
     CODE_END,
+    PID_SIGN,
+    TID_SIGN,
     INLINE_CODE_SIGN,
     NOTIFICATION_SIGN,
     IMAGE_SIGN,
@@ -172,6 +175,26 @@ def process_format(lines):
                 sha256part = segment[2:]
                 if REGEX_SHA256_PART.fullmatch(sha256part):
                     return gen_image_html(sha256part)
+            if segment.startswith(PID_SIGN):
+                pid = segment[len(PID_SIGN):]
+                if REGEX_PINT.fullmatch(pid):
+                    pid = int(pid)
+                    return gen_html_tag(
+                        'a',
+                        _('Post %d') % pid,
+                        href = url_for('forum.post', pid=pid),
+                        target = '_blank'
+                    )
+            if segment.startswith(TID_SIGN):
+                tid = segment[len(TID_SIGN):]
+                if REGEX_PINT.fullmatch(tid):
+                    pid = int(pid)
+                    return gen_html_tag(
+                        'a',
+                        _('Topic %d') % tid,
+                        href = url_for('forum.topic_content', tid=tid),
+                        target = '_blank'
+                    )
             return escape(segment)
         def process():
             i = 0

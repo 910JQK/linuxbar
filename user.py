@@ -8,6 +8,7 @@ from utils import _
 from utils import *
 from config import DB_WILDCARD
 from validation import REGEX_TOKEN
+from post import create_system_message
 from forms import (
     LoginForm,
     RegisterForm,
@@ -264,6 +265,13 @@ def ban(uid):
                     'ok'
                 )
                 ok = True
+                create_system_message(
+                    (
+                        _('You have been banned by moderator {0} for {1} days.')
+                        .format(current_user.name, form.days.data)
+                    ),
+                    user
+                )
             else:
                 flash(_('A ban with longer duration already exists.'), 'err')
         return render_template('user/ban.html', user=user, form=form, ok=ok)
@@ -278,9 +286,12 @@ def change_level(uid):
     if user:
         form = LevelChangeForm(obj=user)
         if form.validate_on_submit():
-            form.populate_obj(user)
-            user.save()
-            flash(_('User privilege changed successfully.'), 'ok')
+            if user.id != current_user.id and user.level == 2:
+                flash(_('Invalid operation.'), 'err')
+            else:
+                form.populate_obj(user)
+                user.save()
+                flash(_('User privilege changed successfully.'), 'ok')
             return redirect(url_for('.profile', uid=uid))
         return render_template('user/change_level.html', form=form, user=user)
     else:
@@ -298,7 +309,7 @@ def logout():
 @user.route('/notifications/<n_type>')
 @login_required
 def notifications(n_type):
-    if n_type not in ['reply', 'at']:
+    if n_type not in ['reply', 'at', 'sys']:
         abort(404)
     user = find_record(User, id=current_user.id)
     if n_type == 'reply':
@@ -307,26 +318,45 @@ def notifications(n_type):
             .update(unread_reply = 0)
             .where(User.id == user.id)
         ).execute()
+        current_user.unread_reply = 0
     elif n_type == 'at':
         (
             User
             .update(unread_at = 0)
             .where(User.id == user.id)
         ).execute()
+        current_user.unread_at = 0
+    elif n_type == 'sys':
+        (
+            User
+            .update(unread_sys = 0)
+            .where(User.id == user.id)
+        ).execute()
+        current_user.unread_sys = 0
     pn = int(request.args.get('pn', '1'))
     count = int(Config.Get('count_item'))
-    messages = (
-        Message
-        .select(Message, User, Post, Topic)
-        .join(User)
-        .switch(Message)
-        .join(Post)
-        .join(Topic)
-        .where(
-            Message.msg_type == n_type,
-            Message.callee == user
+    if n_type != 'sys':
+        messages = (
+            Message
+            .select(Message, User, Post, Topic)
+            .join(User)
+            .switch(Message)
+            .join(Post)
+            .join(Topic)
+            .where(
+                Message.msg_type == n_type,
+                Message.callee == user
+            )
         )
-    )
+    else:
+        messages = (
+            Message.select(Message, Post)
+            .join(Post)
+            .where(
+                Message.msg_type == n_type,
+                Message.callee == user
+            )
+        )
     total = messages.count()
     message_list = messages.order_by(Post.date.desc()).paginate(pn, count)
     return render_template(
