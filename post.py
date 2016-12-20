@@ -41,7 +41,7 @@ def filter_at_messages(lines, callees):
             yield str(line)
 
 
-def create_post(topic, parent, content, add_reply_count=True, is_sys_msg=False):
+def create_post(topic, parent, content, add_reply_count=True, is_sys_msg=False, is_pm=False):
     if not is_sys_msg:
         author = find_record(User, id=current_user.id)
     else:
@@ -52,7 +52,8 @@ def create_post(topic, parent, content, add_reply_count=True, is_sys_msg=False):
     content_processor = pipeline(
         split_lines, process_code_block, process_at, join_lines
     )
-    content = content_processor(content)
+    if not is_sys_msg and not is_pm:
+        content = content_processor(content)
     if parent:
         parent_path = parent.path
         parent_sort_path = parent.sort_path

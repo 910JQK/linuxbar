@@ -3,13 +3,13 @@
   {% for subpost in list %}
     <li class="subpost" id="p{{ subpost.id }}" style="padding-left: {{ ((subpost.path | get_level) - base_level) | get_padding }}em">
       <div class="subpost_left_container">
-	{% if subpost.author %}
+	{% if not subpost.is_sys_msg %}
 	  {{ avatar(subpost.author.mail, 2) }}
 	{% endif %}
       </div>
       <div class="subpost_right_container">
 	<div class="subpost_body">
-	  {% if subpost.author %}
+	  {% if not subpost.is_sys_msg %}
 	    <span class="subpost_author_name">{{ subpost.author.name }}</span>
 	  {% endif %}
 	  <span class="subpost_content content">{{ subpost.content | get_html | safe }}</span>
@@ -18,7 +18,7 @@
 	  <div>
 	  </div>
 	  <div class="info subpost_info">
-	    {% if subpost.author %}
+	    {% if not subpost.is_sys_msg %}
 	      {% if current_user.is_authenticated and current_user.level > 0 %}
 		<a href="{{ url_for('.post_remove', pid=subpost.id, prev=request.url) }}">
 		  <img class="icon btn subpost_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" />

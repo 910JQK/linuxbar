@@ -164,6 +164,9 @@ class Post(BaseModel):
     sort_path = TextField(default='/', index=True)
     is_deleted = BooleanField(default=False)
     @property
+    def is_sys_msg(self):
+        return (not self.author)
+    @property
     def is_available(self):
         if self.is_deleted:
             return False
@@ -174,6 +177,31 @@ class Post(BaseModel):
                     return False
                 p = p.parent
         return True
+    def is_accessible_by(self, user):
+        pid = int(self.path.split('/')[1])
+        post = find_record(Post, id=pid)
+        query = (
+            Message
+            .select()
+            .where(
+                (Message.post == post)
+                & ((Message.msg_type == 'sys') | (Message.msg_type == 'pm'))
+            )
+        )
+        if query:
+            message = query.get()
+            if message.msg_type == 'sys':
+                if message.callee.id == user.id:
+                    return True
+                else:
+                    return False
+            elif message.msg_type == 'pm':
+                if message.callee.id == user.id or message.caller.id == user.id:
+                    return True
+                else:
+                    return False
+        else:
+            return True
 
 
 class DeleteRecord(BaseModel):

@@ -3,7 +3,13 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>{% if n_type == 'reply' %}{{ _('Reply me - ') ~ get_config('site_name') }}{% else %}{{ _('At me - ') ~ get_config('site_name') }}{% endif %}</title>
+    {% set title = {
+    'reply': _('Reply me'),
+    'at': _('At me'),
+    'sys': _('System Messages'),
+    'pm': _('Private Messages')
+    } %}
+    <title>{{ _('%(title)s - %(site)s', title=title[n_type], site=get_config('site_name')) }}</title>
     <link rel="stylesheet" href="/static/global.css" />
     <style>
      ol, ul {
@@ -75,27 +81,17 @@
       {{ user_toolbar(current_user) }}
       <nav>
 	<ul id="nav_list">
+	  {% for type in ['reply', 'at', 'sys', 'pm'] %}
 	  <li>
-	    {% if n_type == 'reply' %}
-	      <span>{{ _('Reply me') }}</span>
+	    {% if n_type == type %}
+	      <span>{{ title[type] }}</span>
 	    {% else %}
-	      <a href="{{ url_for('.notifications', n_type='reply') }}">{{ _('Reply me') }}</a>
+	      <a href="{{ url_for('.notifications', n_type=type) }}">
+		{{ title[type] }}
+	      </a>
 	    {% endif %}
 	  </li>
-	  <li>
-	    {% if n_type == 'at' %}
-	      <span>{{ _('At me') }}</span>
-	    {% else %}
-	      <a href="{{ url_for('.notifications', n_type='at') }}">{{ _('At me') }}</a>
-	    {% endif %}
-	  </li>
-	  <li>
-	    {% if n_type == 'sys' %}
-	      <span>{{ _('System Message') }}</span>
-	    {% else %}
-	      <a href="{{ url_for('.notifications', n_type='sys') }}">{{ _('System Message') }}</a>
-	    {% endif %}
-	  </li>
+	  {% endfor %}
 	</ul>
       </nav>
       <hr/>

@@ -346,7 +346,7 @@ def topic_revert(tid):
 @forum.route('/post/<int:pid>', methods=['GET', 'POST'])
 def post(pid):
     post = find_record(Post, id=pid)
-    if post and post.is_available:
+    if post and post.is_available and post.is_accessible_by(current_user):
         form = PostAddForm()
         if form.validate_on_submit() and post.author:
             if not current_user.is_authenticated:
@@ -358,7 +358,7 @@ def post(pid):
             create_post(post.topic, post, form.content.data)
             flash(_('Reply published successfully.'))
             return redirect(url_for('.post', pid=pid))
-        if post.author:
+        if not post.is_sys_msg:
             posts = (
                 Post
                 .select(Post, User)
@@ -373,6 +373,7 @@ def post(pid):
             )
             post_list = filter_deleted_post(posts)
         else:
+            # system message
             post_list = [post]
         return render_template(
             'forum/post_content.html',
