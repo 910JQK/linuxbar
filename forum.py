@@ -125,9 +125,12 @@ def topic_list(tag_slug):
         )
         with db.atomic():
             for tag in tags:
-                TagRelation.create(
-                    topic=new_topic, tag=find_record(Tag, slug=tag)
-                )
+                found = find_record(Tag, slug=tag)
+                # deleted/renamed tag?
+                if found:
+                    TagRelation.create(
+                        topic=new_topic, tag=found
+                    )
         first_post = create_post(
             new_topic, None, content, add_reply_count=False
         )
@@ -346,16 +349,20 @@ def topic_revert(tid):
 @forum.route('/post/<int:pid>', methods=['GET', 'POST'])
 def post(pid):
     post = find_record(Post, id=pid)
-    if post and post.is_available and post.is_accessible_by(current_user):
+    if post and post.is_available:
+        if post.is_pm:
+            abort(403)
         form = PostAddForm()
-        if form.validate_on_submit() and post.author:
+        if form.validate_on_submit():
+            if post.is_sys_msg:
+                abort(403)
             if not current_user.is_authenticated:
                 flash(_('Please sign in before publishing a post.'), 'err')
                 return redirect(url_for('user.login', next=request.url)) 
             if current_user.is_banned:
                 flash(_('You are being banned.'), 'err')
                 return redirect(request.url)           
-            create_post(post.topic, post, form.content.data)
+            create_post(post.topic, post, form.content.data, is_pm=post.is_pm)
             flash(_('Reply published successfully.'))
             return redirect(url_for('.post', pid=pid))
         if not post.is_sys_msg:
@@ -388,7 +395,9 @@ def post(pid):
 @forum.route('/post/edit/<int:pid>', methods=['GET', 'POST'])
 def post_edit(pid):
     post = find_record(Post, id=pid)
-    if post and post.is_available and post.author:
+    if post and post.is_available:
+        if post.is_sys_msg:
+            abort(403)
         form = PostAddForm(obj=post)
         if form.validate_on_submit():
             if not current_user.is_authenticated:
@@ -412,7 +421,9 @@ def post_edit(pid):
 @privilege_required()
 def post_remove(pid):
     post = find_record(Post, id=pid)
-    if post and post.is_available and post.author:
+    if post and post.is_available:
+        if post.is_sys_msg or post.is_pm:
+            abort(403)
         cancel_url = request.args.get('prev') or url_for('.post', pid=pid)
         if cancel_url.find(url_for('.post', pid=pid)) != -1: 
             if post.parent:
@@ -450,7 +461,9 @@ def post_remove(pid):
 @privilege_required()
 def post_revert(pid):
     post = find_record(Post, id=pid)
-    if post and post.is_deleted and post.author:
+    if post and post.is_deleted:
+        if post.is_sys_msg or post.is_pm:
+            abort(403)
         post.is_deleted = False
         post.save()
         DeleteRecord.create(

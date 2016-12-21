@@ -167,6 +167,9 @@ class Post(BaseModel):
     def is_sys_msg(self):
         return (not self.author)
     @property
+    def is_pm(self):
+        return (not self.topic and self.author)
+    @property
     def is_available(self):
         if self.is_deleted:
             return False
@@ -177,31 +180,6 @@ class Post(BaseModel):
                     return False
                 p = p.parent
         return True
-    def is_accessible_by(self, user):
-        pid = int(self.path.split('/')[1])
-        post = find_record(Post, id=pid)
-        query = (
-            Message
-            .select()
-            .where(
-                (Message.post == post)
-                & ((Message.msg_type == 'sys') | (Message.msg_type == 'pm'))
-            )
-        )
-        if query:
-            message = query.get()
-            if message.msg_type == 'sys':
-                if message.callee.id == user.id:
-                    return True
-                else:
-                    return False
-            elif message.msg_type == 'pm':
-                if message.callee.id == user.id or message.caller.id == user.id:
-                    return True
-                else:
-                    return False
-        else:
-            return True
 
 
 class DeleteRecord(BaseModel):
@@ -219,8 +197,10 @@ class Message(BaseModel):
     callee = ForeignKeyField(User, related_name='msg_called')
     @classmethod
     def try_to_create(Message, msg_type, post, caller, callee):
-        if caller.id == callee.id:
+        assert msg_type in ['reply', 'at', 'sys', 'pm']
+        if caller == callee:
             return
+        unread_field_name = 'unread_%s' % msg_type
         query = Message.select().where(
             Message.msg_type == msg_type,
             Message.post == post,
@@ -228,24 +208,21 @@ class Message(BaseModel):
             Message.callee == callee
         )
         if not query:
-            Message.create(
+            message = Message.create(
                 msg_type = msg_type,
                 post = post,
                 caller = caller,
                 callee = callee
             )
-            if msg_type == 'reply':
-                (
-                    User
-                    .update(unread_reply = User.unread_reply+1)
-                    .where(User.id == callee.id)
-                ).execute()
-            elif msg_type == 'at':
-                (
-                    User
-                    .update(unread_at = User.unread_at+1)
-                    .where(User.id == callee.id)
-                ).execute()                
+            (
+                User
+                .update(
+                    **{unread_field_name: getattr(User, unread_field_name)+1}
+                )
+                .where(User.id == callee.id)
+            ).execute()
+            return message
+        return None
 
 
 class Image(BaseModel):

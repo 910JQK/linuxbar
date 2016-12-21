@@ -6,6 +6,7 @@
     <meta charset="UTF-8" />
     <title>{{ topic.title ~ ' - ' ~ get_config('site_name') }}</title>
     <link rel="stylesheet" href="/static/global.css" />
+    <link rel="stylesheet" href="/static/subpost.css" />
     <link rel="stylesheet" href="/static/highlight.css" />
     <style>
      ol { list-style-type: none; padding: 0; }
@@ -13,27 +14,6 @@
      header + hr { margin-bottom: 0; }
      #post_list { margin-top: 0; }
      .float_right_box { display: flex; justify-content: flex-end; }
-     .btn { cursor: pointer; }
-     .info > * {
-	 margin-left: 0.25em;
-     }
-     .info > img, .info > a, .btn_container > img, .btn_container > a {
-	 margin-left: 0.5em;
-     }
-     .info > span {
-	 font-size: 85%;
-	 color: hsl(0, 0%, 57%);
-     }
-     .icon {
-	 width: 0.75em;
-	 height: 0.75em;
-	 vertical-align: sub;
-     }
-     .btn_container .icon {
-	 width: 1em;
-	 height: 1em;
-	 vertical-align: middle;
-     }
      .content_image {
 	 max-width: 100%;
      }
@@ -103,24 +83,6 @@
      .post_subpost_list.empty:not(.expanded) > .subpost_list_footer {
 	 padding: 0;
      }
-     .subpost {
-	 display: flex;
-	 align-items: flex-start;
-	 padding: 0.8em 1em 0.6em 1em;
-     }
-     .subpost:not(:last-child) {
-	 border-bottom: 1px dotted hsl(0, 0%, 85%);
-     }
-     .subpost_author_name::after { content: ":"; }
-     .subpost_content { white-space: pre-wrap; }
-     .subpost_left_container { flex-shrink: 0; margin-right: 0.8em; }
-     .subpost_right_container { flex-grow: 1; min-width: 0; }
-     .subpost_footer {
-	 display: flex;
-	 justify-content: space-between;
-     }
-     .subpost_reply_to > .icon { vertical-align: middle; }
-     .reply_author_name { font-size: 85%; }
      .subpost_list_footer {
 	 padding: 0.5em 1em;
 	 border-top: 1px dotted hsl(0, 0%, 85%);
@@ -171,12 +133,6 @@
      }
      #add_post_form {
 	 width: 45em;
-     }
-     #add_post_form [name="content"] {
-	 box-sizing: border-box;
-	 width: 100%;
-	 height: 20em;
-	 margin-bottom: 0.25em;
      }
     </style>
   </head>

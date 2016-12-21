@@ -109,7 +109,7 @@ def create_post(topic, parent, content, add_reply_count=True, is_sys_msg=False, 
             callee = p.author
         )
         p = p.parent
-    if topic:
+    if not is_sys_msg and not is_pm:
         Message.try_to_create(
             msg_type = 'reply',
             post = new_post,
@@ -121,13 +121,21 @@ def create_post(topic, parent, content, add_reply_count=True, is_sys_msg=False, 
 
 def create_system_message(content, target):
     post = create_post(None, None, content, is_sys_msg=True)
-    message = Message.create(
+    message = Message.try_to_create(
         msg_type = 'sys',
         post = post,
         caller = None,
         callee = target
     )
-    (
-        User.update(unread_sys = User.unread_sys+1).where(User.id == target.id)
-    ).execute()
+    return message
+
+
+def create_pm(content, target):
+    post = create_post(None, None, content, is_pm=True)
+    message = Message.try_to_create(
+        msg_type = 'pm',
+        post = post,
+        caller = find_record(User, id=current_user.id),
+        callee = target
+    )
     return message

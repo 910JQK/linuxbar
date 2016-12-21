@@ -108,14 +108,14 @@
 		<span class="user_label sys_msg_label">{{ _('[System]') }}</span>
 	      {% endif %}
 		<div class="content_wrapper">
-		  <a class="content" target="_blank" href="{{ url_for('forum.post', pid=message.post.id) }}">
+		  <a class="content" target="_blank" href="{% if n_type != 'pm' %}{{ url_for('forum.post', pid=message.post.id) }}{% else %}{{ url_for('.pm', uid=message.caller.id) }}{% endif %}">
 		    {{ message.post.content | truncate(60) }}
 		  </a>
 		</div>
 	      </div>
 	      <div class="container_bottom">
 		<div class="topic_info_wrapper">
-		  {% if n_type != 'sys' %}
+		  {% if n_type != 'sys' and n_type != 'pm' %}
 		    <img class="topic_icon" src="/static/icons/share.svg" />
 		    <a class="topic_label" target="_blank" href="{{ url_for('forum.topic_content', tid=message.post.topic.id) }}">{{ message.post.topic.title }}</a>
 		  {% endif %}

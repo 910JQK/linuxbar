@@ -27,6 +27,17 @@ input[type="checkbox"] + label {
     color: hsl(0, 0%, 15%)
 }
 
+#add_post_form {
+    width: 35em;
+}
+
+#add_post_form [name="content"] {
+    box-sizing: border-box;
+    width: 100%;
+    height: 15em;
+    margin-bottom: 0.25em;
+}
+
 button::-moz-focus-inner, input[type="submit"]::-moz-focus-inner {
     border: 0px;
 }
@@ -57,6 +68,20 @@ button:focus, input[type="submit"]:focus {
 
 button:disabled, input[type="submit"]:disabled {
     color: hsl(0, 0%, 60%);
+}
+
+.btn { cursor: pointer; }
+
+.icon {
+    width: 0.75em;
+    height: 0.75em;
+    vertical-align: sub;
+}
+
+.btn_container .icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
 }
 
 body.box_center {

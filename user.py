@@ -8,7 +8,7 @@ from utils import _
 from utils import *
 from config import DB_WILDCARD
 from validation import REGEX_TOKEN
-from post import create_system_message
+from post import create_system_message, create_pm
 from forms import (
     LoginForm,
     RegisterForm,
@@ -16,7 +16,8 @@ from forms import (
     PasswordResetForm,
     ProfileForm,
     BanForm,
-    LevelChangeForm
+    LevelChangeForm,
+    PostAddForm
 )
 from models import (
     Config, User, PasswordResetToken, Profile, Ban,
@@ -309,33 +310,19 @@ def logout():
 @user.route('/notifications/<n_type>')
 @login_required
 def notifications(n_type):
-    if n_type not in ['reply', 'at', 'sys']:
+    if n_type not in ['reply', 'at', 'sys', 'pm']:
         abort(404)
+    unread_field_name = 'unread_%s' % n_type
     user = find_record(User, id=current_user.id)
-    if n_type == 'reply':
-        (
-            User
-            .update(unread_reply = 0)
-            .where(User.id == user.id)
-        ).execute()
-        current_user.unread_reply = 0
-    elif n_type == 'at':
-        (
-            User
-            .update(unread_at = 0)
-            .where(User.id == user.id)
-        ).execute()
-        current_user.unread_at = 0
-    elif n_type == 'sys':
-        (
-            User
-            .update(unread_sys = 0)
-            .where(User.id == user.id)
-        ).execute()
-        current_user.unread_sys = 0
+    (
+        User
+        .update(**{unread_field_name: 0})
+        .where(User.id == user.id)
+    ).execute()
+    setattr(current_user, unread_field_name, 0)
     pn = int(request.args.get('pn', '1'))
     count = int(Config.Get('count_item'))
-    if n_type != 'sys':
+    if n_type != 'sys' and n_type != 'pm':
         messages = (
             Message
             .select(Message, User, Post, Topic)
@@ -348,6 +335,17 @@ def notifications(n_type):
                 Message.callee == user
             )
         )
+    elif n_type == 'pm':
+        messages = (
+            Message.select(Message, User, Post)
+            .join(User)
+            .switch(Message)
+            .join(Post)
+            .where(
+                Message.msg_type == n_type,
+                Message.callee == user
+            )
+        )        
     else:
         messages = (
             Message.select(Message, Post)
@@ -367,3 +365,46 @@ def notifications(n_type):
         total = total,
         message_list = message_list
     )
+
+
+@user.route('/pm/<int:uid>', methods=['GET', 'POST'])
+def pm(uid):
+    source = find_record(User, id=current_user.id)
+    target = find_record(User, id=uid)
+    pn = int(request.args.get('pn', '1'))
+    count = int(Config.Get('count_item'))
+    if target:
+        if target.id == source.id:
+            abort(403)
+        messages = (
+            Message
+            .select(Message, User, Post)
+            .join(User)
+            .switch(Message)
+            .join(Post)
+            .where(
+                (Message.msg_type == 'pm')
+                & (
+                    ( (Message.caller == source) & (Message.callee == target) )
+                    | ( (Message.caller == target) & (Message.callee == source) )
+                )
+            )
+        )
+        total = messages.count()
+        message_list = messages.order_by(Post.date.desc()).paginate(pn, count)
+        form = PostAddForm()
+        if form.validate_on_submit():
+            create_pm(form.content.data, target)
+            flash(_('Private message sent successfully.'), 'ok')
+            return redirect(url_for('.pm', uid=target.id))
+        return render_template(
+            'user/pm.html',
+            form = form,
+            target = target,
+            message_list = message_list,
+            pn = pn,
+            count = count,
+            total = total
+        )
+    else:
+        abort(404)

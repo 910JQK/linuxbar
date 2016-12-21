@@ -77,11 +77,17 @@
 	    <a href="{{ url_for('.profile_edit') }}">
 	      <button>{{ _('Edit') }}</button>
 	    </a>
+	  {% else %}
+	    <a href="{{ url_for('.pm', uid=user.id) }}" title="{{ _('Send a private message to this user.') }}">
+	      <button>{{ _('PM') }}</button>
+	    </a>
 	  {% endif %}
 	  {% if current_user.level == 2 %}
-	    <a href="{{ url_for('.change_level', uid=user.id) }}">
-	      <button>{{ _('Change Privilege') }}</button>
-	    </a>
+	    {% if not (user.level == 2 and current_user.id != user.id) %}
+	      <a href="{{ url_for('.change_level', uid=user.id) }}">
+		<button>{{ _('Change Privilege') }}</button>
+	      </a>
+	    {% endif %}
 	  {% endif %}
 	{% endif %}
       </div>

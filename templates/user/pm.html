@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+{% from 'macros.html' import field, submit, avatar, messager, user_toolbar %}
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/static/global.css" />
+    <link rel="stylesheet" href="/static/subpost.css" />
+    <title>
+      {{ _('Private messages with %(target)s - %(site)s', target=target.name, site=get_config('site_name')) }}
+    </title>
+    <style>
+     #container {
+	 width: 55em;
+     }
+     .pm_label {
+	 color: gray;
+	 font-size: 90%;
+     }
+     ul {
+	 padding: 0em;
+	 list-style-type: none;
+     }
+     #add_post_form [name="content"] {
+	 width: 70%;
+	 height: 10em;
+     }
+    </style>
+  </head>
+  <body class="box_horizontal_center">
+    <div id="container">
+      <div id="top_left">
+	<span class="pm_label">{{ _('Private Messages') }}</span>
+      </div>
+      {{ user_toolbar(current_user) }}
+      {{ messager() }}
+      <form id="add_post_form" method="post">
+	<p>{{ _('To: %(name)s', name=target.name) }}</p>
+	{{ form.csrf_token() }}
+	{{ field(form.content) }}
+	<div>
+	  {{ submit(_('Send')) }}
+	</div>
+      </form>
+      <ul>
+	{% for message in message_list %}
+	  <li class="subpost" id="p{{ message.post.id }}">
+	    <div class="subpost_left_container">
+	      {{ avatar(message.caller.mail, 2) }}
+	    </div>
+	    <div class="subpost_right_container">
+	      <div class="subpost_body">
+		<span class="subpost_author_name">{{ message.caller.name }}</span>
+		<span class="subpost_content content">{{ message.post.content | get_html | safe }}</span>
+	      </div>
+	      <div class="subpost_footer">
+		<div>
+		</div>
+		<div class="info subpost_info">
+		  <span class="date">
+		    {{ message.post.date | date }}
+		  </span>
+		</div>
+	      </div>
+	    </div>
+	  </li>
+	{% endfor %}
+      </ul>
+  </body>
+</html>
+

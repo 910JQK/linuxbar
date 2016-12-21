@@ -19,7 +19,7 @@
 	  </div>
 	  <div class="info subpost_info">
 	    {% if not subpost.is_sys_msg %}
-	      {% if current_user.is_authenticated and current_user.level > 0 %}
+	      {% if not subpost.is_pm and current_user.is_authenticated and current_user.level > 0 %}
 		<a href="{{ url_for('.post_remove', pid=subpost.id, prev=request.url) }}">
 		  <img class="icon btn subpost_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" />
 		</a>

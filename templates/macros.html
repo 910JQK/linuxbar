@@ -86,8 +86,12 @@
 	{{ _('At(%(n)d)', n=user.unread_at) }}
       </a>
       <span class="separator">|</span>
-      <a id="atme_link" href="{{ url_for('user.notifications', n_type='sys') }}" target="_blank" data-content="{{ _('Sys') }}">
+      <a id="sys_link" href="{{ url_for('user.notifications', n_type='sys') }}" target="_blank" data-content="{{ _('Sys') }}">
 	{{ _('Sys(%(n)d)', n=user.unread_sys) }}
+      </a>
+      <span class="separator">|</span>
+      <a id="pm_link" href="{{ url_for('user.notifications', n_type='pm') }}" target="_blank" data-content="{{ _('PM') }}">
+	{{ _('PM(%(n)d)', n=user.unread_pm) }}
       </a>
       <span class="separator">|</span>
       <a class="link_logout" href="{{ url_for('user.logout', next=request.url) }}">
