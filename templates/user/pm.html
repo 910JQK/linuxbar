@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import field, submit, avatar, messager, user_toolbar %}
+{% from 'macros.html' import pager, field, submit, avatar, messager, user_toolbar %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -65,6 +65,8 @@
 	  </li>
 	{% endfor %}
       </ul>
+      {{ pager(pn, count, total) }}
+    </div>
   </body>
 </html>
 
