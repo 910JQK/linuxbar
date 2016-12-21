@@ -31,7 +31,7 @@ forum = Blueprint(
 def topic_list(tag_slug):
     pn = int(request.args.get('pn', '1'))
     count = int(Config.Get('count_topic'))
-    distillate_only = bool(request.args.get('distillate', ''))
+    distillate_only = bool(request.args.get('dist', ''))
     distillate_condition = (not distillate_only or Topic.is_distillate == True)
     if not tag_slug:
         is_index = True

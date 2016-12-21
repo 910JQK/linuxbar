@@ -4,9 +4,17 @@
   <head>
     <meta charset="UTF-8" />
     {% if is_index %}
-      <title>{{ get_config('site_name') }}</title>
+      {% if not distillate_only %}
+	<title>{{ get_config('site_name') }}</title>
+      {% else %}
+	<title>{{ _('Dist Topics - %(site)s', site=get_config('site_name')) }}</title>
+      {% endif %}
     {% else %}
-      <title>{{ tag.name ~ ' - ' ~ get_config('site_name') }}</title>
+      {% if not distillate_only %}
+	<title>{{ _('%(tag)s - %(site)s', tag=tag.name, site=get_config('site_name')) }}</title>	
+      {% else %}
+	<title>{{ _('Dist Topics - %(tag)s - %(site)s', tag=tag.name, site=get_config('site_name')) }}</title>
+      {% endif %}
     {% endif %}
     <link rel="stylesheet" href="/static/global.css" />
     <style>
@@ -58,6 +66,9 @@
      #top_left .separator {
 	 margin: 0em 0.2em;
      }
+     .dist_link {
+	 color: gray;
+     }
      .menu_label {
 	 color: gray;
 	 cursor: pointer;
@@ -100,19 +111,27 @@
 	    </span>
 	    <div id="tag_menu" class="menu">
 	      <div class="menu_item">
-		<a href="{{ url_for('index') }}">
+		<a href="{% if not distillate_only %}{{ url_for('index') }}{% else %}{{ url_for('index', dist='dist') }}{% endif %}">
 		  {{ _('Home') }}
 		</a>
 	      </div>
 	      {% for tag in tag_list %}
 		<div class="menu_item">
-		  <a href="{{ url_for('forum.topic_list', tag_slug=tag.slug) }}" title="{{ tag.description }}">
+		  <a href="{% if not distillate_only %}{{ url_for('forum.topic_list', tag_slug=tag.slug) }}{% else %}{{ url_for('forum.topic_list', tag_slug=tag.slug, dist='dist') }}{% endif %}" title="{{ tag.description }}">
 		    {{ tag.name }}
 		  </a>
 		</div>
 	      {% endfor %}
 	    </div>
 	  </div>
+	</span>
+	<span class="separator">|</span>
+	<span>
+	  {% if distillate_only %}
+	    <a class="dist_link" href="{% if is_index %}{{ url_for('index') }}{% else %}{{ url_for('forum.topic_list', tag_slug=tag.slug) }}{% endif %}" title="{{ _('Show all topics') }}">Show All</a>
+	  {% else %}
+	    <a class="dist_link" href="{% if is_index %}{{ url_for('index', dist='dist') }}{% else %}{{ url_for('forum.topic_list', tag_slug=tag.slug, dist='dist') }}{% endif %}" title="{{ _('Show distillate topics only') }}">Dist</a>
+	  {% endif %}
 	</span>
 	{% if current_user.is_authenticated and current_user.level > 0 %}
 	<span class="separator">|</span>
@@ -128,9 +147,17 @@
       </div>
       <header>
 	{% if is_index %}
-	  <h1>{{ get_config('site_name') }}</h1>
+	  {% if not distillate_only %}
+	    <h1>{{ get_config('site_name') }}</h1>
+	  {% else %}
+	    <h1>{{ _('Dist Topics') }}</h1>
+	  {% endif %}
 	{% else %}
-	  <h1>{{ tag.name }}</h1>
+	  {% if not distillate_only %}
+	    <h1>{{ tag.name }}</h1>
+	  {% else %}
+	    <h1>{{ _('Dist Topics: %(tag)s', tag=tag.name) }}
+	  {% endif %}
 	{% endif %}
       </header>
       <hr/>
