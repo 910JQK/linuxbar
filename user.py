@@ -368,6 +368,7 @@ def notifications(n_type):
 
 
 @user.route('/pm/<int:uid>', methods=['GET', 'POST'])
+@login_required
 def pm(uid):
     source = find_record(User, id=current_user.id)
     target = find_record(User, id=uid)

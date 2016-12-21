@@ -396,6 +396,8 @@ def post(pid):
 def post_edit(pid):
     post = find_record(Post, id=pid)
     if post and post.is_available:
+        if current_user.id != post.author.id:
+            abort(401)
         if post.is_sys_msg:
             abort(403)
         form = PostAddForm(obj=post)
@@ -403,8 +405,6 @@ def post_edit(pid):
             if not current_user.is_authenticated:
                 flash(_('Please sign in before editing a post.'), 'err')
                 return redirect(url_for('user.login', next=request.url))
-            if current_user.id != post.author.id:
-                abort(401)
             form.populate_obj(post)
             post.last_edit_date = now()
             post.save()

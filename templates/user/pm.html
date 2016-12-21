@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="/static/global.css" />
     <link rel="stylesheet" href="/static/subpost.css" />
+    <link rel="stylesheet" href="/static/highlight.css" />
     <title>
       {{ _('Private messages with %(target)s - %(site)s', target=target.name, site=get_config('site_name')) }}
     </title>
@@ -56,6 +57,16 @@
 		<div>
 		</div>
 		<div class="info subpost_info">
+		  {% if current_user.id == message.caller.id %}
+		    <a href="{{ url_for('forum.post_edit', pid=message.post.id, next=request.url) }}">
+		      <img class="icon btn subpost_edit_btn" src="/static/icons/pencil.svg" aria-label="edit" alt="edit" title="{{ _('edit this post') }}" />
+		    </a>
+		  {% endif %}
+		  {% if message.post.last_edit_date %}
+		    <span class="edited_mark" title="{{ message.post.last_edit_date | date }}">
+		      {{ _('[Edited]') }}
+		    </span>
+		  {% endif %}
 		  <span class="date">
 		    {{ message.post.date | date }}
 		  </span>
