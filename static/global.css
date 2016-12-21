@@ -192,12 +192,18 @@ code {
     font-size: 1.5em;
 }
 
+.menu_wrapper {
+    position: relative;
+}
+
 .menu_wrapper:hover > .menu {
     display: inherit;
 }
 
 .menu {
     display: none;
+    position: absolute;
+    top: 100%;
     border: 1px solid gray;
     border-top: none;
 }
@@ -207,6 +213,7 @@ code {
     color: hsl(233, 80%, 48%);
     background-color: hsl(0, 0%, 98%);
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .menu_item:hover {
