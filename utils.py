@@ -76,6 +76,13 @@ def path_get_padding(level):
         return 10
 
 
+def get_color(string, saturation, lightness):
+    hash_value = sha256(string)
+    n256 = ord(hash_value[0])*16 + ord(hash_value[1])
+    hue = int(round(360*(n256/256)))
+    return 'hsl(%d, %d%%, %d%%)' % (hue, saturation, lightness)
+
+
 def format_date(date, detailed=False):
     # behaviour of this function must be consistent with the front-end
     if detailed:

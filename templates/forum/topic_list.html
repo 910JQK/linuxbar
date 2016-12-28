@@ -36,7 +36,7 @@
 	 background-color: hsl(0, 0%, 97%);
      }
      .container_middle { padding: 0em 1.2em; width: 35em; }
-     .title { margin-bottom: 0.25em; font-size: 115%; }
+     .title { margin-bottom: 0.25em; font-size: 115%; }     
      .topic.pinned .title::before {
 	 content: "{{ _('[Pinned]') }}";
 	 color: hsl(0, 75%, 50%);
@@ -46,6 +46,16 @@
 	 content: "{{ _('[Dist]') }}";
 	 color: hsl(0, 75%, 50%);
 	 margin-right: 0.25em;
+     }
+     .tag_list:not(.empty) {
+	 margin-top: 0.2em;	 
+     }
+     .tag {
+	 padding: 0.05em 0.2em;
+	 margin-right: 0.3em;
+     }
+     .tag a {
+	 color: white;
      }
      .container_right { width: 13.5em; }
      .container_right .avatar, .container_right .name {
@@ -175,6 +185,17 @@
 		<a target="_blank" href="{{ url_for('forum.topic_content', tid=topic.id) }}">{{ topic.title }}</a>
 	      </div>
 	      <div class="summary">{{ topic.summary }}</div>
+	      <div class="tag_list">
+		{% if is_index %}
+		  {% for tag in topic.tags %}
+		    <span class="tag" style="background-color: {{ tag.slug | get_color(90, 55) }};">
+		      <a href="{{ url_for('forum.topic_list', tag_slug=tag.slug) }}">
+			{{ tag.name }}
+		      </a>
+		    </span>
+		  {% endfor %}
+		{% endif %}
+	      </div>
 	    </div>
 	    <div class="container_right">
 	      <div class="info info_topic">

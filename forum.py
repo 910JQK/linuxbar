@@ -9,6 +9,7 @@ from flask import (
     url_for
 )
 from flask_login import current_user, login_required
+from peewee import JOIN
 
 
 from utils import _
@@ -25,6 +26,49 @@ from config import SUMMARY_LENGTH, DB_WILDCARD, PID_SIGN, TID_SIGN
 forum = Blueprint(
     'forum', __name__, template_folder='templates', static_folder='static'
 )
+
+
+def get_topics(condition, pn, count, use_tag_condition=False):
+    if not use_tag_condition:
+        total = Topic.select().where(condition).count()
+    else:
+        total = (
+            TagRelation
+            .select(TagRelation, Tag, Topic)
+            .join(Tag, JOIN.LEFT_OUTER)
+            .switch(TagRelation)
+            .join(Topic)
+            .where(condition)
+            .count()
+        )
+    query = (
+        TagRelation
+        .select(TagRelation, Tag, Topic, User)
+        .join(Tag, JOIN.LEFT_OUTER)
+        .switch(TagRelation)
+        .join(Topic)
+        .join(User)
+        .where(condition)
+        .order_by(Topic.last_reply_date.desc())
+        .paginate(pn, count)
+    )
+    def topic_list():
+        last = None
+        taglist = []
+        for relation in query:
+            topic = relation.topic
+            if topic != last:
+                if last is not None:
+                    last.tags = taglist
+                    yield last
+                last = topic
+                taglist = []
+            if relation.tag is not None:
+                taglist.append(relation.tag)
+        if last is not None:
+            last.tags = taglist
+            yield last
+    return (topic_list(), total)
 
 
 @forum.route('/topic/list/<tag_slug>', methods=['GET', 'POST'])
@@ -51,52 +95,29 @@ def topic_list(tag_slug):
             )
             .order_by(Topic.post_date)
         )
-        topics = (
-            Topic
-            .select(Topic, User)
-            .join(User)
-            .where(
-                (Topic.is_pinned == False)
-                & (Topic.is_deleted == False)
-                & distillate_condition
-            )
+        condition = (
+            (Topic.is_pinned == False)
+            & (Topic.is_deleted == False)
+            & distillate_condition
         )
-        total = topics.count()
-        topics = (
-            topics
-            .order_by(Topic.last_reply_date.desc())
-            .paginate(pn, count)
-        )
+        topics, total = get_topics(condition, pn, count)
         def get_topic_list():
             for I in pinned_topics:
-                yield I
+                topic = I
+                topic.tags = []
+                yield topic
             for I in topics:
                 yield I
         topic_list = get_topic_list()
     else:
-        relation_list = (
-            TagRelation
-            .select(TagRelation, Tag, Topic, User)
-            .join(Tag)
-            .switch(TagRelation)
-            .join(Topic)
-            .join(User)
-            .where(
-                (Tag.slug == tag_slug)
-                & (Topic.is_deleted == False)
-                & distillate_condition
-            )
+        condition = (
+            (Tag.slug == tag_slug)
+            & (Topic.is_deleted == False)
+            & distillate_condition
         )
-        total = relation_list.count()
-        relation_list = (
-            relation_list
-            .order_by(Topic.last_reply_date.desc())
-            .paginate(pn, count)
+        topic_list, total = get_topics(
+            condition, pn, count, use_tag_condition=True
         )
-        def get_topic_list():
-            for relation in relation_list:
-                yield relation.topic
-        topic_list = get_topic_list()
     form = TopicAddForm()
     form.tags.choices = [(tag.slug, tag.name) for tag in Tag.select()]
     if form.validate_on_submit():
@@ -123,6 +144,7 @@ def topic_list(tag_slug):
             last_reply_date = date_now,
             last_reply_author_id = current_user.id
         )
+        TagRelation.create(topic=new_topic, tag=None)
         with db.atomic():
             for tag in tags:
                 found = find_record(Tag, slug=tag)

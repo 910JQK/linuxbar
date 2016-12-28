@@ -149,7 +149,7 @@ class Topic(BaseModel):
 
 class TagRelation(BaseModel):
     topic = ForeignKeyField(Topic, related_name='tags')
-    tag = ForeignKeyField(Tag, related_name='topics', on_delete='CASCADE')
+    tag = ForeignKeyField(Tag, related_name='topics', on_delete='CASCADE', null=True)
 
 
 class Post(BaseModel):
