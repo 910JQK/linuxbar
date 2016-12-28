@@ -1,6 +1,7 @@
 from flask import Blueprint, session, request, flash, redirect, render_template, url_for, abort
 from flask_login import current_user
 from werkzeug.datastructures import MultiDict
+from peewee import JOIN
 from collections import namedtuple
 import datetime
 
@@ -169,11 +170,12 @@ def delete_record():
     count = int(Config.Get('count_item'))
     records = (
         DeleteRecord
-        .select(DeleteRecord, User)
+        .select(DeleteRecord, User, Topic, Post)
         .join(User)
-        # query problem: foreign key with value NULL will be ignored
-        # when joining, so that joining Topic and Post there will
-        # finally get an empty list
+        .switch(DeleteRecord)
+        .join(Topic, JOIN.LEFT_OUTER)
+        .switch(DeleteRecord)
+        .join(Post, JOIN.LEFT_OUTER)
     )
     total = records.count()
     rec_list = records.order_by(DeleteRecord.date.desc()).paginate(pn, count)
