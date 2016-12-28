@@ -190,7 +190,7 @@
 	      <div class="tag_list{% if not is_index or not topic.tags %} empty{% endif %}">
 		{% if is_index %}
 		  {% for tag in topic.tags %}
-		    <span class="tag" style="background-color: {{ tag.slug | get_color(90, 40) }};">
+		    <span class="tag" style="background-color: {{ tag.slug | get_color(90, 35) }};">
 		      <a href="{{ url_for('forum.topic_list', tag_slug=tag.slug) }}">
 			{{ tag.name }}
 		      </a>
