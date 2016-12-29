@@ -37,6 +37,22 @@ FORMATS = {
     '!': 'del'
     # a single char: tag name
 }
+RICHTEXT_INFO = '''
+<p><b>Bold</b>: <code>***bold**</code> or <code>**bold**</code></p>
+<p><i>Italic</i>: <code>**~italic**</code></p>
+<p><del>Mask</del>: <code>**!Mask**</code></p>
+<p><code>Inline Code</code>: <code>`Inline Code`</code></p>
+<p>Image: <code>%%hash</code></p>
+<div class="highlight"><pre>
+Code Box:
+/***# language
+code
+code
+code
+#***/
+</pre>
+</div>
+'''
 
 
 UPLOAD_FOLDER = 'upload'

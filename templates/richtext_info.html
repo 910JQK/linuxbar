@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/static/global.css" />
+    <title>{{ _('Richtext Usage - %(site)s', site=get_config('site_name')) }}</title>
+    <style>
+      h1 { text-align: center; }
+      .content { min-width: 30em; }
+    </style>
+  </head>
+  <body class="box_center">
+    <div id="container">
+      <h1>{{ _('Richtext Usage') }}</h1>
+      <div class="content">
+	{{ info | safe }}
+      </div>
+    </div>
+  </body>
+</html>

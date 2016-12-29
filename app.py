@@ -5,7 +5,7 @@ import os
 import io
 import hashlib
 import datetime
-from flask import Flask, Response, session
+from flask import Flask, Response, session, render_template
 from flask_babel import Babel
 from flask_login import current_user
 from flask_wtf.csrf import CsrfProtect
@@ -21,7 +21,8 @@ from moderate import moderate
 from image import image
 from forum import forum, topic_list, filter_deleted_post
 from config import (
-    DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE, assert_config
+    DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE, assert_config,
+    RICHTEXT_INFO
 )
 
 
@@ -64,6 +65,11 @@ def get_captcha():
     image.save(output, format='PNG')
     image_data = output.getvalue()
     return Response(image_data, mimetype='image/png')
+
+
+@app.route('/richtext-info')
+def richtext_info():
+    return render_template('richtext_info.html', info=RICHTEXT_INFO)
 
 
 def run():

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import pager, field, submit, avatar, messager, user_toolbar %}
+{% from 'macros.html' import pager, field, submit, avatar, messager, user_toolbar, editor_toolbar %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -37,6 +37,7 @@
       <form id="add_post_form" method="post">
 	<p>{{ _('To: %(name)s', name=target.name) }}</p>
 	{{ form.csrf_token() }}
+	{{ editor_toolbar() }}
 	{{ field(form.content) }}
 	<div>
 	  {{ submit(_('Send')) }}
