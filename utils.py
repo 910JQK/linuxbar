@@ -11,6 +11,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 
+from config import SUMMARY_LENGTH
+
+
 TOKEN_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 
@@ -57,6 +60,13 @@ def find_record(table, *args, **kwargs):
         return find_record_all(table, *args, **kwargs).__next__()
     except StopIteration:
         return None
+
+
+def gen_summary(content):
+    if len(content) > SUMMARY_LENGTH:
+        return content[:SUMMARY_LENGTH-3] + '...'
+    else:
+        return content
 
 
 def path_get_level(path):

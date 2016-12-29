@@ -20,7 +20,7 @@ from forms import TopicAddForm, TopicTagManageForm, PostAddForm
 from models import (
     db, Config, User, Topic, TagRelation, Tag, Post, DeleteRecord, Message
 )
-from config import SUMMARY_LENGTH, DB_WILDCARD, PID_SIGN, TID_SIGN
+from config import DB_WILDCARD, PID_SIGN, TID_SIGN
 
 
 forum = Blueprint(
@@ -130,16 +130,11 @@ def topic_list(tag_slug):
         title = form.title.data
         content = form.content.data
         tags = form.tags.data
-        summary = ''
-        if len(content) > SUMMARY_LENGTH:
-            summary = content[:SUMMARY_LENGTH-3] + '...'
-        else:
-            summary = content
         date_now = now()
         new_topic = Topic.create(
             author_id = current_user.id,
             title = title,
-            summary = summary,
+            summary = '',
             post_date = date_now,
             last_reply_date = date_now,
             last_reply_author_id = current_user.id
@@ -156,6 +151,8 @@ def topic_list(tag_slug):
         first_post = create_post(
             new_topic, None, content, add_reply_count=False
         )
+        new_topic.summary = gen_summary(first_post.content)
+        new_topic.save()
         flash(_('Topic published successfully.'), 'ok')
         return redirect(request.url)
     return render_template(
@@ -430,6 +427,9 @@ def post_edit(pid):
             form.populate_obj(post)
             post.last_edit_date = now()
             post.save()
+            if post.ordinal == 1 and not post.parent and post.topic:
+                post.topic.summary = gen_summary(form.content.data)
+                post.topic.save()
             flash(_('Post edited successfully.'), 'ok')
             return redirect(
                 request.args.get('next') or url_for('.post', pid=pid)
