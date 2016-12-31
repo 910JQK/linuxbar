@@ -44,14 +44,8 @@
 	    <td>{{ user.date_register | date }}</td>
 	  </tr>
 	  <tr>
-	    <td>{{ _('Last Login') }}</td>
-	    <td>
-	      {% if user.date_last_login %}
-		{{ user.date_last_login | date }}
-	      {% else %}
-		{{ _('Not yet signed in') }}
-	      {% endif %}
-	    </td>
+	    <td>{{ _('Posts') }}</td>
+	    <td>{{ total_posts }}</td>
 	  </tr>
 	  <tr>
 	    <td>{{ _('Location') }}</td>

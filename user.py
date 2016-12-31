@@ -221,9 +221,19 @@ def password_reset(uid):
 def profile(uid):
     user = find_record(User, id=uid)
     if user:
+        total_posts = (
+            Post
+            .select()
+            .where(
+                Post.author == user,
+                Post.topic != None
+            )
+            .count()
+        )
         return render_template(
             'user/profile.html',
             user = user,
+            total_posts = total_posts,
             profile = user.profile[0]
         )
     else:
