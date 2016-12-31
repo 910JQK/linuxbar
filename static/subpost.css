@@ -21,6 +21,10 @@
     border-bottom: 1px dotted hsl(0, 0%, 85%);
 }
 
+.subpost_author_name {
+    vertical-align: top;
+}
+
 .subpost_author_name::after {
     content: ":";
 }

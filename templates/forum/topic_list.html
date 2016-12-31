@@ -51,10 +51,11 @@
 	 margin-top: 0.2em;	 
      }
      .tag {
-	 padding: 0.08em 0.25em;
+	 padding: 0.1em 0.3em;
 	 margin-right: 0.4em;
 	 border-radius: 3px;
 	 font-size: 80%;
+	 text-align: center;
      }
      .tag a {
 	 color: white;
@@ -190,11 +191,7 @@
 	      <div class="tag_list{% if not is_index or not topic.tags %} empty{% endif %}">
 		{% if is_index %}
 		  {% for tag in topic.tags %}
-		    <span class="tag" style="background-color: {{ tag.slug | get_color(90, 35) }};">
-		      <a href="{{ url_for('forum.topic_list', tag_slug=tag.slug) }}">
-			{{ tag.name }}
-		      </a>
-		    </span>
+		    <span class="tag" style="background-color: {{ tag.slug | get_color(90, 35) }};"><a href="{{ url_for('forum.topic_list', tag_slug=tag.slug) }}">{{ tag.name }}</a></span>
 		  {% endfor %}
 		{% endif %}
 	      </div>

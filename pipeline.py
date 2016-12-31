@@ -197,11 +197,14 @@ def process_format(lines):
                     )
             return escape(segment)
         def process():
+            snippets = line.split(INLINE_CODE_SIGN)
             i = 0
-            for snippet in line.split(INLINE_CODE_SIGN):
-                if i % 2 == 1:
+            for snippet in snippets:
+                if i % 2 == 1 and i != len(snippets)-1:
                     yield '<code>%s</code>' % escape(snippet)
                 else:
+                    if i % 2 == 1 and i == len(snippets)-1:
+                        snippet = INLINE_CODE_SIGN + snippet
                     for sub_snippet in process_formats(snippet):
                         if not isinstance(sub_snippet, str):
                             yield str(sub_snippet)
