@@ -1,5 +1,7 @@
 var query = selector => document.querySelector(selector);
 var query_all = selector => document.querySelectorAll(selector);
+var _ = str => str; // reserved for l10n
+var timer = new Worker('/static/timer.js');
 
 
 /**
@@ -92,7 +94,62 @@ function POST(url, data, ok, err, timeout) {
 }
 
 
-function update_unread_count() {
+/**
+ * Format date
+ *
+ * @param Number timestamp
+ * @return String
+ */
+function format_date(timestamp) {
+    /* behaviour of this function must be consistent with the back-end */
+    var now = (Date.now() / 1000);
+    var delta = Math.round(now - timestamp);
+    if(delta < 60){
+        return _('just now');
+    } else if(delta < 3600) {
+        let minutes = Math.floor(delta / 60);
+	if(minutes == 1)
+            return _('a minute ago');
+        else
+            return printf(_('%1 minutes ago'), minutes);
+    } else if(delta < 86400) {
+        let hours = Math.floor(delta / 3600);
+        if(hours == 1)
+            return _('an hour ago');
+        else
+            return printf(_('%1 hours ago'), hours);
+    /*  604800 = 86400*7  */
+    } else if(delta < 604800) {
+        let days = Math.floor(delta / 86400);
+        if(days == 1)
+            return _('a day ago');
+        else
+            return printf(_('%1 days ago'), days);
+    /* 2629746 = 86400*(31+28+97/400+31+30+31+30+31+31+30+31+30+31)/12 */
+    } else if(delta < 2629746) {
+        let weeks = Math.floor(delta / 604800);
+        if(weeks == 1)
+            return _('a week ago');
+        else
+            return printf(_('%1 weeks ago'), weeks);
+    /* 31556952 = 86400*(365+97/400) */
+    } else if(delta < 31556952) {
+        let months = Math.floor(delta / 2629746);
+        if(months == 1)
+            return _('a month ago');
+        else
+            return printf(_('%1 months ago'), months);
+    } else {
+        let years = Math.floor(delta / 31556952);
+        if(years == 1)
+            return _('a year ago');
+        else
+            return printf(_('%1 years ago'), years);
+    }
+}
+
+
+function update_unread_info() {
     if(!query('#link_notify_reply'))
 	return;
     GET(
@@ -116,9 +173,27 @@ function update_unread_count() {
 }
 
 
-function init_timer() {
-    var timer = new Worker('/static/timer.js');
+function update_date() {
+    for(let span of query_all('.date')) {
+	span.textContent = format_date(span.dataset.ts);
+    }
+}
+
+
+function init_unread_info_timer() {
     timer.addEventListener('message', function(ev) {
-	update_unread_count();
+	if(ev.data == 'update_unread_info')
+	    update_unread_info();
     });
 }
+
+
+function init_datetime_timer() {
+    timer.addEventListener('message', function(ev) {
+	if(ev.data == 'update_date')
+	    update_date();
+    });
+}
+
+
+window.addEventListener('load', init_datetime_timer);

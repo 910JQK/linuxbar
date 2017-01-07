@@ -1,4 +1,4 @@
-{% from 'macros.html' import avatar, pager %}
+{% from 'macros.html' import avatar, pager, date_span %}
 {% macro subpost_list(list, current_user, base_level=0, first_no_reply_btn=False) %}
   {% for subpost in list %}
     <li class="subpost" id="p{{ subpost.id }}" style="padding-left: {{ ((subpost.path | get_level) - base_level) | get_padding }}em">
@@ -43,9 +43,7 @@
 		{{ _('[Edited]') }}
 	      </span>
 	    {% endif %}
-	    <span class="date">
-	      {{ subpost.date | date }}
-	    </span>
+	    {{ date_span(subpost.date) }}
 	    <span class="ordinal">#{{ subpost.ordinal }}</span>
 	  </div>
 	</div>

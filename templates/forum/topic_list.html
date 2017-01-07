@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar, ban_tip, moderate_menu %}
+{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar, ban_tip, moderate_menu, date_span %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -203,14 +203,14 @@
 		  {{ avatar(topic.author.mail) }}
 		  <span class="name">{{ topic.author.name }}</span>
 		</span>
-		<span class="date">{{ topic.post_date | date }}</span>
+		{{ date_span(topic.post_date) }}
 	      </div>
 	      <div class="info info_last_post">
 		<span class="author" data-uid="{{ topic.last_reply_author.id }}">
 		  {{ avatar(topic.last_reply_author.mail) }}
 		  <span class="name">{{ topic.last_reply_author.name }}</span>
 		</span>
-		<span class="date">{{ topic.last_reply_date | date }}</span>
+		{{ date_span(topic.last_reply_date) }}
 	      </div>
 	    </div>
 	  </li>

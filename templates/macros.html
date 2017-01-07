@@ -35,6 +35,11 @@
 {% endmacro %}
 
 
+{% macro date_span(datetime_obj) %}
+  <span class="date" data-ts="{{ datetime_obj.timestamp() }}">{{ datetime_obj | date }}</span>
+{% endmacro %}
+
+
 {% macro ban_tip(user) %}
   {# please check if banned before invoking this macro #}
   <div class="ban_tip">
@@ -98,7 +103,7 @@
 	{{ _('Logout') }}
       </a>
       <script type="text/javascript">
-	window.addEventListener('load', () => init_timer());
+	window.addEventListener('load', init_unread_info_timer);
       </script>
     {% else %}
       <a class="link_login" href="{{ url_for('user.login', next=request.url) }}">

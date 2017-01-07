@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit, ban_tip, editor_toolbar %}
+{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit, ban_tip, editor_toolbar, date_span %}
 {% from 'forum/subpost_list.html' import subpost_list %}
 <html>
   <head>
@@ -187,7 +187,7 @@
 		  {% if post.last_edit_date %}
 		    <span class="edited_mark" title="{{ post.last_edit_date | date }}">{{ _('[Edited]') }}</span>
 		  {% endif %}
-		  <span class="date">{{ post.date | date }}</span>
+		  {{ date_span(post.date) }}
 		  <span class="ordinal">#{{ post.ordinal }}</span>
 		</div>
 	      </div>
