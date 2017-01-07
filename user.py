@@ -1,4 +1,4 @@
-from flask import Blueprint, session, request, flash, redirect, render_template, url_for, abort
+from flask import Blueprint, session, request, flash, redirect, render_template, url_for, abort, jsonify
 from flask_login import (
     LoginManager, current_user, login_required, login_user, logout_user
 )
@@ -419,3 +419,11 @@ def pm(uid):
         )
     else:
         abort(404)
+
+
+@user.route('/unread-info')
+@login_required
+def unread_info():
+    items = ['reply', 'at', 'pm', 'sys']
+    user = find_record(User, id=current_user.id)
+    return jsonify(**{item: getattr(user, 'unread_'+item) for item in items})

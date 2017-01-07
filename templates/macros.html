@@ -78,25 +78,28 @@
 	</a>
       </span>
       <span class="separator">|</span>
-      <a id="replyme_link" href="{{ url_for('user.notifications', n_type='reply') }}" target="_blank" data-content="{{ _('Reply') }}">
+      <a id="link_notify_reply" href="{{ url_for('user.notifications', n_type='reply') }}" target="_blank" data-content="{{ _('Reply') }}">
 	{{ _('Reply(%(n)d)', n=user.unread_reply) }}
       </a>
       <span class="separator">|</span>
-      <a id="atme_link" href="{{ url_for('user.notifications', n_type='at') }}" target="_blank" data-content="{{ _('At') }}">
+      <a id="link_notify_at" href="{{ url_for('user.notifications', n_type='at') }}" target="_blank" data-content="{{ _('At') }}">
 	{{ _('At(%(n)d)', n=user.unread_at) }}
       </a>
       <span class="separator">|</span>
-      <a id="sys_link" href="{{ url_for('user.notifications', n_type='sys') }}" target="_blank" data-content="{{ _('Sys') }}">
+      <a id="link_notify_sys" href="{{ url_for('user.notifications', n_type='sys') }}" target="_blank" data-content="{{ _('Sys') }}">
 	{{ _('Sys(%(n)d)', n=user.unread_sys) }}
       </a>
       <span class="separator">|</span>
-      <a id="pm_link" href="{{ url_for('user.notifications', n_type='pm') }}" target="_blank" data-content="{{ _('PM') }}">
+      <a id="link_notify_pm" href="{{ url_for('user.notifications', n_type='pm') }}" target="_blank" data-content="{{ _('PM') }}">
 	{{ _('PM(%(n)d)', n=user.unread_pm) }}
       </a>
       <span class="separator">|</span>
       <a class="link_logout" href="{{ url_for('user.logout', next=request.url) }}">
 	{{ _('Logout') }}
       </a>
+      <script type="text/javascript">
+	window.addEventListener('load', () => init_timer());
+      </script>
     {% else %}
       <a class="link_login" href="{{ url_for('user.login', next=request.url) }}">
 	{{ _('Login') }}
