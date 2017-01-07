@@ -208,22 +208,22 @@
 
 {% macro editor_toolbar() %}
   <div class="editor_toolbar">
-    <a href="{{ url_for('richtext_info') }}" target="_blank" aira-label="Bold" title="Bold">
+    <a class="btn bold_btn" href="{{ url_for('richtext_info') }}" target="_blank" aira-label="Bold" title="Bold">
       <img class="icon" src="/static/icons/bold.svg" alt="Bold" />
     </a>
-    <a href="{{ url_for('richtext_info') }}" target="_blank" aira-label="Italic" title="Italic">
+    <a class="btn italic_btn" href="{{ url_for('richtext_info') }}" target="_blank" aira-label="Italic" title="Italic">
       <img class="icon" src="/static/icons/italic.svg" alt="Italic" />
     </a>
-    <a href="{{ url_for('richtext_info') }}" target="_blank" aira-label="Mask" title="Mask">
+    <a class="btn mask_btn" href="{{ url_for('richtext_info') }}" target="_blank" aira-label="Mask" title="Mask">
       <img class="icon" src="/static/icons/contrast.svg" alt="Mask" />
     </a>
-    <a href="{{ url_for('image.upload') }}" target="_blank" aria-label="Image" title="Image">
+    <a class="btn image_btn" href="{{ url_for('image.upload') }}" target="_blank" aria-label="Image" title="Image">
       <img class="icon" src="/static/icons/image.svg" alt="Image" />
     </a>
-    <a href="{{ url_for('richtext_info') }}" target="_blank" aira-label="Inline Code" title="Inline Code">
+    <a class="btn inline_code_btn" href="{{ url_for('richtext_info') }}" target="_blank" aira-label="Inline Code" title="Inline Code">
       <img class="icon" src="/static/icons/code.svg" alt="Inline Code" />
-    </a>    
-    <a href="{{ url_for('richtext_info') }}" target="_blank" aira-label="Code" title="Code">
+    </a>
+    <a class="btn code_btn" href="{{ url_for('richtext_info') }}" target="_blank" aira-label="Code" title="Code">
       <img class="icon" src="/static/icons/terminal.svg" alt="Code" />
     </a>    
   </div>
