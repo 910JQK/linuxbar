@@ -22,7 +22,7 @@ from image import image
 from forum import forum, topic_list, filter_deleted_post
 from config import (
     DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE, assert_config,
-    RICHTEXT_INFO
+    RICHTEXT_INFO, RICHTEXT_INFO_JSON
 )
 
 
@@ -39,7 +39,7 @@ DEBUG = True
 
 @app.context_processor
 def inject_data():
-    return {'get_config': Config.Get}
+    return {'get_config': Config.Get, 'RT_INFO': RICHTEXT_INFO_JSON}
 
 
 app.add_template_filter(md5, 'md5')

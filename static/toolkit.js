@@ -95,26 +95,14 @@ function POST(url, data, ok, err, timeout) {
 
 
 /**
- * Process and replace selected text in a textarea
+ * Cancel a link so that javascript event can make sense
  *
- * @param Object textarea
- * @param Function process_function
+ * @param Object link
  * @return void
  */
-function replace_text(textarea, process_function) {
-    var start = textarea.selectionStart;
-    var end = textarea.selectionEnd;
-    var text = textarea.value;
-    var result = process_function(text.slice(start, end));
-    var processed = result.processed;
-    var delta = result.delta;
-    textarea.value = (
-	text.slice(0, start) + processed + text.slice(end, text.length)
-    );
-    textarea.selectionStart = (
-	textarea.selectionEnd = start + processed.length + delta
-    );
-    textarea.focus();
+function cancel_link(link) {
+    link.href = 'javascript: void(0)';
+    link.target = '';
 }
 
 
@@ -173,43 +161,11 @@ function format_date(timestamp) {
 }
 
 
-function process_text(prefix, suffix) {
-    return function(text) {
-	var delta;
-	if(text.length > 0)
-	    delta = 0;
-	else
-	    delta = -1*suffix.length;	
-	return ({
-	    processed: prefix + text + suffix,
-	    delta: delta
-	});
-    };
-}
-
-
-function init_editor_toolbar(toolbar, textarea) {
-    var format_btns = [
-	['.bold_btn','**','**'],
-	['.italic_btn', '**~', '**'],
-	['.mask_btn', '**!', '**'],
-	['.inline_code_btn', '`', '`']
-    ];
-    for(let I of format_btns) {
-	let query = I[0];
-	let prefix = I[1];
-	let suffix = I[2];
-	var btn = toolbar.querySelector(query);
-	btn.href = 'javascript:void(0)';
-	btn.target = '';
-	btn.addEventListener(
-	    'click',
-	    () => replace_text(textarea, process_text(prefix, suffix))
-	);
-    }
-}
-
-
+/**
+ * Update unread count info in user toolbar
+ *
+ * @return void
+ */
 function update_unread_info() {
     if(!query('#link_notify_reply'))
 	return;
@@ -234,6 +190,11 @@ function update_unread_info() {
 }
 
 
+/**
+ * Update relative datetime of all date spans on the page
+ *
+ * @return void
+ */
 function update_date() {
     for(let span of query_all('.date')) {
 	span.textContent = format_date(span.dataset.ts);
@@ -241,6 +202,11 @@ function update_date() {
 }
 
 
+/**
+ * Enable the timer to update unread info
+ *
+ * @return void
+ */
 function init_unread_info_timer() {
     timer.addEventListener('message', function(ev) {
 	if(ev.data == 'update_unread_info')
@@ -249,6 +215,11 @@ function init_unread_info_timer() {
 }
 
 
+/**
+ * Enable the timer to update relative datetime
+ *
+ * @return void
+ */
 function init_datetime_timer() {
     timer.addEventListener('message', function(ev) {
 	if(ev.data == 'update_date')
@@ -257,14 +228,5 @@ function init_datetime_timer() {
 }
 
 
-function init_editor_toolbars() {
-    for(let I of query_all('.editor_toolbar')) {
-	let toolbar = I;
-	let textarea = toolbar.nextElementSibling;
-	init_editor_toolbar(toolbar, textarea);
-    }
-}
-
-
 window.addEventListener('load', init_datetime_timer);
-window.addEventListener('load', init_editor_toolbars);
+

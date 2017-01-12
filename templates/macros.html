@@ -225,10 +225,25 @@
     </a>
     <a class="btn code_btn" href="{{ url_for('richtext_info') }}" target="_blank" aira-label="Code" title="Code">
       <img class="icon" src="/static/icons/terminal.svg" alt="Code" />
-    </a>    
+    </a>
   </div>
 {% endmacro %}
 
+{% macro insert_code_dialog() %}
+  <div id="insert_code_dialog_wrapper" class="dialog_wrapper" style="display: none;">
+    <div id="insert_code_dialog" class="dialog">
+      <h2>{{ _('Insert Code') }}</h2>
+      <textarea id="insert_code_textarea"></textarea>
+      <div class="box_center">
+	<input id="insert_code_lang_input" type="text" placeholder="{{ _('Language') }}" />
+      </div>
+      <div class="box_center dialog_btn_wrapper">
+	<button id="insert_code_ok_btn">{{ _('OK') }}</button>	      
+	<button id="insert_code_cancel_btn">{{ _('Cancel') }}</button>
+      </div>
+    </div>
+  </div>
+{% endmacro %}
 
 {% macro pager(pn, items_per_page, total, ajax=False) %}
   {% set pages = (total / items_per_page) | round(0, 'ceil') | int %}

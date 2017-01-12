@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar, ban_tip, moderate_menu, date_span %}
+{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar, ban_tip, moderate_menu, date_span, insert_code_dialog %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -18,6 +18,10 @@
     {% endif %}
     <link rel="stylesheet" href="/static/global.css" />
     <script type="text/javascript" src="/static/toolkit.js"></script>
+    <script type="text/javascript" src="/static/editor.js"></script>
+    <template id="richtext_info" style="display: none">
+      {{ RT_INFO }}
+    </template>
     <style>
      li { list-style-type: none; }
      #topic_list { padding: 0em; margin: 0em 0em 2em 0em; }
@@ -224,13 +228,16 @@
 	  <fieldset{% if is_banned %} disabled="disabled"{% endif %}>
 	    {{ form.csrf_token }}
 	    {{ field(form.title) }}
-	    {{ editor_toolbar() }}
+	    {% if not is_banned %}	      
+	      {{ editor_toolbar() }}
+	    {% endif %}
 	    {{ field(form.content) }}
 	    {{ field(form.tags) }}
 	    {{ submit(_('Publish')) }}
-	  </fieldset>	  
-	</form>
+	  </fieldset>
+	</form>	
 	{% if is_banned %}{{ ban_tip(current_user) }}{% endif %}
+	{{ insert_code_dialog() }}
       {% endif %}
     </div>
   </body>

@@ -112,6 +112,9 @@ body.box_horizontal_center {
 
 #container {
     position: relative;
+}
+
+#container, .dialog {
     padding: 2.5em;
     box-shadow: 0 3px 9px hsla(0, 0%, 40%, 0.3);
     background-color: white;
@@ -231,15 +234,60 @@ code {
 }
 
 
-.message.ok { color: hsl(100, 80%, 45%); }
-.message.err { color: hsl(0, 90%, 45%); }
+.dialog_wrapper {
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    bottom: 0%;
+    right: 0%;
+    background-color: hsla(0, 0%, 30%, 0.3);
+}
 
+.dialog {
+    position: fixed;
+    top: 3em;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.dialog input, .dialog textarea {
+    max-width: 100%;
+}
+
+.dialog > h2 {
+    text-align: center;
+}
+
+.dialog_btn_wrapper > button {
+    margin: 0.3em 0.4em;
+}
+
+#insert_code_dialog {
+    width: 20em;    
+}
+
+#insert_code_textarea {
+    height: 15em;    
+}
+
+#insert_code_lang_input {
+    width: 7em;
+    margin: 0.3em 0em;
+    text-align: center;
+}
+
+.message.ok {
+    color: hsl(100, 80%, 45%);
+}
+
+.message.err {
+    color: hsl(0, 90%, 45%);
+}
 
 @keyframes show_message {
     from {top: 0em;}
     to {top: -3em;}
 }
-
 
 #messager {
     box-sizing: border-box;    
@@ -262,11 +310,9 @@ code {
     animation-timing-function: linear;
 }
 
-
 #messager.empty {
     animation-play-state: paused;
 }
-
 
 #messager > .message_list {
     margin: 0em;

@@ -53,6 +53,19 @@ code
 </pre>
 </div>
 '''
+RICHTEXT_INFO_JSON = '''
+{
+  "formats": [
+    ["bold", "**", "**"],
+    ["italic", "**~", "**"],
+    ["mask", "**!", "**"],
+    ["inline_code", "`", "`"]    
+  ],
+  "image_prefix": "%%",
+  "code_prefix": "/***#",
+  "code_suffix": "#***/"
+}
+'''
 
 
 UPLOAD_FOLDER = 'upload'

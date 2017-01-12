@@ -1,11 +1,16 @@
 <!DOCTYPE html>
-{% from 'macros.html' import pager, field, submit, avatar, messager, user_toolbar, editor_toolbar %}
+{% from 'macros.html' import pager, field, submit, avatar, messager, user_toolbar, editor_toolbar, insert_code_dialog %}
 <html>
   <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="/static/global.css" />
     <link rel="stylesheet" href="/static/subpost.css" />
     <link rel="stylesheet" href="/static/highlight.css" />
+    <script type="text/javascript" src="/static/toolkit.js"></script>
+    <script type="text/javascript" src="/static/editor.js"></script>
+    <template id="richtext_info" style="display: none">
+      {{ RT_INFO }}
+    </template>
     <title>
       {{ _('Private messages with %(target)s - %(site)s', target=target.name, site=get_config('site_name')) }}
     </title>
@@ -43,6 +48,7 @@
 	  {{ submit(_('Send')) }}
 	</div>
       </form>
+      {{ insert_code_dialog() }}
       <ul>
 	{% for message in message_list %}
 	  <li class="subpost" id="p{{ message.post.id }}">
