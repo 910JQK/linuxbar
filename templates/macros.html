@@ -233,13 +233,37 @@
   <div id="insert_code_dialog_wrapper" class="dialog_wrapper" style="display: none;">
     <div id="insert_code_dialog" class="dialog">
       <h2>{{ _('Insert Code') }}</h2>
-      <textarea id="insert_code_textarea"></textarea>
+      <textarea id="insert_code_textarea" aria-label="code" placeholder="Input Code Here"></textarea>
       <div class="box_center">
-	<input id="insert_code_lang_input" type="text" placeholder="{{ _('Language') }}" />
+	<input id="insert_code_lang_input" type="text" aria-label="language" placeholder="{{ _('Language') }}" />
       </div>
-      <div class="box_center dialog_btn_wrapper">
+      <div class="dialog_btn_wrapper box_center">
 	<button id="insert_code_ok_btn">{{ _('OK') }}</button>	      
 	<button id="insert_code_cancel_btn">{{ _('Cancel') }}</button>
+      </div>
+    </div>
+  </div>
+{% endmacro %}
+
+{% macro insert_image_dialog() %}
+  <div id="insert_image_dialog_wrapper" class="dialog_wrapper" style="display: none;">
+    <div id="insert_image_dialog" class="dialog">
+      <h2>{{ _('Upload Image') }}</h2>
+      <form id="insert_image_form" method="post" enctype="multipart/form-data">
+	<input id="insert_image_input" type="file" name="image" aria-label="file" autocomplete="off" />
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      </form>
+      <p style="font-size: 75%; color: gray;">
+	{{ _('Only PNG/JPG/GIF are allowed.') }}
+      </p>
+      <div class="box_center" style="font-size: 75%;">
+	<a href="{{ url_for('image.upload') }}" target="_blank">
+	  {{ _('Click here to manage your images') }}
+	</a>
+      </div>
+      <div class="dialog_btn_wrapper box_center">
+	<button id="insert_image_upload_button">Insert</button>
+	<button id="insert_image_cancel_button">Cancel</button>
       </div>
     </div>
   </div>

@@ -8,7 +8,8 @@ from flask import (
     send_file,
     flash,
     abort,
-    url_for
+    url_for,
+    jsonify
 )
 from flask_login import current_user, login_required
 
@@ -65,6 +66,7 @@ def info(sha256part):
 @image.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
+    output_json = bool(request.args.get('json'))
     def sha256f(f):
         hash_sha256 = hashlib.sha256()
         for chunk in iter(lambda: f.read(4096), b''):
@@ -89,7 +91,8 @@ def upload():
             img.seek(0)
             sha256 = sha256f(img)
             img.seek(0)
-            if not find_record(Image, sha256=sha256):
+            exist = find_record(Image, sha256=sha256)
+            if not exist:
                 img.save(get_image_path(sha256, img_type))
                 Image.create(
                     sha256 = sha256,
@@ -98,19 +101,31 @@ def upload():
                     img_type = img_type,
                     date = now()
                 )
-                flash(_('Image uploaded successfully.'), 'ok')
+                if output_json:
+                    return jsonify({'code': 0, 'sha256': sha256})
+                else:
+                    flash(_('Image uploaded successfully.'), 'ok')
             else:
-                flash(_('An identical image already exists.'), 'err')
+                if output_json:
+                    return jsonify({'code': 0, 'sha256': exist.sha256})
+                else:
+                    flash(_('An identical image already exists.'), 'err')
         else:
-            flash(_('Invalid image format.'), 'err')
-    return render_template(
-        'image/upload.html',
-        form = form,
-        img_list = img_list,
-        pn = pn,
-        count = count,
-        total = total
-    )
+            if output_json:
+                return jsonify({'code': 1, 'msg': _('Invalid file format.')})
+            else:
+                flash(_('Invalid image format.'), 'err')
+    if output_json:
+        return jsonify({'code': 2, 'msg': _('No file selected.')})
+    else:
+        return render_template(
+            'image/upload.html',
+            form = form,
+            img_list = img_list,
+            pn = pn,
+            count = count,
+            total = total
+        )
 
 
 @image.route('/remove/<sha256>', methods=['GET', 'POST'])

@@ -256,6 +256,7 @@ code {
 
 .dialog > h2 {
     text-align: center;
+    margin-top: 0px;
 }
 
 .dialog_btn_wrapper > button {
@@ -274,6 +275,11 @@ code {
     width: 7em;
     margin: 0.3em 0em;
     text-align: center;
+}
+
+#insert_image_dialog {
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .message.ok {

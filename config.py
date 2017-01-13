@@ -69,7 +69,7 @@ RICHTEXT_INFO_JSON = '''
 
 
 UPLOAD_FOLDER = 'upload'
-MAX_UPLOAD_SIZE = 5 * 1024 * 1024
+MAX_UPLOAD_SIZE = 7 * 1024 * 1024
 IMAGE_MIME = {'png': 'image/png', 'jpeg': 'image/jpeg', 'gif': 'image/gif'}
 
 

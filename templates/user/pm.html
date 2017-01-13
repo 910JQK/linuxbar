@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import pager, field, submit, avatar, messager, user_toolbar, editor_toolbar, insert_code_dialog %}
+{% from 'macros.html' import pager, field, submit, avatar, messager, user_toolbar, editor_toolbar, insert_code_dialog, insert_image_dialog %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -49,6 +49,7 @@
 	</div>
       </form>
       {{ insert_code_dialog() }}
+      {{ insert_image_dialog() }}
       <ul>
 	{% for message in message_list %}
 	  <li class="subpost" id="p{{ message.post.id }}">

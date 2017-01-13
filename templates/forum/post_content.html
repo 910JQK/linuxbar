@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import field, submit, user_toolbar, messager, ban_tip, editor_toolbar, insert_code_dialog %}
+{% from 'macros.html' import field, submit, user_toolbar, messager, ban_tip, editor_toolbar, insert_code_dialog, insert_image_dialog %}
 {% from 'forum/subpost_list.html' import subpost_list %}
 <html>
   <head>
@@ -63,6 +63,7 @@
       </form>
       {% if is_banned %}{{ ban_tip(current_user) }}{% endif %}
       {{ insert_code_dialog() }}
+      {{ insert_image_dialog() }}
       {% endif %}
     </div>
   </body>
