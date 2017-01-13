@@ -218,7 +218,7 @@ function init_editor_toolbar(toolbar, textarea) {
 	    );
 	else
 	    alert(
-		_('Failed to upload image. Please check if your file is too large and if you are offline.')
+		_('Failed to upload image. Please check if your file is too large or you are offline.')
 	    );
 	toggle_uploading(false);
     }
