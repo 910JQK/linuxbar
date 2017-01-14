@@ -228,5 +228,27 @@ function init_datetime_timer() {
 }
 
 
-window.addEventListener('load', init_datetime_timer);
+function init_tag_selector() {
+    if(tag_selector) {
+	let tags_input = query('select[name="tags"]');
+	for(let I of tags_input.options) {
+	    let option = I;
+	    let checkbox = (
+		tag_selector.querySelector(
+		    printf('input[data-slug="%1"]', option.value)
+		)
+	    );
+	    let event_handler = function() {
+		option.selected = this.checked;
+	    };
+	    checkbox.addEventListener('change', event_handler);
+	    event_handler.call(checkbox);
+	}
+	tags_input.style.display = 'none';
+	tag_selector.style.display = '';
+    }
+}
 
+
+window.addEventListener('load', init_datetime_timer);
+window.addEventListener('load', init_tag_selector);

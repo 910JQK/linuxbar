@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar, ban_tip, moderate_menu, date_span, insert_code_dialog, insert_image_dialog %}
+{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar, ban_tip, moderate_menu, date_span, insert_code_dialog, insert_image_dialog, tag_selector %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -231,6 +231,7 @@
 	    {% endif %}
 	    {{ field(form.content) }}
 	    {{ field(form.tags) }}
+	    {{ tag_selector(tag_list, {}) }}
 	    {{ submit(_('Publish')) }}
 	  </fieldset>
 	</form>	

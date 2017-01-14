@@ -282,6 +282,15 @@ code {
     transform: translate(-50%, -50%);
 }
 
+#tag_selector {
+    padding: 0em;
+    max-width: 30em;
+}
+
+#tag_selector li {
+    display: inline-block;
+}
+
 .message.ok {
     color: hsl(100, 80%, 45%);
 }

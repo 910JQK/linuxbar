@@ -128,7 +128,8 @@ def topic_list(tag_slug):
             condition, pn, count, tag=tag_slug
         )
     form = TopicAddForm()
-    form.tags.choices = [(tag.slug, tag.name) for tag in Tag.select()]
+    tag_list = [tag for tag in Tag.select()]
+    form.tags.choices = [(tag.slug, tag.name) for tag in tag_list]
     if form.validate_on_submit():
         if not current_user.is_authenticated:
             flash(_('Please sign in before publishing a topic.'), 'err')
@@ -170,7 +171,7 @@ def topic_list(tag_slug):
         is_index = is_index,
         distillate_only = distillate_only,
         tag = tag_record,
-        tag_list = Tag.select(),
+        tag_list = tag_list,
         topic_list = topic_list,
         pn = pn,
         count = count,
@@ -262,7 +263,17 @@ def topic_tag_manage(tid):
     topic = find_record(Topic, id=tid)
     if topic and not topic.is_deleted:
         form = TopicTagManageForm()
-        form.tags.choices = [(tag.slug, tag.name) for tag in Tag.select()]
+        tags_all = [tag for tag in Tag.select()]
+        form.tags.choices = [(tag.slug, tag.name) for tag in tags_all]
+        current_tags_slug = {
+            relation.tag.slug: True
+            for relation in (
+                    TagRelation
+                    .select(TagRelation, Tag)
+                    .join(Tag)
+                    .where(TagRelation.topic == topic)
+            )
+        }
         if form.validate_on_submit():
             with db.atomic():
                 for rel in find_record_all(TagRelation, topic=topic):
@@ -273,7 +284,12 @@ def topic_tag_manage(tid):
                     )
             flash(_('Tags changed successfully.'))
             return redirect(url_for('.topic_content', tid=tid))
-        return render_template('forum/topic_tag_manage.html', form=form)
+        return render_template(
+            'forum/topic_tag_manage.html',
+            form=form,
+            tags_all = tags_all,
+            current_tags_slug = current_tags_slug
+        )
     else:
         abort(404)
 

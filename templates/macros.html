@@ -40,6 +40,13 @@
 {% endmacro %}
 
 
+{% macro empty_notice() %}
+  <div class="empty_notice box_center">
+    <span>{{ _('Empty') }}</span>
+  </div>
+{% endmacro %}
+
+
 {% macro ban_tip(user) %}
   {# please check if banned before invoking this macro #}
   <div class="ban_tip">
@@ -70,6 +77,18 @@
       </ul>
     </div>
   {% endwith %}
+{% endmacro %}
+
+
+{% macro tag_selector(tags_all, current_tags_slug) %}
+  <ul id="tag_selector" style="display: none;">
+    {% for tag in tags_all %}
+      <li>
+	<input type="checkbox" data-slug="{{ tag.slug }}" {% if current_tags_slug.get(tag.slug) %}checked="checked"{% endif %} />
+	<span>{{ tag.name }}</span>
+      </li>
+    {% endfor %}
+  </ul>
 {% endmacro %}
 
 
@@ -114,13 +133,6 @@
 	{{ _('Register') }}
       </a>
     {% endif %}
-  </div>
-{% endmacro %}
-
-
-{% macro empty_notice() %}
-  <div class="empty_notice box_center">
-    <span>{{ _('Empty') }}</span>
   </div>
 {% endmacro %}
 

@@ -1,12 +1,17 @@
 {% extends 'form.html' %}
-{% from 'macros.html' import field, submit %}
+{% from 'macros.html' import field, submit, tag_selector %}
 
 {% block title %}{{ _('Change Tags - %(site)s', site=get_config('site_name')) }}{% endblock %}
 {% block body_class %}box_center{% endblock %}
 {% block form_title %}{{ _('Change Tags') }}{% endblock %}
 
+{% block head %}
+  <script type="text/javascript" src="/static/toolkit.js"></script>
+{% endblock %}
+
 {% block form %}
   {{ field(form.tags) }}
+  {{ tag_selector(tags_all, current_tags_slug) }}
 {% endblock %}
 
 
