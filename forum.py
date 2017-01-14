@@ -9,7 +9,7 @@ from flask import (
     url_for
 )
 from flask_login import current_user, login_required
-from peewee import JOIN
+from peewee import prefetch
 
 
 from utils import _
@@ -28,47 +28,57 @@ forum = Blueprint(
 )
 
 
-def get_topics(condition, pn, count, use_tag_condition=False):
-    if not use_tag_condition:
-        total = Topic.select().where(condition).count()
+def get_topics(condition, pn, count, tag=''):
+    # get topics with tags
+    if tag:
+        query_topic = (
+            Topic
+            .select(Topic, User, TagRelation, Tag)
+            .join(User)
+            .switch(Topic)
+            .join(TagRelation)
+            .join(Tag)
+            .where(
+                (Tag.slug == tag)
+                & condition
+            )
+            .order_by(Topic.last_reply_date.desc())
+            .paginate(pn, count)
+        )
     else:
-        total = (
-            TagRelation
-            .select(TagRelation, Tag, Topic)
-            .join(Tag, JOIN.LEFT_OUTER)
-            .switch(TagRelation)
-            .join(Topic)
+        query_topic = (
+            Topic
+            .select(Topic, User)
+            .join(User)
             .where(condition)
+            .order_by(Topic.last_reply_date.desc())
+            .paginate(pn, count)
+        )
+    query_relation = (
+        TagRelation
+        .select(TagRelation, Tag)
+        .join(Tag)
+    )
+    if tag:
+        total = (
+            Topic
+            .select(Topic, TagRelation, Tag)
+            .join(TagRelation)
+            .join(Tag)
+            .where(
+                (Tag.slug == tag)
+                & condition
+            )
             .count()
         )
-    query = (
-        TagRelation
-        .select(TagRelation, Tag, Topic, User)
-        .join(Tag, JOIN.LEFT_OUTER)
-        .switch(TagRelation)
-        .join(Topic)
-        .join(User)
-        .where(condition)
-        .order_by(Topic.last_reply_date.desc())
-        .paginate(pn, count)
-    )
-    def topic_list():
-        last = None
-        taglist = []
-        for relation in query:
-            topic = relation.topic
-            if topic != last:
-                if last is not None:
-                    last.tags = taglist
-                    yield last
-                last = topic
-                taglist = []
-            if relation.tag is not None:
-                taglist.append(relation.tag)
-        if last is not None:
-            last.tags = taglist
-            yield last
-    return (topic_list(), total)
+    else:
+        total = Topic.select().where(condition).count()
+    pf = prefetch(query_topic, query_relation)
+    def get_list():
+        for topic in pf:
+            topic.tags = [relation.tag for relation in topic.tags_prefetch]
+            yield topic
+    return (get_list(), total)
 
 
 @forum.route('/topic/list/<tag_slug>', methods=['GET', 'POST'])
@@ -111,12 +121,11 @@ def topic_list(tag_slug):
         topic_list = get_topic_list()
     else:
         condition = (
-            (Tag.slug == tag_slug)
-            & (Topic.is_deleted == False)
+            (Topic.is_deleted == False)
             & distillate_condition
         )
         topic_list, total = get_topics(
-            condition, pn, count, use_tag_condition=True
+            condition, pn, count, tag=tag_slug
         )
     form = TopicAddForm()
     form.tags.choices = [(tag.slug, tag.name) for tag in Tag.select()]

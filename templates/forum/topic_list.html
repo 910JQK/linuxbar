@@ -193,12 +193,10 @@
 		<a target="_blank" href="{{ url_for('forum.topic_content', tid=topic.id) }}">{{ topic.title }}</a>
 	      </div>
 	      <div class="summary">{{ topic.summary }}</div>
-	      <div class="tag_list{% if not is_index or not topic.tags %} empty{% endif %}">
-		{% if is_index %}
-		  {% for tag in topic.tags %}
-		    <span class="tag" style="background-color: {{ tag.slug | get_color(90, 35) }};"><a href="{{ url_for('forum.topic_list', tag_slug=tag.slug) }}">{{ tag.name }}</a></span>
-		  {% endfor %}
-		{% endif %}
+	      <div class="tag_list{% if not topic.tags %} empty{% endif %}">
+		{% for tag in topic.tags %}
+		  <span class="tag" style="background-color: {{ tag.slug | get_color(90, 35) }};"><a href="{{ url_for('forum.topic_list', tag_slug=tag.slug) }}">{{ tag.name }}</a></span>
+		{% endfor %}
 	      </div>
 	    </div>
 	    <div class="container_right">
