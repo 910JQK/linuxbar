@@ -229,7 +229,7 @@ function init_datetime_timer() {
 
 
 function init_tag_selector() {
-    if(tag_selector) {
+    if(query('#tag_selector')) {
 	let tags_input = query('select[name="tags"]');
 	for(let I of tags_input.options) {
 	    let option = I;

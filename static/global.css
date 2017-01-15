@@ -27,12 +27,18 @@ input[type="checkbox"] + label {
     color: hsl(0, 0%, 15%)
 }
 
+[name="content"] {
+    box-sizing: border-box;
+    padding: 0.2em 0.35em;
+    resize: none;
+    overflow: auto;
+}
+
 #add_post_form {
     width: 35em;
 }
 
 #add_post_form [name="content"] {
-    box-sizing: border-box;
     width: 100%;
     height: 15em;
     margin-bottom: 0.25em;

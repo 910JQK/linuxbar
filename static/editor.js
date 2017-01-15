@@ -260,7 +260,7 @@ function init_editor_toolbar(toolbar, textarea) {
 function init_editor_toolbars() {
     for(let I of query_all('.editor_toolbar')) {
 	let toolbar = I;
-	let textarea = toolbar.nextElementSibling;
+	let textarea = toolbar.nextElementSibling; // note: relative relation
 	init_editor_toolbar(toolbar, textarea);
     }
 }

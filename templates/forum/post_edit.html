@@ -1,14 +1,32 @@
 {% extends 'form.html' %}
-{% from 'macros.html' import field, submit %}
+{% from 'macros.html' import field, submit, editor_toolbar, insert_code_dialog, insert_image_dialog %}
 
 {% block title %}{{ _('Edit Post - %(site)s', site=get_config('site_name')) }}{% endblock %}
 {% block body_class %}box_center{% endblock %}
 {% block form_title %}{{ _('Edit Post') }}{% endblock %}
 
-{% block form %}
-  {{ field(form.content) }}
+{% block style %}
+  [name="content"] { width: 25em; height: 15em; }
+  .editor_toolbar { text-align: left; }
 {% endblock %}
 
+{% block head %}
+  <script type="text/javascript" src="/static/toolkit.js"></script>
+  <script type="text/javascript" src="/static/editor.js"></script>
+  <template id="richtext_info" style="display: none;">
+    {{ RT_INFO }}
+  </template>
+{% endblock %}
+
+{% block container %}
+  {{ insert_code_dialog() }}
+  {{ insert_image_dialog() }}
+{% endblock %}
+
+{% block form %}
+  {{ editor_toolbar() }}
+  {{ field(form.content) }}
+{% endblock %}
 
 {% block buttons %}
   {{ submit(_('Confirm')) }}
