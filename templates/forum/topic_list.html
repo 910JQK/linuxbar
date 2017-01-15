@@ -3,6 +3,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     {% if is_index %}
       {% if not distillate_only %}
 	<title>{{ get_config('site_name') }}</title>
@@ -40,8 +41,15 @@
 	 border-radius: 3px;
 	 background-color: hsl(0, 0%, 97%);
      }
-     .container_middle { padding: 0em 1.2em; width: 35em; }
-     .title { margin-bottom: 0.25em; font-size: 115%; }     
+     .container_middle {
+	 flex-shrink: 1;
+	 padding: 0em 1.2em;
+	 width: 35em;
+     }
+     .title {
+	 margin-bottom: 0.25em;
+	 font-size: 115%;
+     }
      .topic.pinned .title::before {
 	 content: "{{ _('[Pinned]') }}";
 	 color: hsl(0, 75%, 50%);
@@ -65,7 +73,10 @@
      .tag a {
 	 color: white;
      }
-     .container_right { width: 13.5em; }
+     .container_right {
+	 flex-shrink: 0;
+	 width: 13.5em;
+     }
      .container_right .avatar, .container_right .name {
 	 vertical-align: middle;
      }
@@ -76,6 +87,49 @@
 	 overflow: hidden;
 	 text-overflow: ellipsis;
 	 white-space: nowrap;
+     }
+     .empty_notice {
+	 min-width: 45em;
+	 min-height: 20em;
+     }
+     @media only screen and (max-width: 1000px) {
+	 .topic {
+	     display: block;
+	     border-bottom: 1px solid hsl(0, 0%, 30%);
+	 }
+	 .container_left {
+	     display: none;
+	 }
+	 .container_middle {
+	     width: unset;
+	     padding-left: 0em;
+	 }
+	 .container_right {
+	     width: unset;
+	     margin-top: 0.25em;
+	 }
+	 .title {
+	     white-space: unset;
+	 }
+	 .title > a {
+	     display: block;
+	 }
+	 .summary {
+	     white-space: unset;
+	 }
+	 .info_topic {
+	     display: block;
+	 }
+	 .info_topic > .date {
+	     font-size: 85%;
+	     color: hsl(0, 0%, 60%);
+	 }
+	 .info_last_post {
+	     display: none;
+	 }
+	 .empty_notice {
+	     min-width: unset;
+	 }
      }
      #top_left {
 	 display: flex;
@@ -110,10 +164,6 @@
      }
      #add_topic_form [name="content"] {
 	 height: 15em;
-     }
-     .empty_notice {
-	 min-width: 45em;
-	 min-height: 20em;
      }
     </style>
   </head>
