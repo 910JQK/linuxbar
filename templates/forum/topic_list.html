@@ -92,6 +92,40 @@
 	 min-width: 45em;
 	 min-height: 20em;
      }
+     #top_left {
+	 display: flex;
+	 justify-content: space-between;
+     }
+     #top_left .separator {
+	 margin: 0em 0.2em;
+     }
+     .dist_link {
+	 color: gray;
+     }
+     .menu_label {
+	 color: gray;
+	 cursor: pointer;
+     }
+     .menu {
+	 border: 1px solid gray;
+     }
+     .menu_item > a {
+	 color: black;
+     }
+     #add_topic_form {
+	 width: 40em;
+     }
+     #add_topic_form > fieldset > * {
+	 display: block;
+	 margin: 0.2em 0em;
+     }
+     #add_topic_form [name="title"], #add_topic_form [name="content"] {
+	 box-sizing: border-box;
+	 width: 100%;
+     }
+     #add_topic_form [name="content"] {
+	 height: 15em;
+     }
      @media only screen and (max-width: 1000px) {
 	 .topic {
 	     display: block;
@@ -130,40 +164,23 @@
 	 .empty_notice {
 	     min-width: unset;
 	 }
-     }
-     #top_left {
-	 display: flex;
-	 justify-content: space-between;
-     }
-     #top_left .separator {
-	 margin: 0em 0.2em;
-     }
-     .dist_link {
-	 color: gray;
-     }
-     .menu_label {
-	 color: gray;
-	 cursor: pointer;
-     }
-     .menu {
-	 border: 1px solid gray;
-     }
-     .menu_item > a {
-	 color: black;
-     }
-     #add_topic_form {
-	 width: 40em;
-     }
-     #add_topic_form > fieldset > * {
-	 display: block;
-	 margin: 0.2em 0em;
-     }
-     #add_topic_form [name="title"], #add_topic_form [name="content"] {
-	 box-sizing: border-box;
-	 width: 100%;
-     }
-     #add_topic_form [name="content"] {
-	 height: 15em;
+	 #add_topic_form {
+	     width: 100%;
+	 }
+	 #add_topic_form .icon {
+	     font-size: 150%;
+	 }
+	 #add_topic_form input[type="text"], #add_topic_form textarea {
+	     font-size: 140%;
+	 }
+	 #add_topic_form input[type="submit"] {
+	     padding: 0.3em 0em;
+	     width: 100%;
+	 }
+	 #tag_selector {
+	     font-size: 115%;
+	     padding-bottom: 1em;
+	 }
      }
     </style>
   </head>

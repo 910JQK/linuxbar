@@ -308,10 +308,18 @@ code {
 #tag_selector {
     padding: 0em;
     max-width: 30em;
+    cursor: default;    
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout:none; 
 }
 
 #tag_selector li {
-    display: inline-block;
+    display: inline-block;    
+}
+
+#tag_selector span {
+    cursor: default;
 }
 
 .message.ok {

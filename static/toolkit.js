@@ -243,6 +243,14 @@ function init_tag_selector() {
 	    };
 	    checkbox.addEventListener('change', event_handler);
 	    event_handler.call(checkbox);
+	    checkbox.parentElement.addEventListener('click', function(ev) {
+		if(ev.target != checkbox)
+		    checkbox.checked = !checkbox.checked;
+	    });
+	    checkbox.nextElementSibling.unselectable = 'on';
+	    checkbox.nextElementSibling.onselectstart = (function() {
+		return false;
+	    });
 	}
 	tags_input.style.display = 'none';
 	tag_selector.style.display = '';

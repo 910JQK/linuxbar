@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="/static/global.css" />
     <style>
@@ -17,6 +18,18 @@
      input[name="captcha"] + .field_desc { text-align: center; }
      input[name="captcha"] { width: 5em; text-align: center }
      .captcha_image { cursor: pointer; }
+     @media only screen and (max-width: 1000px) {
+	 input, button {
+	     font-size: 125%;
+	 }
+	 input[type="text"], input[type="password"], textarea, select {
+	     width: 100%;
+	 }
+	 #container-buttons > button, #container-buttons > input[type="submit"] {
+	     padding: 0.3em 0em;
+	     width: 100%;
+	 }
+     }
     </style>
     <style>
      {% block style %}
