@@ -10,7 +10,7 @@
       <div class="subpost_right_container">
 	<div class="subpost_body">
 	  {% if not subpost.is_sys_msg %}
-	    <span class="subpost_author_name">{{ subpost.author.name }}</span>
+	    <a href="{{ url_for('user.profile', uid=subpost.author.id) }}" class="subpost_author_name">{{ subpost.author.name }}</a>
 	  {% endif %}
 	  <span class="subpost_content content">{{ subpost.content | get_html | safe }}</span>
 	</div>

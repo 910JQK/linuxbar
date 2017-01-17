@@ -3,6 +3,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />    
     <link rel="stylesheet" href="/static/global.css" />
     <link rel="stylesheet" href="/static/subpost.css" />
     <link rel="stylesheet" href="/static/highlight.css" />
@@ -29,6 +30,17 @@
      #add_post_form [name="content"] {
 	 width: 70%;
 	 height: 10em;
+     }
+     .content_image {
+	 max-width: 100%;
+     }
+     @media only screen and (max-width: 1000px) {
+	 #container {
+	     width: unset;
+	 }
+	 #add_post_form [name="content"] {
+	     width: 100%;
+	 }
      }
     </style>
   </head>

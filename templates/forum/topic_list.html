@@ -50,12 +50,12 @@
 	 margin-bottom: 0.25em;
 	 font-size: 115%;
      }
-     .topic.pinned .title::before {
+     .topic.pinned .title > a::before {
 	 content: "{{ _('[Pinned]') }}";
 	 color: hsl(0, 75%, 50%);
 	 margin-right: 0.25em;
      }
-     .topic.distillate:not(.pinned) .title::before {
+     .topic.distillate:not(.pinned) .title > a::before {
 	 content: "{{ _('[Dist]') }}";
 	 color: hsl(0, 75%, 50%);
 	 margin-right: 0.25em;

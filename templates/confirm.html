@@ -3,10 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <title>{{ _('Confirm Operation - %(site)s', site=get_config('site_name')) }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="/static/global.css" />
     <style>
       .btn_wrapper { display: flex; justify-content: space-around; }
       .message_text { font-size: 115%; }
+      @media only screen and (max-width: 1000px) {
+	  .message_text { font-size: 150%; text-align: center; }
+	  .btn_wrapper { justify-content: space-around; width: 100%; }
+	  .btn_wrapper > * {
+	      font-size: 135%;
+	      width: 40%;
+	  }
+	  .btn_wrapper button {
+	      width: 100%;
+	      padding: 0.3em 0em;
+	  }
+      }
     </style>
   </head>
   <body class="box_center">

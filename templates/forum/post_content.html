@@ -4,6 +4,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="/static/global.css" />
     <link rel="stylesheet" href="/static/subpost.css" />
     <link rel="stylesheet" href="/static/highlight.css" />
@@ -20,10 +21,32 @@
      .icon {
 	 width: 0.6em;
 	 height: 0.6em;
-     }     
+     }
      .list {
 	 padding: 0em;
 	 list-style-type: none;
+     }
+     .content_image {
+	 max-width: 100%;
+     }
+     @media only screen and (max-width: 1000px) {
+	 #container {
+	     width: unset;
+	 }
+	 #add_post_form {
+	     width: 100%;
+	 }
+	 #add_post_form .icon {
+	     font-size: 150%;	     
+	 }
+	 #add_post_form textarea {
+	     font-size: 140%;
+	     margin: 0.2em 0em;
+	 }
+	 #add_post_form input[type="submit"] {
+	     padding: 0.3em 0em;
+	     width: 100%;
+	 }
      }
     </style>
   </head>

@@ -209,8 +209,12 @@ function update_date() {
  */
 function init_unread_info_timer() {
     timer.addEventListener('message', function(ev) {
-	if(ev.data == 'update_unread_info')
-	    update_unread_info();
+	if(ev.data == 'update_unread_info') {
+	    if(!document.hidden) {
+		// only check when the page is foreground
+		update_unread_info();
+	    }
+	}
     });
 }
 

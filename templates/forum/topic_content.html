@@ -4,6 +4,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ topic.title ~ ' - ' ~ get_config('site_name') }}</title>
     <link rel="stylesheet" href="/static/global.css" />
     <link rel="stylesheet" href="/static/subpost.css" />
@@ -17,13 +18,14 @@
      ol { list-style-type: none; padding: 0; }
      h1 { font-size: 1.5em; }
      header + hr { margin-bottom: 0; }
-     #post_list { margin-top: 0; }
+     #post_list { margin-top: 0; position: relative; }
      .float_right_box { display: flex; justify-content: flex-end; }
      .content_image {
 	 max-width: 100%;
      }
      .post {
 	 display: flex;
+	 position: relative;
 	 width: 55em;
 	 word-wrap: break-word;
 	 border-bottom: 1px solid hsl(0, 0%, 75%);
@@ -40,13 +42,12 @@
 	 /*	 background-color: hsl(0, 0%, 97%);*/
 	 border-right: 1px solid hsl(0, 0%, 93%);
      }
-     .container_left > :first-child {
+     .container_left > .avatar {
 	 margin-top: 1.5em;
 	 margin-bottom: 0.2em;
      }
      .user_info_link { color: black; }
      .container_right {
-	 position: relative;
 	 flex-grow: 1;
 	 padding: 1.85em 1.5em 0.55em 1.5em;
 	 min-width: 0;
@@ -141,6 +142,45 @@
      #add_post_form {
 	 width: 45em;
      }
+     @media only screen and (max-width: 1000px) {
+	 #add_post_form {
+	     width: 100%;
+	 }
+	 #add_post_form .icon {
+	     font-size: 150%;	     
+	 }
+	 #add_post_form textarea {
+	     font-size: 140%;
+	     margin: 0.2em 0em;
+	 }
+	 #add_post_form input[type="submit"] {
+	     padding: 0.3em 0em;
+	     width: 100%;
+	 }
+	 .post {
+	     display: block;
+	     width: 100%;
+	 }
+	 .container_left {
+	     display: block;
+	     box-sizing: border-box;
+	     width: 100%;
+	     padding: 0.3em 0.5em;
+	     border-right: none;
+	 }
+	 .container_left .avatar {
+	     width: 2em;
+	     height: 2em;
+	     margin: 0em;
+	     vertical-align: middle;
+	 }
+	 .post_footer .icon {
+	     font-size: 135%;
+	 }
+	 .subpost_footer .btn:not(.subpost_reply_btn) {
+	     display: none;
+	 }
+     }
     </style>
   </head>
   <body class="box_horizontal_center">
@@ -164,21 +204,16 @@
 	      </a>
 	    </div>
 	    <div class="container_right">
-	      {% if loop.index0 == 0 and current_user.is_authenticated and current_user.level > 0 %}
-		<div class="menu_wrapper" id="topic_manage_menu_wrapper">
-		  <span class="menu_label" id="topic_manage_btn">
-		    {{ _('Manage') }}
-		  </span>
-		  {{ topic_manage_menu(topic, current_user) }}
-		</div>
-	      {% endif %}
 	      <div class="post_body content">{{ post.content | get_html | safe }}</div>
 	      <div class="post_footer float_right_box" id="f{{ post.id }}">
 		<div class="info post_info">
 		  {% if current_user.level and current_user.level > 0 %}
-		    <a href="{{ url_for('.post_remove', pid=post.id, prev=request.url) }}">
-		      <img class="icon btn post_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" />
-		    </a>
+		    {% if post.ordinal != 1 %}
+		      {# avoid to be thought as topic delete button #}
+		      <a href="{{ url_for('.post_remove', pid=post.id, prev=request.url) }}">		      
+			<img class="icon btn post_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" />
+		      </a>
+		    {% endif %}
 		    <a href="{{ url_for('user.ban', uid=post.author.id) }}" target="_blank">
 		      <img class="icon btn post_ban_icon" src="/static/icons/ban.svg" aria-label="ban" alt="ban" title="{{ _('ban this user') }}" />
 		    </a>
@@ -215,6 +250,14 @@
 	    </div>
 	  </li>
 	{% endfor %}
+	{% if current_user.is_authenticated and current_user.level > 0 %}
+	  <div class="menu_wrapper" id="topic_manage_menu_wrapper">
+	    <span class="menu_label" id="topic_manage_btn">
+	      {{ _('Manage') }}
+	    </span>
+	    {{ topic_manage_menu(topic, current_user) }}
+	  </div>
+	{% endif %}	    
       </ol>
       {{ pager(pn, count, total) }}
       {% if current_user.is_authenticated %}

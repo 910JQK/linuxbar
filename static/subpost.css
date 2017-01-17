@@ -23,6 +23,7 @@
 
 .subpost_author_name {
     vertical-align: top;
+    color: black;
 }
 
 .subpost_author_name::after {
@@ -46,4 +47,17 @@
 .subpost_footer {
     display: flex;
     justify-content: space-between;
+}
+
+
+.subpost_footer .icon {
+    width: 0.75em;
+    height: 0.75em;
+}
+
+
+@media only screen and (max-width: 1000px) {
+    .subpost_footer .icon {
+	font-size: 135%;
+    }
 }
