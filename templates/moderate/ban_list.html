@@ -3,6 +3,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ _('Ban List - %(site)s', site=get_config('site_name')) }}</title>
     <link rel="stylesheet" href="/static/global.css" />
     <style>
@@ -10,6 +11,17 @@
       .empty_notice { min-width: 30em; min-height: 20em; }
       td { text-align: left; }
       td, th { padding: 0.1em 0.5em; }
+      @media only screen and (max-width: 1000px) {
+	  .empty_notice {
+	      min-width: unset;
+	      width: 100%;
+	  }
+	  .table_wrapper {
+	      max-width: 100%;
+	      overflow-x: auto;
+	      display: block;
+	  }
+      }
     </style>
   </head>
   <body class="box_horizontal_center">

@@ -234,6 +234,8 @@ function init_datetime_timer() {
 
 function init_tag_selector() {
     if(query('#tag_selector')) {
+	let fieldset = query('#add_topic_form > fieldset');
+	let banned = fieldset && fieldset.disabled;
 	let tags_input = query('select[name="tags"]');
 	for(let I of tags_input.options) {
 	    let option = I;
@@ -247,10 +249,14 @@ function init_tag_selector() {
 	    };
 	    checkbox.addEventListener('change', event_handler);
 	    event_handler.call(checkbox);
-	    checkbox.parentElement.addEventListener('click', function(ev) {
-		if(ev.target != checkbox)
-		    checkbox.checked = !checkbox.checked;
-	    });
+	    if(!banned) {
+		checkbox.parentElement.addEventListener('click', function(ev) {
+		    if(ev.target != checkbox)
+			checkbox.checked = !checkbox.checked;
+		});
+	    } else {
+		checkbox.parentElement.style.color = 'gray';
+	    }
 	    checkbox.nextElementSibling.unselectable = 'on';
 	    checkbox.nextElementSibling.onselectstart = (function() {
 		return false;

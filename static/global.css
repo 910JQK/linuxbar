@@ -14,6 +14,16 @@ a {
 
 fieldset { border: none; padding: 0; margin: 0; }
 
+textarea {
+    resize: none;
+    overflow: auto;
+}
+
+textarea[name="content"] {
+    margin: 0.2em 0em;
+    height: 15em;
+}
+
 input[type="text"], input[type="password"], textarea {
     box-sizing: border-box;
     width: 21.55em;
@@ -30,7 +40,6 @@ input[type="checkbox"] + label {
 [name="content"] {
     box-sizing: border-box;
     padding: 0.2em 0.35em;
-    resize: none;
     overflow: auto;
 }
 
@@ -40,7 +49,6 @@ input[type="checkbox"] + label {
 
 #add_post_form [name="content"] {
     width: 100%;
-    height: 15em;
     margin-bottom: 0.25em;
 }
 
@@ -143,21 +151,6 @@ body.box_horizontal_center {
 
 #container > #top_right *, #container > #top_left * {
     vertical-align: middle;
-}
-
-@media only screen and (max-width: 1000px) {
-    body.box_center, body.box_horizontal_center {
-	display: unset;
-    }
-    #container {
-	overflow: hidden;
-	margin: 0em auto;
-	padding: 2.5em 0.4em;
-	min-height: 100vh;
-    }
-    .box_horizontal_center > #container {
-	margin: 0em auto;
-    }
 }
 
 .user_toolbar .name a {
@@ -364,4 +357,32 @@ code {
     margin: 0em;
     padding: 0em;
     list-style-type: none;
+}
+
+@media only screen and (max-width: 1000px) {
+    body.box_center, body.box_horizontal_center {
+	display: unset;
+    }
+    #container {
+	overflow: hidden;
+	margin: 0em auto;
+	padding: 2.5em 0.4em;
+	min-height: 100vh;
+    }
+    .box_horizontal_center > #container {
+	margin: 0em auto;
+    }
+    textarea[name="content"] {
+	height: 9em;
+    }
+    .editor_toolbar .icon {
+	font-size: 150%;
+    }
+    #add_topic_form [name="content"], #add_post_form [name="content"] {
+	font-size: 140%;
+    }
+    #add_topic_form [type="submit"], #add_post_form [type="submit"] {
+	padding: 0.3em 0em;
+	width: 100%;
+    }
 }
