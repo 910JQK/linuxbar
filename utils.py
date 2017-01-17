@@ -2,6 +2,7 @@ import random
 import hashlib
 import datetime
 import threading
+from math import log
 from html import escape
 from urllib.parse import quote
 
@@ -74,16 +75,8 @@ def path_get_level(path):
 
 
 def path_get_padding(level):
-    x = level-1
-    if x == -1:
-        return 0
-    elif x <= 5:
-        # current = 1 - 0.1*x (x >= 0)
-        return (x+1)*(2-x/10)/2
-    elif x > 5 and x < 28:
-        return 4.5 + 0.25*(x-5)
-    else:
-        return 10
+    # f(0) = 0, f(4) = 0.8 + 2.2 = 3
+    return 0.8 + (2.2/log(1+4))*log(1+level)
 
 
 def get_color(string, saturation, lightness):

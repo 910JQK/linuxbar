@@ -233,7 +233,7 @@
 	      {# `subpost count` is the total count of its *direct* subposts #}
 	      <div class="post_subpost_list{% if subpost_count == 0 %} empty{% endif %}">
 		<ol class="subpost_list">
-		  {{ subpost_list(gen_subpost_list(post), current_user) }}
+		  {{ subpost_list(gen_subpost_list(post), current_user, base_level=1) }}
 		</ol>
 		<div class="subpost_list_footer">
 		  {% if cut %}
