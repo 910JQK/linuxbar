@@ -25,6 +25,9 @@ from models import (
 )
 
 
+NOTIFICATION_TYPES = ['reply', 'at', 'sys', 'pm']
+
+
 user = Blueprint(
     'user', __name__, template_folder='templates', static_folder='static'
 )
@@ -278,6 +281,7 @@ def ban(uid):
                 ok = True
                 create_system_message(
                     (
+                        # TODO: ngettext
                         _('You have been banned by moderator {0} for {1} days.')
                         .format(current_user.name, form.days.data)
                     ),
@@ -320,7 +324,7 @@ def logout():
 @user.route('/notifications/<n_type>')
 @login_required
 def notifications(n_type):
-    if n_type not in ['reply', 'at', 'sys', 'pm']:
+    if n_type not in NOTIFICATION_TYPES:
         abort(404)
     unread_field_name = 'unread_%s' % n_type
     user = find_record(User, id=current_user.id)
@@ -330,6 +334,9 @@ def notifications(n_type):
         .where(User.id == user.id)
     ).execute()
     setattr(current_user, unread_field_name, 0)
+    unread = {
+        t: getattr(current_user, 'unread_%s' % t) for t in NOTIFICATION_TYPES
+    }
     pn = int(request.args.get('pn', '1'))
     count = int(Config.Get('count_item'))
     if n_type != 'sys' and n_type != 'pm':
@@ -370,6 +377,7 @@ def notifications(n_type):
     return render_template(
         'user/notification.html',
         n_type = n_type,
+        unread = unread,
         pn = pn,
         count = count,
         total = total,
@@ -424,6 +432,6 @@ def pm(uid):
 @user.route('/unread-info')
 @login_required
 def unread_info():
-    items = ['reply', 'at', 'pm', 'sys']
+    items = NOTIFICATION_TYPES
     user = find_record(User, id=current_user.id)
     return jsonify(**{item: getattr(user, 'unread_'+item) for item in items})

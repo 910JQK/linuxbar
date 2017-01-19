@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import pager, user_toolbar, messager, empty_notice %}
+{% from 'macros.html' import pager, user_toolbar, messager, empty_notice, date_span %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -93,7 +93,6 @@
   <body class="box_horizontal_center">
     <div id="container">
       {{ messager() }}
-      {{ user_toolbar(current_user) }}
       <nav>
 	<ul id="nav_list">
 	  {% for type in ['reply', 'at', 'sys', 'pm'] %}
@@ -101,8 +100,8 @@
 	    {% if n_type == type %}
 	      <span>{{ link_text[type] }}</span>
 	    {% else %}
-	      <a href="{{ url_for('.notifications', n_type=type) }}">
-		{{ link_text[type] }}
+	      <a href="{{ url_for('.notifications', n_type=type) }}" {% if unread[type] > 0 %}class="link_highlight"{% endif %}>
+		{{ _('%(name)s (%(unread)d)', name=link_text[type], unread=unread[type]) }}
 	      </a>
 	    {% endif %}
 	  </li>
@@ -123,7 +122,7 @@
 		<span class="user_label sys_msg_label">{{ _('[System]') }}</span>
 	      {% endif %}
 		<div class="content_wrapper">
-		  <a class="content" target="_blank" href="{% if n_type != 'pm' %}{{ url_for('forum.post', pid=message.post.id) }}{% else %}{{ url_for('.pm', uid=message.caller.id) }}{% endif %}">
+		  <a class="content" target="_blank" href="{% if n_type == 'pm' %}{{ url_for('.pm', uid=message.caller.id) }}{% elif n_type == 'at' and message.post.ordinal == 1 and not message.post.parent %}{{ url_for('forum.topic_content', tid=message.post.topic.id) }}{% else %}{{ url_for('forum.post', pid=message.post.id) }}{% endif %}">
 		    {{ message.post.content | truncate(60) }}
 		  </a>
 		</div>
@@ -139,9 +138,7 @@
 		  {% if message.post.last_edit_date %}
 		    <span class="edited_mark" title="{{ message.post.last_edit_date | date }}">{{ _('[Edited]') }}</span>
 		  {% endif %}
-		  <span class="date">
-		    {{ message.post.date | date }}
-		  </span>
+		  {{ date_span(message.post.date) }}
 		</div>
 	      </div>
 	    </li>

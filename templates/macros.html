@@ -95,6 +95,7 @@
 {% macro user_toolbar(user) %}
   <div class="user_toolbar" id="top_right">
     {% if user.is_authenticated %}
+      {% set unread_total = user.unread_reply + user.unread_at + user.unread_sys + user.unread_pm %}
       {{ avatar(user.mail) }}
       <span class="name">
 	<a href="{{ url_for('user.profile', uid=user.id) }}" target="_blank">
@@ -102,20 +103,24 @@
 	</a>
       </span>
       <span class="separator">|</span>
-      <a id="link_notify_reply" href="{{ url_for('user.notifications', n_type='reply') }}" target="_blank" data-content="{{ _('Reply') }}">
+      <a id="link_notify_reply" href="{{ url_for('user.notifications', n_type='reply') }}" target="_blank" data-content="{{ _('Reply') }}" class="link_notify{% if user.unread_reply > 0 %} link_highlight{% endif %}">
 	{{ _('Reply(%(n)d)', n=user.unread_reply) }}
       </a>
       <span class="separator">|</span>
-      <a id="link_notify_at" href="{{ url_for('user.notifications', n_type='at') }}" target="_blank" data-content="{{ _('At') }}">
+      <a id="link_notify_at" href="{{ url_for('user.notifications', n_type='at') }}" target="_blank" data-content="{{ _('At') }}" class="link_notify{% if user.unread_at > 0 %} link_highlight{% endif %}">
 	{{ _('At(%(n)d)', n=user.unread_at) }}
       </a>
       <span class="separator">|</span>
-      <a id="link_notify_sys" href="{{ url_for('user.notifications', n_type='sys') }}" target="_blank" data-content="{{ _('Sys') }}">
+      <a id="link_notify_sys" href="{{ url_for('user.notifications', n_type='sys') }}" target="_blank" data-content="{{ _('Sys') }}" class="link_notify{% if user.unread_sys > 0 %} link_highlight{% endif %}">
 	{{ _('Sys(%(n)d)', n=user.unread_sys) }}
       </a>
       <span class="separator">|</span>
-      <a id="link_notify_pm" href="{{ url_for('user.notifications', n_type='pm') }}" target="_blank" data-content="{{ _('PM') }}">
+      <a id="link_notify_pm" href="{{ url_for('user.notifications', n_type='pm') }}" target="_blank" data-content="{{ _('PM') }}" class="link_notify{% if user.unread_pm %} link_highlight{% endif %}">
 	{{ _('PM(%(n)d)', n=user.unread_pm) }}
+      </a>
+      <span class="separator">|</span>
+      <a id="link_notify_all" href="{{ url_for('user.notifications', n_type='reply') }}" class="link_notify{% if unread_total %} link_highlight{% endif %}">
+	{{ _('Message(%(n)d)', n=unread_total) }}
       </a>
       <span class="separator">|</span>
       <a class="link_logout" href="{{ url_for('user.logout', next=request.url) }}">

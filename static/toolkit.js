@@ -173,13 +173,25 @@ function update_unread_info() {
 	'/user/unread-info',
 	{},
 	function(xhr) {
+	    function try_to_highlight(link, n) {
+		if(n > 0 && !link.classList.contains('link_highlight'))
+		    link.classList.add('link_highlight');
+		else if(n == 0 && link.classList.contains('link_highlight'))
+		    link.classList.remove('link_highlight');
+	    }
 	    var result = JSON.parse(xhr.responseText);
+	    var total = 0;
 	    for(let item of Object.keys(result)) {
 		let link = query(printf('#link_notify_%1', item));
+		let n = result[item];
 		link.textContent = (
-		    printf('%1(%2)', link.dataset.content, result[item])
+		    printf('%1(%2)', link.dataset.content, n)
 		);
+		try_to_highlight(link, n);
+		total += n;
 	    }
+	    link_notify_all.textContent = printf('Message(%1)', total);
+	    try_to_highlight(link_notify_all, total);
 	},
 	function(status, text) {
 	    console.error(

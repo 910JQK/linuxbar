@@ -157,9 +157,18 @@ body.box_horizontal_center {
     color: black;
 }
 
+.user_toolbar #link_notify_all,
+.user_toolbar #link_notify_all + .separator {
+    display: none;
+}
+
 span.separator {
     color: hsl(0, 0%, 60%);
     margin: 0em 0.1em;
+}
+
+.link_highlight {
+    color: hsl(0, 85%, 55%);
 }
 
 .content del {
@@ -384,5 +393,14 @@ code {
     #add_topic_form [type="submit"], #add_post_form [type="submit"] {
 	padding: 0.3em 0em;
 	width: 100%;
+    }
+    .user_toolbar .link_notify:not(#link_notify_all),
+    .user_toolbar .link_notify:not(#link_notify_all) + .separator
+    {
+	display: none;
+    }
+    .user_toolbar #link_notify_all,
+    .user_toolbar #link_notify_all + .separator {
+	display: unset;
     }
 }
