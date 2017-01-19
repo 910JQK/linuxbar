@@ -98,6 +98,15 @@ button:disabled, input[type="submit"]:disabled {
     vertical-align: middle;
 }
 
+.label_icon {
+    width: 0.75em;
+    height: 0.75em;
+}
+
+.label_icon + span {
+    color: black;
+}
+
 body.box_center {
     margin: 0px;
     width: 100vw;
@@ -402,5 +411,12 @@ code {
     .user_toolbar #link_notify_all,
     .user_toolbar #link_notify_all + .separator {
 	display: unset;
+    }
+    .label_icon {
+	width: 1em;
+	height: 1em;
+    }
+    .label_icon + span {
+	display: none;
     }
 }

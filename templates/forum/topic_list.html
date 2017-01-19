@@ -187,7 +187,7 @@
 	    <div id="tag_menu" class="menu">
 	      <div class="menu_item">
 		<a href="{% if not distillate_only %}{{ url_for('index') }}{% else %}{{ url_for('index', dist='dist') }}{% endif %}">
-		  {{ _('Home') }}
+		  {{ _('All') }}
 		</a>
 	      </div>
 	      {% for tag in tag_list %}

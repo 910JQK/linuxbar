@@ -140,7 +140,7 @@
 	 color: gray;
      }
      #add_post_form {
-	 width: 45em;
+	 width: 35em;
      }
      @media only screen and (max-width: 1000px) {
 	 #add_post_form {
@@ -187,7 +187,10 @@
       {{ messager() }}
       {{ user_toolbar(current_user) }}
       <div id="top_left">
-	<a href="{{ url_for('index') }}">{{ _('Home') }}</a>
+	<a href="{{ url_for('index') }}">
+	  <img class="label_icon" src="/static/icons/home.svg" />
+	  <span>{{ _('Home') }}</span>
+	</a>
       </div>
       <header>
 	<h1>{{ topic.title }}</h1>

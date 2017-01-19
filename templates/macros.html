@@ -71,7 +71,9 @@
       <ul class="message_list">
 	{% if messages %}
 	  {% for category, message in messages %}
-	    <li class="message{% if category != 'ok' %} {{ category }}{% endif %}">{{ message }}</li>
+	    {% if loop.index0 == 0 %}
+	      <li class="message{% if category != 'ok' %} {{ category }}{% endif %}">{{ message }}</li>
+	    {% endif %}
 	  {% endfor %}
 	{% endif %}
       </ul>

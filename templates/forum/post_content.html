@@ -47,13 +47,15 @@
       {{ messager() }}
       <div id="top_left">
 	{% if not post.is_sys_msg %}	
-	  <a href={{ url_for('.topic_content', tid=post.topic.id) }}>
-	    {{ _('Topic') }}
+	  <a href={{ url_for('.topic_content', tid=post.topic.id) }} title="{{ _('Go back to the topic') }}">
+	    <img class="label_icon" src="/static/icons/list.svg" />
+	    <span>{{ _('Topic') }}</span>
 	  </a>	    
 	  {% if post.parent %}
 	    <span class="separator">|</span>
-	    <a href="{{ url_for('.post', pid=post.parent.id) }}">
-	      {{ _('Upper') }}
+	    <a href="{{ url_for('.post', pid=post.parent.id) }}" title="{{ _('Go back to the post of the upper layer') }}">
+	      <img class="label_icon" src="/static/icons/arrow-thick-top-modified.svg" />
+	      <span>{{ _('Upper') }}</span>
 	    </a>
 	  {% endif %}
 	{% endif %}
