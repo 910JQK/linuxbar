@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8">
+  <!-- fix alignment problem  -->
+  <g transform="matrix(1,0,0,0.8,0,0.25)">
+    <path d="M2.97 0l-2.97 3h2v5h2v-5h2l-3.03-3z" transform="translate(1)" />
+  </g>
+</svg>
