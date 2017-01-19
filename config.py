@@ -16,6 +16,7 @@ DEFAULT_CONFIG = {
 
 DEBUG = True
 SECRET_KEY = b'\xe9\xd3\x8fV0n\xcajX~P%*\xf1=O\xb7\xbc\xfa\xe5\xf5db'
+INACTIVE_USER_LIFETIME = 30 # minutes
 TOKEN_LIFETIME = 20 # minutes
 SUMMARY_LENGTH = 60 # in [4, 128] (128 = Topic.summary.max_length / 4)
 BAN_DAYS = [1, 3, 10, 30, 100]

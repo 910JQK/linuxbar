@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 
 from utils import *
-from config import DEFAULT_CONFIG, TOKEN_LIFETIME
+from config import DEFAULT_CONFIG, TOKEN_LIFETIME, INACTIVE_USER_LIFETIME
 
 
 # use sqlite temporarily
@@ -60,6 +60,33 @@ class User(UserMixin, BaseModel):
     @property
     def is_banned(self):
         return (self.banned and self.banned[0].is_valid)
+    @classmethod
+    def check_conflict(User, mail, name):
+        conflict_query = User.select().where(
+            (User.mail == mail) | (User.name == name)
+        )
+        if conflict_query:
+            conflict = conflict_query.get()
+            if (
+                    not conflict.is_active
+                    and (
+                        (now() - conflict.date_register)
+                        > datetime.timedelta(
+                            minutes=INACTIVE_USER_LIFETIME
+                        )
+                    )
+            ):
+                (
+                    PasswordResetToken.delete().where(
+                        PasswordResetToken.user == conflict
+                    )
+                ).execute()
+                conflict.profile[0].delete_instance()
+                conflict.delete_instance()
+                conflict = None
+        else:
+            conflict = None
+        return conflict
 
 
 class Profile(BaseModel):

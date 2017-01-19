@@ -100,10 +100,7 @@ def register():
     signed_up = False
     if form.validate_on_submit():
         if session.get('captcha') == form.captcha.data:
-            conflict = User.select().where(
-                User.mail == form.mail.data
-                | User.name == form.name.data
-            )
+            conflict = User.check_conflict(form.mail.data, form.name.data)
             if not conflict:
                 user = User(
                     mail = form.mail.data,
@@ -125,6 +122,7 @@ def register():
                     flash(_('Name already in use.'), 'err')
         else:
             flash(_('Wrong captcha.'), 'err')
+            session['captcha'] = None
     return render_template('user/register.html', form=form, signed_up=signed_up)
 
 
@@ -149,7 +147,7 @@ def activate(uid, token):
 def login():
     if current_user.is_authenticated:
         flash(_('You have already signed in.'))
-        return redirect('index')
+        return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
         query = User.select().where(
