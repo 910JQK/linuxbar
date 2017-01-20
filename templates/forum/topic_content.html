@@ -15,17 +15,35 @@
       {{ RT_INFO }}
     </template>
     <style>
-     ol { list-style-type: none; padding: 0; }
-     h1 { font-size: 1.5em; }
-     header + hr { margin-bottom: 0; }
-     #post_list { margin-top: 0; position: relative; }
-     .float_right_box { display: flex; justify-content: flex-end; }
+     ol {
+	 list-style-type: none;
+	 padding: 0;
+     }
+     h1 {
+	 font-size: 1.5em;
+     }
+     header + hr {
+	 margin-bottom: 0;
+     }
+     #top_left {
+	 display: flex;
+	 justify-content: space-between;
+     }
+     #top_left .separator {
+	 margin: 0em 0.2em;
+     }
+     #post_list {
+	 margin-top: 0;
+     }
+     .float_right_box {
+	 display: flex;
+	 justify-content: flex-end;
+     }
      .content_image {
 	 max-width: 100%;
      }
      .post {
 	 display: flex;
-	 position: relative;
 	 width: 55em;
 	 word-wrap: break-word;
 	 border-bottom: 1px solid hsl(0, 0%, 75%);
@@ -52,23 +70,6 @@
 	 padding: 1.85em 1.5em 0.55em 1.5em;
 	 min-width: 0;
      }
-     #topic_manage_menu_wrapper {
-	 position: absolute;
-	 top: 0em;
-	 right: 2em;
-     }
-     #topic_manage_btn {
-	 box-sizing: border-box;
-	 padding: 0em 0.2em 0.1em 0.2em;
-	 background-color: hsl(0, 0%, 93%);
-	 background-image: linear-gradient(to bottom, hsl(0, 0%, 98%), hsl(0, 0%, 90%));
-	 border: 2px solid hsl(0, 0%, 60%);
-	 border-top: none;
-	 border-bottom-left-radius: 3px;
-	 border-bottom-right-radius: 3px;
-	 cursor: pointer;
-     }
-     #topic_manage_menu { position: initial; }
      .post_body { min-height: 16em; white-space: pre-wrap; }
      .post_footer .icon { vertical-align: middle;  }
      .post_subpost_list {
@@ -187,10 +188,22 @@
       {{ messager() }}
       {{ user_toolbar(current_user) }}
       <div id="top_left">
-	<a href="{{ url_for('index') }}">
+	<a href="{{ url_for('index') }}" title="{{ _('Go back to the homepage') }}">
 	  <img class="label_icon" src="/static/icons/home.svg" />
 	  <span>{{ _('Home') }}</span>
 	</a>
+	{% if current_user.is_authenticated and current_user.level > 0 %}
+	  <span class="separator">|</span>
+	  <span>
+	    <div class="menu_wrapper" id="topic_manage_menu_wrapper">
+	      <span class="menu_label">
+		<img class="label_icon" src="/static/icons/wrench.svg" />
+		<span>{{ _('Manage') }}</span>
+	      </span>
+	      {{ topic_manage_menu(topic, current_user) }}
+	    </div>
+	  </span>
+	{% endif %}
       </div>
       <header>
 	<h1>{{ topic.title }}</h1>
@@ -252,14 +265,6 @@
 	    </div>
 	  </li>
 	{% endfor %}
-	{% if current_user.is_authenticated and current_user.level > 0 %}
-	  <div class="menu_wrapper" id="topic_manage_menu_wrapper">
-	    <span class="menu_label" id="topic_manage_btn">
-	      {{ _('Manage') }}
-	    </span>
-	    {{ topic_manage_menu(topic, current_user) }}
-	  </div>
-	{% endif %}	    
       </ol>
       {{ pager(pn, count, total) }}
       {% if current_user.is_authenticated %}

@@ -246,6 +246,10 @@ code {
     display: inherit;
 }
 
+.menu_label {
+    cursor: pointer;
+}
+
 .menu_keeper {
     display: none;
 }
@@ -255,7 +259,6 @@ code {
     position: absolute;
     top: 100%;
     border: 1px solid gray;
-    border-top: none;
 }
 
 .menu_item {
@@ -270,11 +273,10 @@ code {
     background-color: hsl(0, 0%, 90%);
 }
 
-
 .menu_item > a {
     display: block;
+    color: black;
 }
-
 
 .dialog_wrapper {
     position: absolute;
@@ -515,5 +517,9 @@ code {
 	display: block;
 	text-align: center;
 	margin-top: 3.5em;
+    }
+    .content del {
+	background-color: unset;
+	text-decoration: line-through;
     }
 }

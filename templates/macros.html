@@ -164,6 +164,7 @@
 
 
 {% macro topic_manage_menu(topic, current_user) %}
+  <div class="menu_keeper"></div>
   <div id="topic_manage_menu" class="menu">
     {% if current_user.is_authenticated and current_user.level > 0 %}
       {% if current_user.level == 2 %}
