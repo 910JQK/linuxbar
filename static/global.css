@@ -1,6 +1,3 @@
-/* TODO: Firstly make style for PC and then make style for mobile devices. */
-/* TODO: Use different layout for different viewport sizes. */
-
 body {
     font-family: sans-serif;
     background-color: hsl(0, 0%, 90%);
@@ -356,6 +353,11 @@ code {
     to {top: -3em;}
 }
 
+@keyframes show_message_mobile {
+    from { display: block; opacity: 1; }
+    to { display: none; opacity: 0; }
+}
+
 #messager {
     box-sizing: border-box;    
     position: fixed;
@@ -521,5 +523,18 @@ code {
     .content del {
 	background-color: unset;
 	text-decoration: line-through;
+    }
+    #messager {
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	color: white;
+	background-color: hsla(0, 0%, 10%, 0.8);
+	border-radius: 4px;
+	font-size: 120%;
+	height: unset;
+	width: unset;
+	max-width: 80%;
+	animation-name: show_message_mobile;
     }
 }
