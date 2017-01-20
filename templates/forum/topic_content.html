@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit, ban_tip, editor_toolbar, date_span, insert_code_dialog, insert_image_dialog %}
+{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit, ban_tip, editor_toolbar, date_span, insert_code_dialog, insert_image_dialog, user_helper %}
 {% from 'forum/subpost_list.html' import subpost_list %}
 <html>
   <head>
@@ -279,6 +279,7 @@
 	{{ insert_code_dialog() }}
 	{{ insert_image_dialog() }}
       {% endif %}
+      {{ user_helper(current_user) }}
     </div>
   </body>
 </html>

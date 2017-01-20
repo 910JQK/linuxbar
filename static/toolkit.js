@@ -190,7 +190,7 @@ function update_unread_info() {
 		try_to_highlight(link, n);
 		total += n;
 	    }
-	    link_notify_all.textContent = printf('Message(%1)', total);
+	    link_notify_all.firstChild.innerText = total.toString();
 	    try_to_highlight(link_notify_all, total);
 	},
 	function(status, text) {

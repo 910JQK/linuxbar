@@ -162,7 +162,7 @@ body.box_horizontal_center {
     vertical-align: middle;
 }
 
-.user_toolbar .name a {
+.user_toolbar .user_indicator a {
     color: black;
 }
 
@@ -178,6 +178,10 @@ span.separator {
 
 .link_highlight {
     color: hsl(0, 85%, 55%);
+}
+
+.user_helper {
+    display: none;
 }
 
 .content del {
@@ -240,6 +244,10 @@ code {
 
 .menu_wrapper:hover > .menu {
     display: inherit;
+}
+
+.menu_keeper {
+    display: none;
 }
 
 .menu {
@@ -403,20 +411,109 @@ code {
 	padding: 0.3em 0em;
 	width: 100%;
     }
-    .user_toolbar .link_notify:not(#link_notify_all),
-    .user_toolbar .link_notify:not(#link_notify_all) + .separator
+    #container > #top_left, #container > #top_right {
+	box-sizing: border-box;
+	position: fixed;
+	top: 0em;
+	width: 50%;
+	height: 2.5em;
+	padding: 0.5em 0.7em;
+	background-color: hsl(0, 0%, 10%);
+	z-index: 100;
+    }
+    #container > #top_left {
+	left: 0em;
+	justify-content: flex-start;
+    }
+    #container > #top_right {
+	right: 0em;
+	display: flex;
+	justify-content: flex-end;
+    }
+    #top_left .separator, #top_right .separator {
+	display: none;
+    }
+    #top_left .label_icon {
+	filter: invert(95%);
+    }
+    #top_left .menu {
+	/* due to the margin the menu may disappear when moving mouse */
+	/* use the rule on .menu_keeper below to avoid that */
+	margin-top: 0.5em;
+	border: 1px solid black;
+	border-top: none;
+    }
+    #top_left .menu_keeper {
+	/* right below the menu button, avoiding the menu from disappearing */
+	/* although in a touch-screen device this work is unnecessary, */
+	/* when debuging using a PC, this problem is extrodinarily */
+	/* troublesome so ... */
+	display: unset;
+	position: absolute;
+	top: 100%;
+	width: 1.5em;
+	height: 0.5em;
+	z-index: 101;
+    }    
+    #top_left .menu_item {
+	font-size: 135%;
+	padding: 0.4em 0.3em;
+	background-color: hsl(0, 0%, 10%);
+    }
+    #top_left .menu_item:hover {
+	background-color: hsl(0, 0%, 30%);
+    }
+    #top_left .menu_item > a {
+	color: white;
+    }
+    #top_left > * {
+	margin-right: 0.8em;
+    }
+    #top_right > * {
+	margin-left: 0.8em;
+    }
+    #top_right a {
+	color: white;
+    }
+    .user_toolbar .user_indicator {
+	display: none;
+    }
+    .user_toolbar .link_notify:not(#link_notify_all)
     {
 	display: none;
     }
-    .user_toolbar #link_notify_all,
-    .user_toolbar #link_notify_all + .separator {
-	display: unset;
+    .user_toolbar #link_notify_all {
+	box-sizing: border-box;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	background-color: gray;
+	text-align: center;
+	min-width: 1.5em;
+	height: 1.5em;
+	padding: 0.2em;
+	border-radius: 4px;	
+    }
+    .user_toolbar #link_notify_all.link_highlight {
+	flex-shrink: 0;
+	flex-grow: 0;
+	color: white;
+	background-color: hsl(0, 60%, 55%);
+    }
+    .user_toolbar .link_logout {
+	display: none;
     }
     .label_icon {
-	width: 1em;
-	height: 1em;
+	width: 1.5em;
+	height: 1.5em;
     }
     .label_icon + span {
 	display: none;
+    }
+    .user_helper {
+	display: block;
+	text-align: center;
+	margin-top: 3.5em;
     }
 }

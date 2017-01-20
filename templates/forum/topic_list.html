@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar, ban_tip, moderate_menu, date_span, insert_code_dialog, insert_image_dialog, tag_selector %}
+{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar, ban_tip, moderate_menu, date_span, insert_code_dialog, insert_image_dialog, tag_selector, user_helper %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -182,8 +182,10 @@
 	<span>
 	  <div id="tag_menu_wrapper" class="menu_wrapper">
 	    <span class="menu_label">
-	      {{ _('Tags') }}
+	      <img class="label_icon" src="/static/icons/tags-modified.svg" />
+	      <span>{{ _('Tags') }}</span>
 	    </span>
+	    <div class="menu_keeper"></div>
 	    <div id="tag_menu" class="menu">
 	      <div class="menu_item">
 		<a href="{% if not distillate_only %}{{ url_for('index') }}{% else %}{{ url_for('index', dist='dist') }}{% endif %}">
@@ -203,9 +205,15 @@
 	<span class="separator">|</span>
 	<span>
 	  {% if distillate_only %}
-	    <a class="dist_link" href="{% if is_index %}{{ url_for('index') }}{% else %}{{ url_for('forum.topic_list', tag_slug=tag.slug) }}{% endif %}" title="{{ _('Show all topics') }}">Show All</a>
+	    <a class="dist_link" href="{% if is_index %}{{ url_for('index') }}{% else %}{{ url_for('forum.topic_list', tag_slug=tag.slug) }}{% endif %}" title="{{ _('Show all topics') }}">
+	      <img class="label_icon" src="/static/icons/grid-three-up.svg" />
+	      <span>{{ _('Show All') }}</span>
+	    </a>
 	  {% else %}
-	    <a class="dist_link" href="{% if is_index %}{{ url_for('index', dist='dist') }}{% else %}{{ url_for('forum.topic_list', tag_slug=tag.slug, dist='dist') }}{% endif %}" title="{{ _('Show distillate topics only') }}">Dist</a>
+	    <a class="dist_link" href="{% if is_index %}{{ url_for('index', dist='dist') }}{% else %}{{ url_for('forum.topic_list', tag_slug=tag.slug, dist='dist') }}{% endif %}" title="{{ _('Show distillate topics only') }}">
+	      <img class="label_icon" src="/static/icons/star.svg" />
+	      <span>Dist</span>
+	    </a>
 	  {% endif %}
 	</span>
 	{% if current_user.is_authenticated and current_user.level > 0 %}
@@ -213,7 +221,8 @@
 	<span>
 	    <div id="moderate_menu_wrapper" class="menu_wrapper">
 	      <span class="menu_label">
-		{{ _('Moderate') }}
+		<img class="label_icon" src="/static/icons/cog.svg" />
+		<span>{{ _('Moderate') }}</span>
 	      </span>
 	      {{ moderate_menu(current_user) }}
 	  </div>
@@ -296,6 +305,7 @@
 	{{ insert_code_dialog() }}
 	{{ insert_image_dialog() }}
       {% endif %}
+      {{ user_helper(current_user) }}
     </div>
   </body>
 </html>

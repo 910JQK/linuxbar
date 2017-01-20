@@ -98,11 +98,13 @@
   <div class="user_toolbar" id="top_right">
     {% if user.is_authenticated %}
       {% set unread_total = user.unread_reply + user.unread_at + user.unread_sys + user.unread_pm %}
-      {{ avatar(user.mail) }}
-      <span class="name">
-	<a href="{{ url_for('user.profile', uid=user.id) }}" target="_blank">
-	   {{ user.name }}
-	</a>
+      <span class="user_indicator">
+	{{ avatar(user.mail) }}
+	<span class="name">
+	  <a href="{{ url_for('user.profile', uid=user.id) }}" target="_blank">
+	    {{ user.name }}
+	  </a>
+	</span>
       </span>
       <span class="separator">|</span>
       <a id="link_notify_reply" href="{{ url_for('user.notifications', n_type='reply') }}" target="_blank" data-content="{{ _('Reply') }}" class="link_notify{% if user.unread_reply > 0 %} link_highlight{% endif %}">
@@ -117,12 +119,14 @@
 	{{ _('Sys(%(n)d)', n=user.unread_sys) }}
       </a>
       <span class="separator">|</span>
-      <a id="link_notify_pm" href="{{ url_for('user.notifications', n_type='pm') }}" target="_blank" data-content="{{ _('PM') }}" class="link_notify{% if user.unread_pm %} link_highlight{% endif %}">
+      <a id="link_notify_pm" href="{{ url_for('user.notifications', n_type='pm') }}" target="_blank" data-content="{{ _('PM') }}" class="link_notify{% if user.unread_pm > 0 %} link_highlight{% endif %}">
 	{{ _('PM(%(n)d)', n=user.unread_pm) }}
       </a>
       <span class="separator">|</span>
-      <a id="link_notify_all" href="{{ url_for('user.notifications', n_type='reply') }}" class="link_notify{% if unread_total %} link_highlight{% endif %}">
-	{{ _('Message(%(n)d)', n=unread_total) }}
+      <a id="link_notify_all" href="{{ url_for('user.notifications', n_type='reply') }}" target="_blank" class="link_notify{% if unread_total > 0 %} link_highlight{% endif %}">
+	<span>
+	  {{ _('%(n)d', n=unread_total) }}
+	</span>
       </a>
       <span class="separator">|</span>
       <a class="link_logout" href="{{ url_for('user.logout', next=request.url) }}">
@@ -139,6 +143,21 @@
       <a class="link_register" href="{{ url_for('user.register') }}">
 	{{ _('Register') }}
       </a>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+
+{% macro user_helper(current_user) %}
+  <div class="user_helper">
+    {% if current_user.is_authenticated %}
+      <hr/>
+      <div>{{ _('User: %(user)s', user=current_user.name) }}</div>
+      <div>
+	<a aria-label="logout" href="{{ url_for('user.logout') }}">
+	  {{ _('Logout') }}
+	</a>
+      </div>
     {% endif %}
   </div>
 {% endmacro %}
@@ -191,6 +210,7 @@
 
 
 {% macro moderate_menu(current_user) %}
+  <div class="menu_keeper"></div>
   <div id="moderate_menu" class="menu">
     {% if current_user.level > 0 %}
       {% if current_user.level == 2 %}
