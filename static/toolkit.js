@@ -257,7 +257,7 @@ function init_datetime_timer() {
 }
 
 
-/*
+/**
  * Initialize the tag selector
  *
  * @return void
@@ -298,7 +298,7 @@ function init_tag_selector() {
 }
 
 
-/*
+/**
  * Add addtional features to forms
  *
  * @return void
@@ -307,28 +307,52 @@ function init_forms() {
     if(query('#add_topic_form')) {
 	let title = add_topic_form.querySelector('[name="title"]');
 	let content = add_topic_form.querySelector('[name="content"]');
-	add_topic_form.addEventListener('submit', function(ev) {
+	let validate = function() {
 	    if(!title.value) {
 		alert(_('Title cannot be empty.'));
-		ev.preventDefault();
 	    } else if (!content.value) {
 		alert(_('Content cannot be empty.'));
-		ev.preventDefault();
 	    } else if(utf8size(title.value) > TITLE_MAX_SIZE) {
 		alert(
 		    printf(_('Title cannot exceed %1 bytes.'), TITLE_MAX_SIZE)
 		);
-		ev.preventDefault();
+	    } else {
+		return true;
 	    }
+	    return false;
+	};
+	content.addEventListener('keyup', function(ev) {
+	    if(ev.key == 'Enter' && ev.ctrlKey) {
+		ev.preventDefault();
+		if(validate())
+		    add_topic_form.submit();
+	    }
+	});
+	add_topic_form.addEventListener('submit', function(ev) {
+	    if(!validate())
+		ev.preventDefault();
 	});
     }
     if(query('#add_post_form')) {
 	let content = add_post_form.querySelector('[name="content"]');
-	add_post_form.addEventListener('submit', function(ev) {
+	let validate = function() {
 	    if(!content.value) {
 		alert(_('Content cannot be empty.'));
-		ev.preventDefault();
+		return false;
+	    } else {
+		return true;
 	    }
+	};
+	content.addEventListener('keyup', function(ev) {
+	    if(ev.key == 'Enter' && ev.ctrlKey) {
+		ev.preventDefault();
+		if(validate())
+		    add_post_form.submit();
+	    }
+	});
+	add_post_form.addEventListener('submit', function(ev) {
+	    if(!validate())
+		ev.preventDefault();
 	});
     }
 }
