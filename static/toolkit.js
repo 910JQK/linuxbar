@@ -2,15 +2,28 @@ var query = selector => document.querySelector(selector);
 var query_all = selector => document.querySelectorAll(selector);
 var _ = str => str; // reserved for l10n
 var timer = new Worker('/static/timer.js');
+var TITLE_MAX_SIZE= 64;
+
+
+/**
+ * Return the UTF-8 byte count of `str`
+ *
+ * @param String str
+ * @return Number
+ */
+function utf8size(str) {
+    return unescape(encodeURIComponent(str)).length;
+}
 
 
 /**
  * Return a copy of `str` with placeholders replaced by the rest arguments.
+ *
  * @param String str
  * @param String ...args
  * @return String
  */
-function printf(){
+function printf() {
     var str = arguments[0];
     var args = arguments;
     str = str.replace(/%(\d+)|%{(\d+)}/g, function(match, number1, number2){
@@ -244,6 +257,11 @@ function init_datetime_timer() {
 }
 
 
+/*
+ * Initialize the tag selector
+ *
+ * @return void
+ */
 function init_tag_selector() {
     if(query('#tag_selector')) {
 	let fieldset = query('#add_topic_form > fieldset');
@@ -280,5 +298,42 @@ function init_tag_selector() {
 }
 
 
+/*
+ * Add addtional features to forms
+ *
+ * @return void
+ */
+function init_forms() {
+    if(query('#add_topic_form')) {
+	let title = add_topic_form.querySelector('[name="title"]');
+	let content = add_topic_form.querySelector('[name="content"]');
+	add_topic_form.addEventListener('submit', function(ev) {
+	    if(!title.value) {
+		alert(_('Title cannot be empty.'));
+		ev.preventDefault();
+	    } else if (!content.value) {
+		alert(_('Content cannot be empty.'));
+		ev.preventDefault();
+	    } else if(utf8size(title.value) > TITLE_MAX_SIZE) {
+		alert(
+		    printf(_('Title cannot exceed %1 bytes.'), TITLE_MAX_SIZE)
+		);
+		ev.preventDefault();
+	    }
+	});
+    }
+    if(query('#add_post_form')) {
+	let content = add_post_form.querySelector('[name="content"]');
+	add_post_form.addEventListener('submit', function(ev) {
+	    if(!content.value) {
+		alert(_('Content cannot be empty.'));
+		ev.preventDefault();
+	    }
+	});
+    }
+}
+
+
 window.addEventListener('load', init_datetime_timer);
 window.addEventListener('load', init_tag_selector);
+window.addEventListener('load', init_forms);
