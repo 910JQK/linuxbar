@@ -155,7 +155,11 @@ body.box_horizontal_center {
     right: 1em;
 }
 
-#container > #top_right *, #container > #top_left * {
+#container > #top_left img,
+#container > #top_left img + *,
+#container > #top_right img,
+#container > #top_right img + *
+{
     vertical-align: middle;
 }
 
