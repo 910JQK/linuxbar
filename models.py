@@ -165,6 +165,7 @@ class Topic(BaseModel):
     author = ForeignKeyField(User, related_name='topics')
     title = CharField(max_length=64)
     summary = CharField(max_length=512)
+    summary_images = CharField(max_length=26, default='')
     post_date = DateTimeField()
     reply_count = IntegerField(default=0)
     last_reply_date = DateTimeField()
@@ -260,10 +261,15 @@ class Image(BaseModel):
     date = DateTimeField(index=True)
 
 
+class Face(BaseModel):
+    name = CharField(max_length=32, unique=True, index=True)
+    hash_value = CharField(max_length=64)
+
+
 tables = [
     Config, User, Profile, PasswordResetToken, Ban,
     Tag, Topic, TagRelation, Post,
-    DeleteRecord, Message, Image
+    DeleteRecord, Message, Image, Face
 ]
 
 

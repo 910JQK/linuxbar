@@ -1,0 +1,44 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import field, submit %}
+
+{% block title %}{{ _('Face Management - %(site)s', site=get_config('site_name')) }}{% endblock %}
+{% block body_class %}box_horizontal_center{% endblock %}
+{% block form_title %}{{ _('Face Management') }}{% endblock %}
+
+{% block style %}
+  td { text-align: left; }
+  td, th { padding: 0.1em 0.5em; }
+{% endblock %}
+
+{% block form %}
+  <div class="table_wrapper">
+    <table>
+      {% if faces %}
+      <tr>
+	<th>{{ _('Name') }}</th>
+	<th>{{ _('Image') }}</th>
+	<th>{{ _('Operations') }}</th>
+      </tr>
+      {% endif %}
+      {% for face in faces %}
+	<tr>
+	  <td>{{ face.name }}</td>
+	  <td>
+	    <img src="{{ url_for('image.get', sha256part=face.hash_value) }}" />
+	  </td>
+	  <td>
+	    <a href="{{ url_for('.face_remove', name=face.name) }}">Delete</a>
+	  </td>
+	</tr>
+      {% endfor %}
+    </table>
+  </div>
+  <hr/>
+  {{ field(form.name) }}
+  {{ field(form.hash_value) }}
+{% endblock %}
+
+
+{% block buttons %}
+  {{ submit(_('Add')) }}
+{% endblock %}

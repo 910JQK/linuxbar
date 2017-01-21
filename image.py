@@ -16,7 +16,7 @@ from flask_login import current_user, login_required
 
 from utils import _
 from utils import *
-from models import Config, User, Image
+from models import Config, User, Image, Face
 from forms import ImageUploadForm
 from validation import REGEX_SHA256, REGEX_SHA256_PART
 from config import IMAGE_MIME, UPLOAD_FOLDER
@@ -59,6 +59,15 @@ def info(sha256part):
             )
         else:
             abort(404)
+    else:
+        abort(404)
+
+
+@image.route('/face/<name>')
+def face(name):
+    rec = find_record(Face, name=name)
+    if rec:
+        return get(rec.hash_value)
     else:
         abort(404)
 

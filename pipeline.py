@@ -17,6 +17,7 @@ from config import (
     INLINE_CODE_SIGN,
     NOTIFICATION_SIGN,
     IMAGE_SIGN,
+    FACE_SIGN,
     FORMAT_SIGN,
     FORMAT_DEFAULT,
     FORMATS
@@ -133,6 +134,9 @@ def process_format(lines):
         return (
             '<a class="content_image_link" href="%s" target="_blank"><img class="content_image" src="%s"></img></a>' % (url, url)
         )
+    def gen_face_html(face_name):
+        url = url_for('image.face', name=face_name)
+        return '<img class="content_image face" src="%s"></img>' % url
     def process_line_str(line):
         def process_formats(text):
             i = 0
@@ -171,10 +175,13 @@ def process_format(lines):
                     href = url_for('user.profile_by_name', name=username),
                     target = '_blank'
                 )
-            if segment.startswith(IMAGE_SIGN*2):
-                sha256part = segment[2:]
+            if segment.startswith(IMAGE_SIGN):
+                sha256part = segment[len(IMAGE_SIGN):]
                 if REGEX_SHA256_PART.fullmatch(sha256part):
                     return gen_image_html(sha256part)
+            if segment.startswith(FACE_SIGN):
+                face_name = segment[len(FACE_SIGN):]
+                return gen_face_html(face_name)
             if segment.startswith(PID_SIGN):
                 pid = segment[len(PID_SIGN):]
                 if REGEX_PINT.fullmatch(pid):

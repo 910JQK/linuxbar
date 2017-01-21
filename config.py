@@ -29,7 +29,8 @@ PID_SIGN = 'p#'
 TID_SIGN = 't#'
 INLINE_CODE_SIGN = '`' # a single char
 NOTIFICATION_SIGN = '@' # a single char
-IMAGE_SIGN = '%' # a single char
+IMAGE_SIGN = '%%'
+FACE_SIGN = '#'
 FORMAT_SIGN = '**'
 FORMAT_DEFAULT = '*' # a single char
 FORMATS = {
@@ -79,7 +80,6 @@ def assert_config():
     assert SUMMARY_LENGTH in range(4, 128+1)
     assert len(INLINE_CODE_SIGN) == 1
     assert len(NOTIFICATION_SIGN) == 1
-    assert len(IMAGE_SIGN) == 1
     assert len(FORMAT_DEFAULT) == 1
     for sign in FORMATS:
         assert len(sign) == 1    

@@ -10,8 +10,8 @@ from utils import _
 from utils import *
 from user import privilege_required
 from post import create_system_message
-from forms import ConfigEditForm, TagEditForm
-from models import Config, Tag, Ban, User, DeleteRecord, Topic, Post
+from forms import ConfigEditForm, TagEditForm, FaceAddForm
+from models import Config, Tag, Ban, User, DeleteRecord, Topic, Post, Face
 
 
 moderate = Blueprint(
@@ -209,5 +209,42 @@ def moderator_list():
         total = total,
         moderator_list = moderator_list
     )
+
+
+@moderate.route('/face/list', methods=['GET', 'POST'])
+@privilege_required()
+def face_list():
+    faces = [face for face in Face.select()]
+    form = FaceAddForm()
+    if form.validate_on_submit():
+        if not find_record(Face, name=form.name.data):
+            Face.create(
+                name = form.name.data,
+                hash_value = form.hash_value.data
+            )
+            flash(_('Face %s added successfully.') % form.name.data, 'ok')
+            return redirect(url_for('.face_list'))
+        else:
+            flash(_('A face with the same name already exists.'), 'err')
+    return render_template('moderate/face_list.html', faces=faces, form=form)
+
+
+@moderate.route('/face/remove/<name>', methods=['GET', 'POST'])
+@privilege_required()
+def face_remove(name):
+    face = find_record(Face, name=name)
+    if face:
+        if request.form.get('confirmed'):
+            face.delete_instance()
+            flash(_('Face %s deleted successfully.') % face.name, 'ok')
+            return redirect(url_for('.face_list'))
+        else:
+            return render_template(
+                'confirm.html',
+                text = _('Are you sure to delete face %s ?') % face.name,
+                url_no = url_for('.face_list')
+            )
+    else:
+        abort(404)
 
 

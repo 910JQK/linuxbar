@@ -251,3 +251,21 @@ class PostAddForm(FlaskForm):
 class TopicTagManageForm(FlaskForm):
     tags = SelectMultipleField(_('Tags'), validators=[Optional()], coerce=str)
 
+
+class FaceAddForm(FlaskForm):
+    name = StringField(
+        _('Name'),
+        validators = [
+            Required(),
+            SizeRange(1, 32)
+        ],
+        description = _('Name of the face.')
+    )
+    hash_value = StringField(
+        _('Hash'),
+        validators = [
+            Required(),
+            Regexp(REGEX_SHA256_PART, message=_('Invalid format'))
+        ],
+        description = _('Image hash value.')
+    )
