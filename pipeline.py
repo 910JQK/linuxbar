@@ -181,7 +181,11 @@ def process_format(lines):
                     return gen_image_html(sha256part)
             if segment.startswith(FACE_SIGN):
                 face_name = segment[len(FACE_SIGN):]
-                return gen_face_html(face_name)
+                if not face_name.startswith(FACE_SIGN):
+                    return gen_face_html(face_name)
+                else:
+                    # preserve the original text
+                    return face_name
             if segment.startswith(PID_SIGN):
                 pid = segment[len(PID_SIGN):]
                 if REGEX_PINT.fullmatch(pid):
