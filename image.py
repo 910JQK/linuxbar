@@ -1,8 +1,10 @@
+import io
 import os
 import imghdr
 from flask import (
     Blueprint,
     request,
+    Response,
     render_template,
     redirect,
     send_file,
@@ -12,6 +14,7 @@ from flask import (
     jsonify
 )
 from flask_login import current_user, login_required
+from PIL import Image as PILImage
 
 
 from utils import _
@@ -19,7 +22,7 @@ from utils import *
 from models import Config, User, Image, Face
 from forms import ImageUploadForm
 from validation import REGEX_SHA256, REGEX_SHA256_PART
-from config import IMAGE_MIME, UPLOAD_FOLDER
+from config import IMAGE_MIME, UPLOAD_FOLDER, THUMBNAIL_MAX_HEIGHT
 
 
 image = Blueprint(
@@ -34,12 +37,27 @@ def get_image_path(sha256, img_type):
 
 @image.route('/get/<sha256part>')
 def get(sha256part):
+    is_thumbnail = bool(request.args.get('thumbnail'))
     if REGEX_SHA256_PART.fullmatch(sha256part):
         img_query = Image.select().where(Image.sha256.startswith(sha256part))
         if img_query:
             img = img_query.get()
             mime = IMAGE_MIME[img.img_type]
-            return send_file(get_image_path(img.sha256, img.img_type), mime)
+            path = get_image_path(img.sha256, img.img_type)
+            if not is_thumbnail:
+                return send_file(path, mime)
+            else:
+                output = io.BytesIO()
+                p_img = PILImage.open(path)
+                if p_img.size[1] > THUMBNAIL_MAX_HEIGHT:
+                    p_img.thumbnail((
+                        round(
+                            p_img.size[0]*THUMBNAIL_MAX_HEIGHT/p_img.size[1]
+                        ),
+                        THUMBNAIL_MAX_HEIGHT
+                    ))
+                p_img.save(output, p_img.format)
+                return Response(output.getvalue(), mimetype=mime)
         else:
             abort(404)
     else:

@@ -7,9 +7,54 @@ from pipeline import (
     join_lines
 )
 from models import (
-    db, User, Topic, Post, DeleteRecord, Message
+    db, User, Topic, Post, DeleteRecord, Message, Image
 )
-from config import NOTIFICATION_SIGN
+from config import NOTIFICATION_SIGN, IMAGE_SIGN, SUMMARY_LENGTH
+from validation import REGEX_SHA256_PART
+
+
+def get_images(lines):
+    found = {}
+    for line in lines:
+        for segment in line.split(' '):
+            if (
+                    segment.startswith(IMAGE_SIGN)
+                    and REGEX_SHA256_PART.fullmatch(segment[len(IMAGE_SIGN):])
+            ):
+                image_query = (
+                    Image
+                    .select()
+                    .where(
+                        Image.sha256.startswith(
+                            segment[len(IMAGE_SIGN):]
+                        )
+                    )
+                )
+                if image_query:
+                    image = image_query.get()
+                    if not found.get(image.sha256):
+                        yield image
+
+
+def gen_summary(content):
+    if len(content) > SUMMARY_LENGTH:
+        return content[:SUMMARY_LENGTH-3] + '...'
+    else:
+        return content
+
+
+def gen_summary_images(content):
+    content_processor = pipeline(
+        split_lines, process_code_block, get_images
+    )
+    images = []
+    n = 0
+    for image in content_processor(content):
+        if n >= 3:
+            break
+        images.append(image)
+        n += 1
+    return ','.join([image.sha256[:10] for image in images])
 
 
 def filter_at_messages(lines, callees):

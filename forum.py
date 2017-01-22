@@ -15,7 +15,9 @@ from peewee import prefetch
 from utils import _
 from utils import *
 from user import privilege_required
-from post import create_post, create_system_message
+from post import (
+    gen_summary, gen_summary_images, create_post, create_system_message
+)
 from forms import TopicAddForm, TopicTagManageForm, PostAddForm
 from models import (
     db, Config, User, Topic, TagRelation, Tag, Post, DeleteRecord, Message
@@ -162,6 +164,7 @@ def topic_list(tag_slug):
             new_topic, None, content, add_reply_count=False
         )
         new_topic.summary = gen_summary(first_post.content)
+        new_topic.summary_images = gen_summary_images(first_post.content)
         new_topic.save()
         flash(_('Topic published successfully.'), 'ok')
         return redirect(request.url)
@@ -454,6 +457,9 @@ def post_edit(pid):
             post.save()
             if post.ordinal == 1 and not post.parent and post.topic:
                 post.topic.summary = gen_summary(form.content.data)
+                post.topic.summary_images = gen_summary_images(
+                    form.content.data
+                )
                 post.topic.save()
             flash(_('Post edited successfully.'), 'ok')
             return redirect(

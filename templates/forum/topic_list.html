@@ -60,6 +60,14 @@
 	 color: hsl(0, 75%, 50%);
 	 margin-right: 0.25em;
      }
+     .summary_images {
+	 width: 100%;
+	 overflow-x: auto;
+	 white-space: nowrap;
+     }
+     .summary_image {
+	 max-height: 6em;
+     }
      .tag_list:not(.empty) {
 	 margin-top: 0.2em;	 
      }
@@ -249,6 +257,13 @@
 		<a target="_blank" href="{{ url_for('forum.topic_content', tid=topic.id) }}">{{ topic.title }}</a>
 	      </div>
 	      <div class="summary">{{ topic.summary }}</div>
+	      <div class="summary_images">
+		{% for hash in topic.get_summary_images_hash() %}
+		  <a href="{{ url_for('image.get', sha256part=hash) }}" target="_blank">
+		    <img class="summary_image" src="{{ url_for('image.get', sha256part=hash, thumbnail='thumbnail') }}" />
+		  </a>
+		{% endfor %}
+	      </div>
 	      <div class="tag_list{% if not topic.tags %} empty{% endif %}">
 		{% for tag in topic.tags %}
 		  <span class="tag" style="background-color: {{ tag.slug | get_color(90, 35) }};"><a href="{{ url_for('forum.topic_list', tag_slug=tag.slug) }}">{{ tag.name }}</a></span>

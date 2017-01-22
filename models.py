@@ -165,7 +165,7 @@ class Topic(BaseModel):
     author = ForeignKeyField(User, related_name='topics')
     title = CharField(max_length=64)
     summary = CharField(max_length=512)
-    summary_images = CharField(max_length=26, default='')
+    summary_images = CharField(max_length=32, default='')
     post_date = DateTimeField()
     reply_count = IntegerField(default=0)
     last_reply_date = DateTimeField()
@@ -173,6 +173,11 @@ class Topic(BaseModel):
     is_pinned = BooleanField(default=False, index=True)
     is_distillate = BooleanField(default=False, index=True)
     is_deleted = BooleanField(default=False, index=True)
+    def get_summary_images_hash(self):
+        if self.summary_images:
+            return self.summary_images.split(',')
+        else:
+            return []
 
 
 class TagRelation(BaseModel):
