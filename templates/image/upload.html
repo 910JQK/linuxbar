@@ -31,7 +31,7 @@
 	  </td>
 	  <td title="{{ img.sha256 }}">
 	    <a target="_blank" href="{{ url_for('.get', sha256part=img.sha256) }}">
-	      {{ img.sha256 | truncate(8, true, '') }}
+	      {{ img.sha256 | truncate(10, true, '') }}
 	    </a>
 	  </td>
 	  <td>

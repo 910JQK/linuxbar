@@ -203,7 +203,7 @@ function init_editor_toolbar(toolbar, textarea) {
 	if(result.code == 0) {
 	    insert_text(
 		textarea,
-		printf(' %1%2 ', info.image_prefix, result.sha256.slice(0,8))
+		printf(' %1%2 ', info.image_prefix, result.sha256.slice(0,10))
 	    );
 	    close_image_dialog();
 	} else {
