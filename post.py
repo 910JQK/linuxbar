@@ -34,6 +34,7 @@ def get_images(lines):
                     image = image_query.get()
                     if not found.get(image.sha256):
                         yield image
+                        found[image.sha256] = True
 
 
 def gen_summary(content):
