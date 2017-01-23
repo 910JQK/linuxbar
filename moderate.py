@@ -214,7 +214,7 @@ def moderator_list():
 @moderate.route('/face/list', methods=['GET', 'POST'])
 @privilege_required()
 def face_list():
-    faces = [face for face in Face.select()]
+    faces = [face for face in Face.select().order_by(Face.name)]
     form = FaceAddForm()
     if form.validate_on_submit():
         if not find_record(Face, name=form.name.data):

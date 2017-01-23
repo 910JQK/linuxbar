@@ -1,38 +1,40 @@
 {% extends 'form.html' %}
-{% from 'macros.html' import field, submit %}
+{% from 'macros.html' import field, submit, pager %}
 
 {% block title %}{{ _('Face Management - %(site)s', site=get_config('site_name')) }}{% endblock %}
 {% block body_class %}box_horizontal_center{% endblock %}
 {% block form_title %}{{ _('Face Management') }}{% endblock %}
 
 {% block style %}
-  td { text-align: left; }
-  td, th { padding: 0.1em 0.5em; }
+.tip { font-size: 90%; }
+.columns {
+    columns: 3;
+    column-rule: 1px solid hsl(0, 0%, 60%);
+    column-gap: 1em;
+    -moz-columns: 3;
+    -moz-column-rule: 1px solid hsl(0, 0%, 60%);
+    -moz-column-gap: 1em;
+    -webkit-columns: 3;
+    -webkit-column-rule: 1px solid hsl(0, 0%, 60%);
+    -webkit-column-gap: 1em;
+}
+.item { display: flex; justify-content: space-between; }
+.name { font-size: 115%; font-weight: bold; }
+.face { vertical-align: center; }
 {% endblock %}
 
 {% block form %}
-  <div class="table_wrapper">
-    <table>
-      {% if faces %}
-      <tr>
-	<th>{{ _('Name') }}</th>
-	<th>{{ _('Image') }}</th>
-	<th>{{ _('Operations') }}</th>
-      </tr>
-      {% endif %}
+  <div class="columns">
       {% for face in faces %}
-	<tr>
-	  <td>{{ face.name }}</td>
-	  <td>
-	    <img src="{{ url_for('image.get', sha256part=face.hash_value) }}" />
-	  </td>
-	  <td>
-	    <a href="{{ url_for('.face_remove', name=face.name) }}">Delete</a>
-	  </td>
-	</tr>
+	<div class="item">
+	  <a href="{{ url_for('.face_remove', name=face.name) }}">
+	    <img class="face" src="{{ url_for('image.get', sha256part=face.hash_value) }}" />
+	  </a>
+	  <span class="name">{{ face.name }}</span>
+	</div>
       {% endfor %}
-    </table>
   </div>
+  <p class="tip">{{ _('Click the face if you want to remove it.') }}</p>
   <hr/>
   {{ field(form.name) }}
   {{ field(form.hash_value) }}
