@@ -279,8 +279,11 @@ def ban(uid):
                 ok = True
                 create_system_message(
                     (
-                        # TODO: ngettext
-                        _('You have been banned by moderator {0} for {1} days.')
+                        _(
+                            'You have been banned by moderator {0} for {1} day.',
+                            'You have been banned by moderator {0} for {1} days.',
+                            form.days.data
+                        )
                         .format(current_user.name, form.days.data)
                     ),
                     user

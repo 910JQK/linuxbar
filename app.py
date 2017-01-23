@@ -80,6 +80,17 @@ def richtext_info():
 
 def run():
     assert_config()
+    gettext.install(
+        'linuxbar',
+        os.path.join(
+            os.path.dirname(
+                os.path.realpath(
+                    __file__
+                )
+            ),
+            'locale'
+        )
+    )
     app.secret_key = SECRET_KEY
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_SIZE

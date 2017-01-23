@@ -1,5 +1,6 @@
 import re
 import random
+import gettext
 import hashlib
 import datetime
 import threading
@@ -19,15 +20,11 @@ TOKEN_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 now = datetime.datetime.now
 
 
-# reserved for l10n
 def _(string, string_pl=None, n=None):
     if not string_pl:
-        return string
+        return gettext.gettext(string)
     else:
-        if n == 1:
-            return string
-        else:
-            return string_pl
+        return gettext.ngettext(string, string_pl, n)
 
 
 def sha256(string):

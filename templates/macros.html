@@ -125,7 +125,7 @@
       <span class="separator">|</span>
       <a id="link_notify_all" href="{{ url_for('user.notifications', n_type='reply') }}" target="_blank" class="link_notify{% if unread_total > 0 %} link_highlight{% endif %}">
 	<span>
-	  {{ _('%(n)d', n=unread_total) }}
+	  {{ '%d' % unread_total }}
 	</span>
       </a>
       <span class="separator">|</span>
