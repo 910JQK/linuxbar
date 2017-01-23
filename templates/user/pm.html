@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import pager, field, submit, avatar, messager, user_toolbar, editor_toolbar, insert_code_dialog, insert_image_dialog %}
+{% from 'macros.html' import pager, field, submit, avatar, messager, user_toolbar, editor_toolbar, insert_code_dialog, insert_image_dialog, face_picker %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -20,7 +20,6 @@
 	 width: 55em;
      }
      .pm_label {
-	 color: gray;
 	 font-size: 90%;
      }
      ul {
@@ -30,6 +29,9 @@
      #add_post_form [name="content"] {
 	 width: 70%;
 	 height: 10em;
+     }
+     .face_picker {
+	 width: 70%;
      }
      .content_image {
 	 max-width: 100%;
@@ -42,6 +44,9 @@
 	     width: 100%;
 	 }
 	 #add_post_form [name="content"] {
+	     width: 100%;
+	 }
+	 .face_picker {
 	     width: 100%;
 	 }
      }
@@ -59,6 +64,7 @@
 	{{ form.csrf_token() }}
 	{{ editor_toolbar() }}
 	{{ field(form.content) }}
+	{{ face_picker(get_faces()) }}
 	<div>
 	  {{ submit(_('Send')) }}
 	</div>

@@ -71,18 +71,14 @@ function replace_text(textarea, process_function) {
 
 
 /**
- * Insert `text` to the cursor position of `textarea`
+ * Insert `text` to the `position` of `textarea`
  *
  * @param Object textarea
+ * @param Number position
  * @param String text
  * @return void
  */
-function insert_text(textarea, text) {
-    var position;
-    if(textarea.selectionDirection == 'forward')
-	position = textarea.selectionStart;
-    else
-	position = textarea.selectionEnd;
+function insert_text(textarea, position, text) {
     textarea.value = (
 	textarea.value.slice(0, position)
 	    + text
@@ -91,6 +87,47 @@ function insert_text(textarea, text) {
 	    )
     );
     textarea.selectionStart = textarea.selectionEnd = position + text.length;
+}
+
+
+/**
+ * Insert a block of text to a specified textarea
+ *
+ * @param Object textarea
+ * @param String text
+ * @return void
+ */
+function insert_block(textarea, text) {
+    var position;
+    if(textarea.selectionDirection == 'forward')
+	position = textarea.selectionStart;
+    else
+	position = textarea.selectionEnd;
+    if(position == 0 || textarea.value[position-1] == '\n')
+	insert_text(textarea, position, text+'\n');
+    else
+	insert_text(textarea, position, '\n'+text+'\n');
+}
+
+
+/**
+ * Insert a segment of text to a specified textarea
+ *
+ * @param Object textarea
+ * @param String text
+ * @return void
+ */
+function insert_segment(textarea, text) {
+    var position;
+    if(textarea.selectionDirection == 'forward')
+	position = textarea.selectionStart;
+    else
+	position = textarea.selectionEnd;
+    var value = textarea.value;
+    var add_space = !Boolean(
+	position == 0 || value[position-1]  == ' ' || value[position-1] == '\n'
+    );
+    insert_text(textarea, position, (add_space?' ':'')+text+' ');
 }
 
 
@@ -117,7 +154,7 @@ function process_text(prefix, suffix) {
 
 
 /**
- * Initialize specified editor toolbar and textarea
+ * Initialize specified editor toolbar with corresponding textarea
  *
  * @param Object toolbar
  * @param Object textarea
@@ -147,10 +184,10 @@ function init_editor_toolbar(toolbar, textarea) {
 	wrapper.style.display = '';
     }
     function insert_code() {
-	insert_text(
+	insert_block(
 	    textarea,
 	    printf(
-		'\n%1 %2\n%3\n%4\n',
+		'%1 %2\n%3\n%4',
 		info.code_prefix,
 		lang_input.value,
 		code_textarea.value,
@@ -201,9 +238,9 @@ function init_editor_toolbar(toolbar, textarea) {
     function upload_ok(xhr) {
 	var result = JSON.parse(xhr.responseText);
 	if(result.code == 0) {
-	    insert_text(
+	    insert_segment(
 		textarea,
-		printf(' %1%2 ', info.image_prefix, result.sha256.slice(0,10))
+		info.image_prefix + result.sha256.slice(0,10)
 	    );
 	    close_image_dialog();
 	} else {
@@ -253,17 +290,39 @@ function init_editor_toolbar(toolbar, textarea) {
 
 
 /**
- * Initialize all editor toolbars on the page
+ * Initialize specified face picker with corresponding textarea
  *
+ * @param Object face_picker
+ * @param Object textarea
  * @return void
  */
-function init_editor_toolbars() {
-    for(let I of query_all('.editor_toolbar')) {
-	let toolbar = I;
-	let textarea = toolbar.nextElementSibling; // note: relative relation
-	init_editor_toolbar(toolbar, textarea);
+function init_face_picker(face_picker, textarea) {
+    var info = JSON.parse(richtext_info.innerHTML);
+    var prefix = info.face_prefix;
+    for(let I of face_picker.querySelectorAll('.face')) {
+	let face = I;
+	face.addEventListener('click', function() {
+	    insert_segment(textarea, (prefix + face.dataset.name));
+	    textarea.focus();
+	});
     }
 }
 
 
-window.addEventListener('load', init_editor_toolbars);
+/**
+ * Initialize all editors on the page
+ *
+ * @return void
+ */
+function init_editors() {
+    for(let I of query_all('.editor_toolbar')) {
+	let toolbar = I;
+	let textarea = toolbar.nextElementSibling; // note: relative relation
+	let face_picker = textarea.nextElementSibling;
+	init_editor_toolbar(toolbar, textarea);
+	init_face_picker(face_picker, textarea);
+    }
+}
+
+
+window.addEventListener('load', init_editors);

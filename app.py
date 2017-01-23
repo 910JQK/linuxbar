@@ -14,7 +14,7 @@ from flask_wtf.csrf import CsrfProtect
 import captcha
 from utils import _
 from utils import *
-from models import Config
+from models import Config, Face
 from pipeline import get_content_html
 from user import user, login_manager
 from moderate import moderate
@@ -39,7 +39,13 @@ DEBUG = True
 
 @app.context_processor
 def inject_data():
-    return {'get_config': Config.Get, 'RT_INFO': RICHTEXT_INFO_JSON}
+    def get_faces():
+        return Face.select().order_by(Face.name)
+    return {
+        'get_config': Config.Get,
+        'get_faces': get_faces,
+        'RT_INFO': RICHTEXT_INFO_JSON
+    }
 
 
 app.add_template_filter(md5, 'md5')

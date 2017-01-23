@@ -46,6 +46,7 @@ RICHTEXT_INFO = '''
 <p><del>Mask</del>: <code>**!Mask**</code></p>
 <p><code>Inline Code</code>: <code>`Inline Code`</code></p>
 <p>Image: <code>%%hash</code></p>
+<p>Face: <code>#name</code></p>
 <div class="highlight"><pre>
 Code Box:
 /***# language
@@ -65,6 +66,7 @@ RICHTEXT_INFO_JSON = '''
     ["inline_code", "`", "`"]    
   ],
   "image_prefix": "%%",
+  "face_prefix": "#",
   "code_prefix": "/***#",
   "code_suffix": "#***/"
 }

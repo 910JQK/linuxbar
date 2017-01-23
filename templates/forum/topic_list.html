@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar, ban_tip, moderate_menu, date_span, insert_code_dialog, insert_image_dialog, tag_selector, user_helper %}
+{% from 'macros.html' import messager, avatar, user_toolbar, empty_notice, pager, field, submit, editor_toolbar, ban_tip, moderate_menu, date_span, insert_code_dialog, insert_image_dialog, tag_selector, user_helper, face_picker %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -301,6 +301,7 @@
 	      {{ editor_toolbar() }}
 	    {% endif %}
 	    {{ field(form.content) }}
+	    {{ face_picker(get_faces()) }}
 	    {{ field(form.tags) }}
 	    {{ tag_selector(tag_list, {}) }}
 	    {{ submit(_('Publish')) }}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import field, submit, user_toolbar, messager, ban_tip, editor_toolbar, insert_code_dialog, insert_image_dialog, user_helper %}
+{% from 'macros.html' import field, submit, user_toolbar, messager, ban_tip, editor_toolbar, insert_code_dialog, insert_image_dialog, user_helper, face_picker %}
 {% from 'forum/subpost_list.html' import subpost_list %}
 <html>
   <head>
@@ -80,6 +80,7 @@
 	    {{ editor_toolbar() }}
 	  {% endif %}
 	  {{ field(form.content) }}
+	  {{ face_picker(get_faces()) }}
 	  {{ submit('Reply') }}
 	</fieldset>
       </form>

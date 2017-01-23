@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit, ban_tip, editor_toolbar, date_span, insert_code_dialog, insert_image_dialog, user_helper %}
+{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit, ban_tip, editor_toolbar, date_span, insert_code_dialog, insert_image_dialog, user_helper, face_picker %}
 {% from 'forum/subpost_list.html' import subpost_list %}
 <html>
   <head>
@@ -277,6 +277,7 @@
 	      {{ editor_toolbar() }}
 	    {% endif %}
 	    {{ field(form.content) }}
+	    {{ face_picker(get_faces()) }}
             {{ submit(_('Reply')) }}
 	  </fieldset>
 	</form>

@@ -316,6 +316,14 @@
   </div>
 {% endmacro %}
 
+{% macro face_picker(faces) %}
+  <div class="face_picker">
+    {% for face in faces %}
+      <img src="{{ url_for('image.face', name=face.name) }}" title="{{ face.name }}" data-name="{{ face.name }}" class="face" />
+    {% endfor %}
+  </div>
+{% endmacro %}
+
 {% macro pager(pn, items_per_page, total, ajax=False) %}
   {% set pages = (total / items_per_page) | round(0, 'ceil') | int %}
   {% if pn <= 4 %}
