@@ -266,7 +266,7 @@ function init_editor_toolbar(toolbar, textarea) {
 	}
 	toggle_uploading(true);
 	image_upload_request = POST(
-	    '/image/upload?json=json',
+	    insert_image_form.dataset.url,
 	    new FormData(insert_image_form),
 	    upload_ok,
 	    upload_err

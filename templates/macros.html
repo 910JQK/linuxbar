@@ -296,7 +296,7 @@
   <div id="insert_image_dialog_wrapper" class="dialog_wrapper" style="display: none;">
     <div id="insert_image_dialog" class="dialog">
       <h2>{{ _('Upload Image') }}</h2>
-      <form id="insert_image_form" method="post" enctype="multipart/form-data">
+      <form id="insert_image_form" method="post" enctype="multipart/form-data" data-url="{{ url_for('image.upload', json='json') }}">
 	<input id="insert_image_input" type="file" name="image" aria-label="file" autocomplete="off" />
 	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
       </form>
