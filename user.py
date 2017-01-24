@@ -75,7 +75,7 @@ def send_token_activation(user, token):
         html = _(
             ('Activation link for %s: ') % user.name
             + '<a target="_blank" href="%s">%s</a>' % (
-                url_quote(url),
+                escape(url),
                 escape(url)
             )
         )
