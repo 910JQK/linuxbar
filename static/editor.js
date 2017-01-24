@@ -1,4 +1,5 @@
 var IMAGE_HEADERS = [[137,80,78,71],[255,216],[71,73,70,56]];
+var UPLOAD_TIMEOUT = 40*1000;
 var format_checking = false;
 var reader = new FileReader();
 
@@ -269,7 +270,8 @@ function init_editor_toolbar(toolbar, textarea) {
 	    insert_image_form.dataset.url,
 	    new FormData(insert_image_form),
 	    upload_ok,
-	    upload_err
+	    upload_err,
+	    UPLOAD_TIMEOUT
 	);
     }
     var image_btn = toolbar.querySelector('.image_btn');
