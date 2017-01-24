@@ -1,8 +1,13 @@
+var WORKER_CODE = "function message(msg) { return function() { postMessage(msg); } }; setInterval(message('update_unread_info'), 150*1000); setInterval(message('update_date'), 60*1000)";
+var TITLE_MAX_SIZE= 64;
+
+
 var query = selector => document.querySelector(selector);
 var query_all = selector => document.querySelectorAll(selector);
 var _ = str => str; // reserved for l10n
-var timer = new Worker('/static/timer.js');
-var TITLE_MAX_SIZE= 64;
+var timer = new Worker(
+    URL.createObjectURL(new Blob([WORKER_CODE], {type: 'text/javascript'}))
+);
 
 
 /**

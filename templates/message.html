@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="/static/global.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}" />
     <style>
       .message_list { margin: auto; padding: 0; max-width: 20em; }
       .message_list > li { list-style-type: none; } 

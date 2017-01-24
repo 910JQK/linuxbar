@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>{{ _('Image Info: %(hash)s', hash=sha256part) ~ ' - ' ~ get_config('site_name') }}</title>
-    <link rel="stylesheet" href="/static/global.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}" />
     <style>
       h1 { text-align: center; }
       td { padding: 0.15em 0.3em; }

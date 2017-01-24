@@ -27,8 +27,8 @@
 {% endblock %}
 
 {% block head %}
-  <script type="text/javascript" src="/static/toolkit.js"></script>
-  <script type="text/javascript" src="/static/editor.js"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='toolkit.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='editor.js') }}"></script>
   <template id="richtext_info" style="display: none;">
     {{ RT_INFO }}
   </template>

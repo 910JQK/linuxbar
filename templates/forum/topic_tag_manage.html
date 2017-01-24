@@ -6,7 +6,7 @@
 {% block form_title %}{{ _('Change Tags') }}{% endblock %}
 
 {% block head %}
-  <script type="text/javascript" src="/static/toolkit.js"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='toolkit.js') }}"></script>
 {% endblock %}
 
 {% block form %}

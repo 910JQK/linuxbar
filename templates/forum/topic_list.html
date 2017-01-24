@@ -17,9 +17,9 @@
 	<title>{{ _('Dist Topics - %(tag)s - %(site)s', tag=tag.name, site=get_config('site_name')) }}</title>
       {% endif %}
     {% endif %}
-    <link rel="stylesheet" href="/static/global.css" />
-    <script type="text/javascript" src="/static/toolkit.js"></script>
-    <script type="text/javascript" src="/static/editor.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}" />
+    <script type="text/javascript" src="{{ url_for('static', filename='toolkit.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='editor.js') }}"></script>
     <template id="richtext_info" style="display: none">
       {{ RT_INFO }}
     </template>
@@ -180,7 +180,7 @@
 	<span>
 	  <div id="tag_menu_wrapper" class="menu_wrapper">
 	    <span class="menu_label">
-	      <img class="label_icon" src="/static/icons/tags-modified.svg" />
+	      <img class="label_icon" src="{{ url_for('static', filename='icons/tags-modified.svg') }}" />
 	      <span>{{ _('Tags') }}</span>
 	    </span>
 	    <div class="menu_keeper"></div>
@@ -204,12 +204,12 @@
 	<span>
 	  {% if distillate_only %}
 	    <a class="dist_link" href="{% if is_index %}{{ url_for('index') }}{% else %}{{ url_for('forum.topic_list', tag_slug=tag.slug) }}{% endif %}" title="{{ _('Show all topics') }}">
-	      <img class="label_icon" src="/static/icons/grid-three-up.svg" />
+	      <img class="label_icon" src="{{ url_for('static', filename='icons/grid-three-up.svg') }}" />
 	      <span>{{ _('Show All') }}</span>
 	    </a>
 	  {% else %}
 	    <a class="dist_link" href="{% if is_index %}{{ url_for('index', dist='dist') }}{% else %}{{ url_for('forum.topic_list', tag_slug=tag.slug, dist='dist') }}{% endif %}" title="{{ _('Show distillate topics only') }}">
-	      <img class="label_icon" src="/static/icons/star.svg" />
+	      <img class="label_icon" src="{{ url_for('static', filename='icons/star.svg') }}" />
 	      <span>Dist</span>
 	    </a>
 	  {% endif %}
@@ -219,7 +219,7 @@
 	<span>
 	    <div id="moderate_menu_wrapper" class="menu_wrapper">
 	      <span class="menu_label">
-		<img class="label_icon" src="/static/icons/cog.svg" />
+		<img class="label_icon" src="{{ url_for('static', filename='icons/cog.svg') }}" />
 		<span>{{ _('Moderate') }}</span>
 	      </span>
 	      {{ moderate_menu(current_user) }}

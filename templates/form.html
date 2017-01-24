@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}{% endblock %}</title>
-    <link rel="stylesheet" href="/static/global.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}" />
     <style>
      #container > h1 { margin-top: 0px; }
      .field_desc { color: gray; font-size: 75%; text-align: left; }

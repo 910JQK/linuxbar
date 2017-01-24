@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <title>{{ _('Confirm Operation - %(site)s', site=get_config('site_name')) }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/static/global.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}" />
     <style>
       .btn_wrapper { display: flex; justify-content: space-around; }
       .message_text { font-size: 115%; }

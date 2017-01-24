@@ -21,20 +21,58 @@ from moderate import moderate
 from image import image
 from forum import forum, topic_list, filter_deleted_post
 from config import (
-    DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE, assert_config,
-    RICHTEXT_INFO, RICHTEXT_INFO_JSON
+    PREFIX_ENABLED, PREFIX, DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE, 
+    RICHTEXT_INFO, RICHTEXT_INFO_JSON, assert_config
 )
 
 
+class PrefixMiddleware(object):
+    def __init__(self, app, prefix=''):
+        self.app = app
+        self.prefix = prefix
+    def __call__(self, environ, start_response):
+        #environ['PATH_INFO'] = environ['PATH_INFO'][len(self.prefix):]
+        environ['SCRIPT_NAME'] = self.prefix
+        return self.app(environ, start_response)
+
+
 app = Flask(__name__)
+
+assert_config()
+app.secret_key = SECRET_KEY
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_SIZE
+if PREFIX_ENABLED:
+    app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=PREFIX)
+
 babel = Babel(app)
 login_manager.init_app(app)
 CsrfProtect(app)
+
 app.register_blueprint(user, url_prefix='/user')
 app.register_blueprint(moderate, url_prefix='/moderate')
 app.register_blueprint(image, url_prefix='/image')
 app.register_blueprint(forum, url_prefix='/forum')
-DEBUG = True
+
+app.add_template_filter(md5, 'md5')
+app.add_template_filter(format_date, 'date')
+app.add_template_filter(get_color, 'get_color')
+app.add_template_filter(path_get_level, 'get_level')
+app.add_template_filter(path_get_padding, 'get_padding')
+app.add_template_filter(get_content_html, 'get_html')
+app.add_template_filter(filter_deleted_post, 'filter_deleted_post')
+
+gettext.install(
+    'linuxbar',
+    os.path.join(
+        os.path.dirname(
+            os.path.realpath(
+                __file__
+            )
+        ),
+        'locale'
+    )
+)
 
 
 @app.context_processor
@@ -46,15 +84,6 @@ def inject_data():
         'get_faces': get_faces,
         'RT_INFO': RICHTEXT_INFO_JSON
     }
-
-
-app.add_template_filter(md5, 'md5')
-app.add_template_filter(format_date, 'date')
-app.add_template_filter(get_color, 'get_color')
-app.add_template_filter(path_get_level, 'get_level')
-app.add_template_filter(path_get_padding, 'get_padding')
-app.add_template_filter(get_content_html, 'get_html')
-app.add_template_filter(filter_deleted_post, 'filter_deleted_post')
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -79,21 +108,6 @@ def richtext_info():
 
 
 def run():
-    assert_config()
-    gettext.install(
-        'linuxbar',
-        os.path.join(
-            os.path.dirname(
-                os.path.realpath(
-                    __file__
-                )
-            ),
-            'locale'
-        )
-    )
-    app.secret_key = SECRET_KEY
-    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-    app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_SIZE
     app.run(debug=DEBUG)
 
 

@@ -14,6 +14,8 @@ DEFAULT_CONFIG = {
 }
 
 
+PREFIX_ENABLED = False
+PREFIX = '/linuxbar'
 DEBUG = True
 SECRET_KEY = b'\xe9\xd3\x8fV0n\xcajX~P%*\xf1=O\xb7\xbc\xfa\xe5\xf5db'
 INACTIVE_USER_LIFETIME = 30 # minutes

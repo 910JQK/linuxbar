@@ -6,11 +6,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ topic.title ~ ' - ' ~ get_config('site_name') }}</title>
-    <link rel="stylesheet" href="/static/global.css" />
-    <link rel="stylesheet" href="/static/subpost.css" />
-    <link rel="stylesheet" href="/static/highlight.css" />
-    <script type="text/javascript" src="/static/toolkit.js"></script>
-    <script type="text/javascript" src="/static/editor.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='subpost.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='highlight.css') }}" />
+    <script type="text/javascript" src="{{ url_for('static', filename='toolkit.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='editor.js') }}"></script>
     <template id="richtext_info" style="display: none">
       {{ RT_INFO }}
     </template>
@@ -189,7 +189,7 @@
       {{ user_toolbar(current_user) }}
       <div id="top_left">
 	<a href="{{ url_for('index') }}" title="{{ _('Go back to the homepage') }}">
-	  <img class="label_icon" src="/static/icons/home.svg" />
+	  <img class="label_icon" src="{{ url_for('static', filename='icons/home.svg') }}" />
 	  <span>{{ _('Home') }}</span>
 	</a>
 	{% if current_user.is_authenticated and current_user.level > 0 %}
@@ -197,7 +197,7 @@
 	  <span>
 	    <div class="menu_wrapper" id="topic_manage_menu_wrapper">
 	      <span class="menu_label">
-		<img class="label_icon" src="/static/icons/wrench.svg" />
+		<img class="label_icon" src="{{ url_for('static', filename='icons/wrench.svg') }}" />
 		<span>{{ _('Manage') }}</span>
 	      </span>
 	      {{ topic_manage_menu(topic, current_user) }}
@@ -226,16 +226,16 @@
 		    {% if post.ordinal != 1 %}
 		      {# avoid to be thought as topic delete button #}
 		      <a href="{{ url_for('.post_remove', pid=post.id, prev=request.url) }}">		      
-			<img class="icon btn post_del_btn" src="/static/icons/x.svg" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" />
+			<img class="icon btn post_del_btn" src="{{ url_for('static', filename='icons/x.svg') }}" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" />
 		      </a>
 		    {% endif %}
 		    <a href="{{ url_for('user.ban', uid=post.author.id) }}" target="_blank">
-		      <img class="icon btn post_ban_icon" src="/static/icons/ban.svg" aria-label="ban" alt="ban" title="{{ _('ban this user') }}" />
+		      <img class="icon btn post_ban_icon" src="{{ url_for('static', filename='icons/ban.svg') }}" aria-label="ban" alt="ban" title="{{ _('ban this user') }}" />
 		    </a>
 		  {% endif %}
 		  {% if current_user.is_authenticated and post.author.id == current_user.id %}
 		    <a href="{{ url_for('forum.post_edit', pid=post.id, next=request.url) }}">
-		      <img class="icon btn post_edit_btn" src="/static/icons/pencil.svg" aria-label="edit" alt="edit" title="{{ _('edit this post') }}" />
+		      <img class="icon btn post_edit_btn" src="{{ url_for('static', filename='icons/pencil.svg') }}" aria-label="edit" alt="edit" title="{{ _('edit this post') }}" />
 		    </a>
 		  {% endif %}
 		  {% if post.last_edit_date %}

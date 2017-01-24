@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />    
     <title>{{ _('User: %(name)s', name=user.name) ~ ' - ' ~ get_config('site_name') }}</title>
-    <link rel="stylesheet" href="/static/global.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}" />
     <style>
       header { display: flex; align-items: center; }
       header > .avatar { flex-shrink: 0; }
