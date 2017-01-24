@@ -129,6 +129,7 @@ def create_post(topic, parent, content, add_reply_count=True, is_sys_msg=False, 
     new_post.save()
     if topic:
         topic.last_reply_date = new_post.date
+        topic.last_reply_author = new_post.author
         topic.save()
         if add_reply_count:
             (
