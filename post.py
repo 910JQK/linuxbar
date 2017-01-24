@@ -38,7 +38,12 @@ def filter_images(lines, images):
                 return _('[Image]')
         return segment
     for line in lines:
-        yield ' '.join(process_segment(segment) for segment in line.split(' '))
+        if isinstance(line, str):
+            yield (
+                ' '.join(process_segment(segment) for segment in line.split(' '))
+            )
+        else:
+            yield str(line)
 
 
 def gen_summary(content):
