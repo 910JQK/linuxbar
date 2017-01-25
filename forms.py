@@ -240,12 +240,16 @@ class ImageUploadForm(FlaskForm):
 class TopicAddForm(FlaskForm):
     # size range of the title must be consistent with the front-end script
     title = StringField(_('Title'), validators=[Required(), SizeRange(1, 64)])
-    content = TextAreaField(_('Content'), validators=[Required()])
+    content = TextAreaField(
+        _('Content'), validators=[Required(), SizeRange(1, 15000)]
+    )
     tags = SelectMultipleField(_('Tags'), validators=[Optional()], coerce=str)
 
 
 class PostAddForm(FlaskForm):
-    content = TextAreaField(_('Content'), validators=[Required()])
+    content = TextAreaField(
+        _('Content'), validators=[Required(), SizeRange(1, 15000)]
+    )
 
 
 class TopicTagManageForm(FlaskForm):

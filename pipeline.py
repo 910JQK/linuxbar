@@ -20,7 +20,9 @@ from config import (
     FACE_SIGN,
     FORMAT_SIGN,
     FORMAT_DEFAULT,
-    FORMATS
+    FORMATS,
+    IMAGE_LIMIT,
+    FACE_LIMIT
 )
 
 
@@ -116,6 +118,8 @@ def process_line_without_format(line, process_segment):
 
 
 def process_format(lines):
+    count_image = 0
+    count_face = 0
     def gen_html_tag(tag, content, **attrs):
         if not attrs:
             return '<%s>%s</%s>' % (tag, escape(content), tag)
@@ -155,6 +159,8 @@ def process_format(lines):
                     yield snippet
                 i += 1
         def process_segment(segment):
+            nonlocal count_image
+            nonlocal count_face
             for protocol in LINK_PROTOCOLS:
                 head = protocol + '://'
                 if (
@@ -175,13 +181,15 @@ def process_format(lines):
                     href = url_for('user.profile_by_name', name=username),
                     target = '_blank'
                 )
-            if segment.startswith(IMAGE_SIGN):
+            if segment.startswith(IMAGE_SIGN) and count_image < IMAGE_LIMIT:
                 sha256part = segment[len(IMAGE_SIGN):]
                 if REGEX_SHA256_PART.fullmatch(sha256part):
+                    count_image += 1
                     return gen_image_html(sha256part)
-            if segment.startswith(FACE_SIGN):
+            if segment.startswith(FACE_SIGN) and count_face < FACE_LIMIT:
                 face_name = segment[len(FACE_SIGN):]
                 if not face_name.startswith(FACE_SIGN):
+                    count_face += 1
                     return gen_face_html(face_name)
                 else:
                     # preserve the original text

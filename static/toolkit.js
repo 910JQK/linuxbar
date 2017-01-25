@@ -1,5 +1,6 @@
 var WORKER_CODE = "function message(msg) { return function() { postMessage(msg); } }; setInterval(message('update_unread_info'), 150*1000); setInterval(message('update_date'), 60*1000)";
-var TITLE_MAX_SIZE= 64;
+var TITLE_MAX_SIZE = 64;
+var CONTENT_MAX_SIZE = 15000;
 
 
 var query = selector => document.querySelector(selector);
@@ -315,11 +316,21 @@ function init_forms() {
 	let validate = function() {
 	    if(!title.value) {
 		alert(_('Title cannot be empty.'));
-	    } else if (!content.value) {
+	    } else if(!content.value) {
 		alert(_('Content cannot be empty.'));
 	    } else if(utf8size(title.value) > TITLE_MAX_SIZE) {
 		alert(
-		    printf(_('Title cannot exceed %1 bytes.'), TITLE_MAX_SIZE)
+		    printf(
+			_('Title cannot exceed %1 bytes.'),
+			TITLE_MAX_SIZE
+		    )
+		);
+	    } else if(utf8size(content.value) > CONTENT_MAX_SIZE) {
+		alert(
+		    printf(
+			_('Content cannot exceed %1 bytes'),
+			CONTENT_MAX_SIZE
+		    )
 		);
 	    } else {
 		return true;
@@ -343,10 +354,17 @@ function init_forms() {
 	let validate = function() {
 	    if(!content.value) {
 		alert(_('Content cannot be empty.'));
-		return false;
+	    } else if(utf8size(content.value) > CONTENT_MAX_SIZE) {
+		alert(
+		    printf(
+			_('Content cannot exceed %1 bytes'),
+			CONTENT_MAX_SIZE
+		    )
+		);
 	    } else {
 		return true;
 	    }
+	    return false;
 	};
 	content.addEventListener('keyup', function(ev) {
 	    if(ev.key == 'Enter' && ev.ctrlKey) {
