@@ -383,6 +383,29 @@ function init_forms() {
 }
 
 
+/**
+ * Expand clickable area of items of topic list
+ *
+ * @return void
+ */
+function init_topic_links() {
+    for(let I of query_all('.topic')) {
+	let url = I.querySelector('.title > a').href;
+	I.addEventListener('click', function(ev) {
+	    if(
+		document.body.offsetWidth <= 1000
+		    && !ev.target.classList.contains('tag_link')
+		    && !ev.target.classList.contains('summary_image')
+	      ) {
+		ev.preventDefault();
+		window.open(url);
+	    }
+	});
+    }
+}
+
+
 window.addEventListener('load', init_datetime_timer);
-window.addEventListener('load', init_tag_selector);
 window.addEventListener('load', init_forms);
+window.addEventListener('load', init_tag_selector);
+window.addEventListener('load', init_topic_links);

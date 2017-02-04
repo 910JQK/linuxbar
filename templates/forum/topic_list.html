@@ -125,6 +125,7 @@
 	 .topic {
 	     display: block;
 	     border-bottom: 1px solid hsl(0, 0%, 30%);
+	     cursor: pointer;
 	 }
 	 .container_left {
 	     display: none;
@@ -266,7 +267,7 @@
 	      </div>
 	      <div class="tag_list{% if not topic.tags %} empty{% endif %}">
 		{% for tag in topic.tags %}
-		  <span class="tag" style="background-color: {{ tag.slug | get_color(90, 35) }};"><a href="{{ url_for('forum.topic_list', tag_slug=tag.slug) }}">{{ tag.name }}</a></span>
+		  <span class="tag" style="background-color: {{ tag.slug | get_color(90, 35) }};"><a class="tag_link" href="{{ url_for('forum.topic_list', tag_slug=tag.slug) }}">{{ tag.name }}</a></span>
 		{% endfor %}
 	      </div>
 	    </div>
