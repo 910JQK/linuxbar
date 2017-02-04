@@ -198,7 +198,6 @@ function init_editor_toolbar(toolbar, textarea) {
     }
     function close_code_dialog() {
 	code_textarea.value = '';
-	lang_input.value = '';
 	wrapper.style.display = 'none';
 	textarea.focus();
     }
