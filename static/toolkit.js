@@ -287,8 +287,10 @@ function init_tag_selector() {
 	    event_handler.call(checkbox);
 	    if(!banned) {
 		checkbox.parentElement.addEventListener('click', function(ev) {
-		    if(ev.target != checkbox)
+		    if(ev.target != checkbox) {
 			checkbox.checked = !checkbox.checked;
+			event_handler.call(checkbox);
+		    }
 		});
 	    } else {
 		checkbox.parentElement.style.color = 'gray';
