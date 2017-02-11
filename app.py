@@ -63,6 +63,7 @@ app.add_template_filter(path_get_level, 'get_level')
 app.add_template_filter(path_get_padding, 'get_padding')
 app.add_template_filter(get_content_html, 'get_html')
 app.add_template_filter(filter_deleted_post, 'filter_deleted_post')
+app.add_template_filter(filter_append_time, 'append_time')
 
 
 @app.context_processor

@@ -80,6 +80,10 @@ def path_get_padding(level):
     return 0.8 + (2.2/log(1+4))*log(1+level)
 
 
+def filter_append_time(string):
+    return string + '?t=' + str(now().timestamp())
+
+
 def get_color(string, saturation, lightness):
     hash_value = sha256(string)
     n256 = int(hash_value[0:2], 16)

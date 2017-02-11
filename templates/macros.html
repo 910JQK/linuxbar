@@ -13,7 +13,7 @@
 {% macro field(wtf_field) %}
   {% if wtf_field.name == 'captcha' %}
     <div class="captcha_wrapper">
-      <img class="captcha_image" src="{{ url_for('get_captcha') }}" />
+      <img class="captcha_image" src="{{ url_for('get_captcha') | append_time }}" />
     </div>
   {% endif %}
   {% if wtf_field.type == 'BooleanField' %}
