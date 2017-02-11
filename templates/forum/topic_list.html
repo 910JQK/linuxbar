@@ -211,7 +211,7 @@
 	  {% else %}
 	    <a class="dist_link" href="{% if is_index %}{{ url_for('index', dist='dist') }}{% else %}{{ url_for('forum.topic_list', tag_slug=tag.slug, dist='dist') }}{% endif %}" title="{{ _('Show distillate topics only') }}">
 	      <img class="label_icon" src="{{ url_for('static', filename='icons/star.svg') }}" />
-	      <span>Dist</span>
+	      <span>{{ _('Dist') }}</span>
 	    </a>
 	  {% endif %}
 	</span>
@@ -293,7 +293,7 @@
       {{ pager(pn, count, total) }}
       {% if current_user.is_authenticated %}
 	{% set is_banned = current_user.is_banned %}
-	<p class="bold">Publish a new topic</p>
+	<p class="bold">{{ _('Publish a new topic') }}</p>
 	<form id="add_topic_form" method="post">
 	  <fieldset{% if is_banned %} disabled="disabled"{% endif %}>
 	    {{ form.csrf_token }}

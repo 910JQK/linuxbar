@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}" />
     <style>
       .btn_wrapper { display: flex; justify-content: space-around; }
+      .btn_wrapper button { min-width: 3em; margin: 0em 0.5em; }
       .message_text { font-size: 115%; }
       @media only screen and (max-width: 1000px) {
 	  .message_text { font-size: 150%; text-align: center; }
@@ -18,6 +19,7 @@
 	  .btn_wrapper button {
 	      width: 100%;
 	      padding: 0.3em 0em;
+	      margin: 0em;
 	  }
       }
     </style>

@@ -61,7 +61,7 @@
 
 
 {% macro avatar(mail, size=1) %}
-  <img class="avatar" src="https://www.gravatar.com/avatar/{{ mail | lower | md5 }}?d=mm&s={{ size*FONT_SIZE }}" />
+  <img class="avatar" src="https://www.gravatar.com/avatar/{{ mail | md5 }}?d=mm&s={{ size*FONT_SIZE }}" />
 {% endmacro %}
 
 

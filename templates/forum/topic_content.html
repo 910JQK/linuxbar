@@ -80,10 +80,6 @@
      .post_subpost_list.empty > .subpost_list_footer {
 	 border-top: none;
      }
-     .post_subpost_list.cut > .subpost_list_footer {
-	 padding: 0;
-	 border-top: none;
-     }
      /* .expanded: reply form is visible */
      .post_subpost_list.empty:not(.expanded) {
 	 border: none;
@@ -252,9 +248,6 @@
 		  {{ subpost_list(gen_subpost_list(post), current_user, base_level=1) }}
 		</ol>
 		<div class="subpost_list_footer">
-		  {% if cut %}
-		    <div class="btn expand_all_btn">{{ _('click to expand remaining posts') }}</div>
-		  {% endif %}
 		  <div class="pager_and_reply_btn_wrapper">
 		    <div class="subpost_list_pager">
 		    </div>
