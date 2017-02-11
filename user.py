@@ -72,8 +72,8 @@ def send_token_activation(user, token):
         addr_from = Config.Get('mail_addr'),
         addr_to = user.mail,
         content = _('Activation link for %s: ') % user.name + url,
-        html = _(
-            ('Activation link for %s: ') % user.name
+        html = (
+            _('Activation link for %s: ') % user.name
             + '<a target="_blank" href="%s">%s</a>' % (
                 escape(url),
                 escape(url)
