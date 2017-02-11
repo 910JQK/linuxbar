@@ -241,6 +241,9 @@ function update_date() {
     for(let span of query_all('.date')) {
 	span.textContent = format_date(span.dataset.ts);
     }
+    for(let mark of query_all('.edited_mark')) {
+	mark.title = format_date(mark.dataset.ts);
+    }
 }
 
 

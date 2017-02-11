@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit, ban_tip, editor_toolbar, date_span, insert_code_dialog, insert_image_dialog, user_helper, face_picker %}
+{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit, ban_tip, editor_toolbar, date_span, insert_code_dialog, insert_image_dialog, user_helper, face_picker, edited_mark %}
 {% from 'forum/subpost_list.html' import subpost_list %}
 <html>
   <head>
@@ -233,9 +233,7 @@
 		      <img class="icon btn post_edit_btn" src="{{ url_for('static', filename='icons/pencil.svg') }}" aria-label="edit" alt="edit" title="{{ _('edit this post') }}" />
 		    </a>
 		  {% endif %}
-		  {% if post.last_edit_date %}
-		    <span class="edited_mark" title="{{ post.last_edit_date | date }}">{{ _('[Edited]') }}</span>
-		  {% endif %}
+		  {{ edited_mark(post.last_edit_date) }}
 		  {{ date_span(post.date) }}
 		  <span class="ordinal">#{{ post.ordinal }}</span>
 		</div>
@@ -261,7 +259,7 @@
       {{ pager(pn, count, total) }}
       {% if current_user.is_authenticated %}
 	{% set is_banned = current_user.is_banned %}
-	<p class="bold">Reply this topic</p>
+	<p class="bold">{{ _('Reply this topic') }}</p>
 	<form id="add_post_form" method="post">
 	  <fieldset{% if is_banned %} disabled="disabled"{% endif %}>
 	    {{ form.csrf_token }}

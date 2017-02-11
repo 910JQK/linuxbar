@@ -136,7 +136,7 @@ def process_format(lines):
     def gen_image_html(sha256part):
         url = url_for('image.get', sha256part=sha256part)
         return (
-            '<a class="content_image_link" href="%s" target="_blank"><img class="content_image" src="%s"></img></a>' % (url, url)
+            '<a class="content_image_link" href="%s" target="_blank"><img class="content_image" src="%s" /></a>' % (url, url)
         )
     def gen_face_html(face_name):
         url = url_for('image.face', name=face_name)

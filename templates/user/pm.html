@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import pager, field, submit, avatar, messager, user_toolbar, editor_toolbar, insert_code_dialog, insert_image_dialog, face_picker %}
+{% from 'macros.html' import pager, field, submit, avatar, messager, user_toolbar, editor_toolbar, insert_code_dialog, insert_image_dialog, face_picker, date_span, edited_mark %}
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -93,14 +93,8 @@
 		      <img class="icon btn subpost_edit_btn" src="{{ url_for('static', filename='icons/pencil.svg') }}" aria-label="edit" alt="edit" title="{{ _('edit this post') }}" />
 		    </a>
 		  {% endif %}
-		  {% if message.post.last_edit_date %}
-		    <span class="edited_mark" title="{{ message.post.last_edit_date | date }}">
-		      {{ _('[Edited]') }}
-		    </span>
-		  {% endif %}
-		  <span class="date">
-		    {{ message.post.date | date }}
-		  </span>
+		  {{ edited_mark(message.post.last_edit_date) }}
+		  {{ date_span(message.post.date) }}
 		</div>
 	      </div>
 	    </div>

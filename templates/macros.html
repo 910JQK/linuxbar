@@ -40,6 +40,15 @@
 {% endmacro %}
 
 
+{% macro edited_mark(edit_date) %}
+  {% if edit_date %}
+    <span class="edited_mark" data-ts="{{ edit_date.timestamp() }}" title="{{ edit_date | date }}">
+      {{ _('[Edited]') }}
+    </span>
+  {% endif %}
+{% endmacro %}
+
+
 {% macro empty_notice() %}
   <div class="empty_notice box_center">
     <span>{{ _('Empty') }}</span>

@@ -80,7 +80,7 @@
 	  {% endif %}
 	  {{ field(form.content) }}
 	  {{ face_picker(get_faces()) }}
-	  {{ submit('Reply') }}
+	  {{ submit(_('Reply')) }}
 	</fieldset>
       </form>
       {% if is_banned %}{{ ban_tip(current_user) }}{% endif %}
