@@ -1,0 +1,1342 @@
+# Chinese (Simplified, China) translations for Linuxbar.
+# Copyright (C) 2017 910JQK
+# This file is distributed under the same license as the Linuxbar project.
+# 910JQK <v910JQK@gmail.com>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2017-02-11 14:19+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_Hans_CN\n"
+"Language-Team: zh_Hans_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.3.4\n"
+
+#: forms.py:22
+msgid "This field is required."
+msgstr "此处必填"
+
+#: forms.py:26
+msgid "Invalid username format."
+msgstr "用户名格式不正确"
+
+#: forms.py:30
+msgid "Passwords are inconsistent."
+msgstr "密码不匹配"
+
+#: forms.py:34
+msgid "Positive integer required"
+msgstr "必须是正整数"
+
+#: forms.py:39 forms.py:97 forms.py:190
+msgid "Email Address"
+msgstr "邮箱"
+
+#: forms.py:41 forms.py:99
+msgid "Invalid Email Address."
+msgstr "邮箱地址无效"
+
+#: forms.py:43
+msgid "Used to enable your account and reset your password."
+msgstr "用以启用帐号和重置密码"
+
+#: forms.py:46
+msgid "Nickname"
+msgstr "昵称"
+
+#: forms.py:50
+msgid "Nickname as well as identifier."
+msgstr "昵称，同时也是不可重复的用户名"
+
+#: forms.py:53 forms.py:84
+msgid "Password"
+msgstr "密码"
+
+#: forms.py:57 forms.py:88
+msgid "Your password. Won't be encrypted if not using HTTPS."
+msgstr "密码，非 HTTPS 则不加密传输"
+
+#: forms.py:60 forms.py:114
+msgid "Password Confirmation"
+msgstr "确认密码"
+
+#: forms.py:64 forms.py:118
+msgid "Repeat your password to confirm."
+msgstr "重复输入一遍密码以确认"
+
+#: forms.py:67
+msgid "Captcha"
+msgstr "验证码"
+
+#: forms.py:69
+msgid "Invalid captcha"
+msgstr "验证码无效"
+
+#: forms.py:77
+msgid "Login name"
+msgstr "登录名"
+
+#: forms.py:81
+msgid "Login Name can be either nickname or email address."
+msgstr "登录名可以是用户名也可以是邮箱"
+
+#: forms.py:91
+msgid "Remember me"
+msgstr "记住我"
+
+#: forms.py:101
+msgid "Email address of your account."
+msgstr "注册时填写的邮箱地址"
+
+#: forms.py:107
+msgid "New Password"
+msgstr "新的密码"
+
+#: forms.py:111
+msgid "New password. Won't be encrypted if not using HTTPS."
+msgstr "新的密码，非 HTTPS 则不加密传输"
+
+#: forms.py:121
+msgid "Token"
+msgstr "Token"
+
+#: forms.py:123
+msgid "Invalid token format"
+msgstr "Token 格式错误"
+
+#: forms.py:126
+#, python-format
+msgid "The token sent to you by email. Valid in %d minutes."
+msgstr "Token 已发送到你的邮箱。%d 分钟内有效。"
+
+#: forms.py:133
+msgid "Bio"
+msgstr "Bio"
+
+#: forms.py:133
+msgid "A brief description of you."
+msgstr "个人简介"
+
+#: forms.py:135 templates/user/profile.html:63
+msgid "Location"
+msgstr "位置"
+
+#: forms.py:137
+msgid "Your geolocation."
+msgstr "地理位置"
+
+#: forms.py:140 templates/user/profile.html:67
+msgid "Birth Year"
+msgstr "出生年份"
+
+#: forms.py:142
+msgid "Your birth year, at least four digits."
+msgstr "出生年份，四位数字"
+
+#: forms.py:145 templates/user/profile.html:71
+msgid "Occupation"
+msgstr "职业"
+
+#: forms.py:147
+msgid "Your work."
+msgstr "工作"
+
+#: forms.py:150 templates/user/profile.html:75
+msgid "IM Accounts"
+msgstr "IM 帐号"
+
+#: forms.py:152
+msgid "Your instant-messaging accounts."
+msgstr "即时通迅帐号"
+
+#: forms.py:158
+msgid "Duration"
+msgstr "时长"
+
+#: forms.py:162
+msgid "%d Day"
+msgid_plural  "%d Days"
+msgstr[0] "%d 天"
+msgstr[1] "%d 天"
+
+#: forms.py:172 templates/user/change_level.html:23
+msgid "Privilege"
+msgstr "权限"
+
+#: forms.py:174
+msgid "None"
+msgstr "无"
+
+#: forms.py:174 templates/user/profile.html:41
+msgid "Moderator"
+msgstr "管理员"
+
+#: forms.py:174 templates/moderate/moderator_list.html:42
+#: templates/user/profile.html:43
+msgid "Administrator"
+msgstr "站点管理员"
+
+#: forms.py:182
+msgid "Site Name"
+msgstr "站点名称"
+
+#: forms.py:183
+msgid "Name of this site."
+msgstr "这个站的标题"
+
+#: forms.py:186
+msgid "Site URL"
+msgstr "站点 URL"
+
+#: forms.py:187
+msgid "URL of this site. Example: https://foobar.invalid"
+msgstr "站点 URL. 例：https://foobar.invalid"
+
+#: forms.py:191
+msgid "Email address showed in mails sent by this site."
+msgstr "发件邮件地址"
+
+#: forms.py:194
+msgid "Topics per page"
+msgstr "每页主题帖数"
+
+#: forms.py:195
+msgid "The number of topics shown in one page in a topic list."
+msgstr "每页主题列表中主题帖的数量"
+
+#: forms.py:199
+msgid "Posts per page"
+msgstr "每页帖子数"
+
+#: forms.py:200
+msgid "The number of posts shown in one page in a post list."
+msgstr "每页主题帖中楼层的数量"
+
+#: forms.py:204
+msgid "Items per page"
+msgstr "每页条目数"
+
+#: forms.py:205
+msgid "The number of items shown in one page in a list"
+msgstr "每页列表中条目的数量"
+
+#: forms.py:212 templates/moderate/tag_list.html:18
+msgid "Slug"
+msgstr "代称"
+
+#: forms.py:216
+msgid "Invalid format."
+msgstr "格式不正确"
+
+#: forms.py:218
+msgid "Name in URL. Only Latin, number and \"-\" are allowed."
+msgstr "URL 中的名称。只能包含拉丁字母，数字和短线。"
+
+#: forms.py:221 forms.py:261 templates/moderate/moderator_list.html:26
+#: templates/moderate/tag_list.html:19
+msgid "Name"
+msgstr "昵称"
+
+#: forms.py:223
+msgid "Name that is displayed."
+msgstr "显示的名称"
+
+#: forms.py:226
+msgid "Description"
+msgstr "描述"
+
+#: forms.py:228
+msgid "Detailed description."
+msgstr "详细的说明"
+
+#: forms.py:234
+msgid "Image"
+msgstr "图片"
+
+#: forms.py:236
+msgid "Image file to upload (PNG/JPG/GIF)."
+msgstr "要上传的图片 (PNG/JPG/GIF)"
+
+#: forms.py:242
+msgid "Title"
+msgstr "标题"
+
+#: forms.py:244 forms.py:251
+msgid "Content"
+msgstr "内容"
+
+#: forms.py:246 forms.py:256 templates/forum/topic_list.html:185
+#: templates/macros.html:172
+msgid "Tags"
+msgstr "标签"
+
+#: forms.py:266
+msgid "Name of the face."
+msgstr "表情的名称"
+
+#: forms.py:269
+msgid "Hash"
+msgstr "哈希值"
+
+#: forms.py:272
+msgid "Invalid format"
+msgstr "格式不正确"
+
+#: forms.py:274
+msgid "Image hash value."
+msgstr "图片的哈希值"
+
+#: forum.py:137
+msgid "Please sign in before publishing a topic."
+msgstr "发帖请先登录"
+
+#: forum.py:140 forum.py:231 forum.py:411
+msgid "You are being banned."
+msgstr "您正处于封禁状态"
+
+#: forum.py:170
+msgid "Topic published successfully."
+msgstr "主题帖发表成功"
+
+#: forum.py:228 forum.py:408
+msgid "Please sign in before publishing a post."
+msgstr "发帖请先登录"
+
+#: forum.py:234
+msgid "Post published successfully."
+msgstr "帖子发表成功"
+
+#: forum.py:289
+msgid "Tags changed successfully."
+msgstr "标签变更成功"
+
+#: forum.py:310
+msgid "Topic pinned successfully."
+msgstr "置顶成功"
+
+#: forum.py:314
+msgid "Topic unpinned successfully."
+msgstr "取消置顶成功"
+
+#: forum.py:329
+msgid "Distillate added successfully."
+msgstr "加精成功"
+
+#: forum.py:333
+msgid "Distillate removed successfully."
+msgstr "取消精品成功"
+
+#: forum.py:352
+#, python-brace-format
+msgid ""
+"Your topic {0} has been deleted by moderator {1}.\n"
+"The title of your topic is {2}."
+msgstr ""
+"您的主题帖 {0} 已被管理员 {1} 删除。\n"
+"该主题帖的标题是 {2}."
+
+#: forum.py:357
+msgid "Topic deleted successfully."
+msgstr "删除成功"
+
+#: forum.py:362
+msgid "Are you sure to delete this topic?"
+msgstr "确定要删掉这个主题帖？"
+
+#: forum.py:384
+#, python-brace-format
+msgid ""
+"Your deleted topic {0} has been reverted by moderator {1}.\n"
+"{2}"
+msgstr ""
+"您的主题帖 {0} 已被管理员 {1} 恢复。\n"
+"{2}"
+
+#: forum.py:391
+msgid "Topic reverted successfully."
+msgstr "恢复成功"
+
+#: forum.py:414
+msgid "Reply published successfully."
+msgstr "回复成功"
+
+#: forum.py:454
+msgid "Please sign in before editing a post."
+msgstr "发帖请先登录"
+
+#: forum.py:464
+msgid "Post edited successfully."
+msgstr "编辑成功"
+
+#: forum.py:496
+#, python-brace-format
+msgid ""
+"Your post {0} has been deleted by moderator {1}.\n"
+"The content of your post is shown below:\n"
+"\n"
+"{2}"
+msgstr ""
+"您的帖子 {0} 已被管理员 {1} 删除。\n"
+"原帖内容如下：\n"
+"\n"
+"{2}"
+
+#: forum.py:501
+msgid "Post deleted successfully."
+msgstr "删除成功"
+
+#: forum.py:506
+msgid "Are you sure to delete this post?"
+msgstr "确定要删掉这个帖子？"
+
+#: forum.py:527
+#, python-brace-format
+msgid ""
+"Your deleted post {0} has been reverted by moderator {1}.\n"
+"{2}"
+msgstr ""
+"您的帖子 {0} 已被管理员 {1} 恢复。\n"
+"{2}"
+
+#: forum.py:534
+msgid "Post reverted successfully."
+msgstr "恢复成功"
+
+#: image.py:134
+msgid "Image uploaded successfully."
+msgstr "上传成玏"
+
+#: image.py:139
+msgid "An identical image already exists."
+msgstr "同一图片已存在"
+
+#: image.py:142
+msgid "Invalid file format."
+msgstr "文件格式不正确"
+
+#: image.py:144
+msgid "Invalid image format."
+msgstr "图片格式不正确"
+
+#: image.py:146
+msgid "No file selected."
+msgstr "没有选择文件"
+
+#: image.py:173
+#, python-format
+msgid "Image %s deleted successfully."
+msgstr "图片 %s 已成功删除。"
+
+#: image.py:184
+#, python-format
+msgid "Are you sure to delete image %s ?"
+msgstr "确定要删除图片 %s ?"
+
+#: moderate.py:40
+msgid "Site config updated successfully."
+msgstr "站点配置已更新"
+
+#: moderate.py:57
+#, python-format
+msgid "Tag %s created successfully."
+msgstr "标签 %s 创建成功"
+
+#: moderate.py:59 moderate.py:87
+msgid "Naming conflict detected."
+msgstr "命名冲突"
+
+#: moderate.py:84
+#, python-format
+msgid "Edit on tag %s saved successfully."
+msgstr "对标签 %s 的编辑已保存"
+
+#: moderate.py:100
+#, python-format
+msgid "Tag %s deleted successfully."
+msgstr "标签 %s 已成功删除"
+
+#: moderate.py:105
+#, python-format
+msgid "Are you sure to delete tag %s ?"
+msgstr "确定要删掉标签 %s ?"
+
+#: moderate.py:142
+#, python-brace-format
+msgid "The ban on you has been cancelled by moderator {0}"
+msgstr "封禁已被管理员 {0} 解除。"
+
+#: moderate.py:148
+#, python-format
+msgid "Ban on user %s reverted successfully."
+msgstr "对 %s 的封禁已解除"
+
+#: moderate.py:156
+#, python-format
+msgid "Are you sure to revert ban on user %s ?"
+msgstr "确定要解除对 %s 的封禁？"
+
+#: moderate.py:162
+msgid "No such ban record."
+msgstr "没有这一封禁记录"
+
+#: moderate.py:225
+#, python-format
+msgid "Face %s added successfully."
+msgstr "表情 %s 添加成功"
+
+#: moderate.py:228
+msgid "A face with the same name already exists."
+msgstr "同名表情已存在"
+
+#: moderate.py:239
+#, python-format
+msgid "Face %s deleted successfully."
+msgstr "表情 %s 删除成功"
+
+#: moderate.py:244
+#, python-format
+msgid "Are you sure to delete face %s ?"
+msgstr "确定要删除表情 %s ?"
+
+#: pipeline.py:203
+#, python-format
+msgid "Post %d"
+msgstr "帖子 %d"
+
+#: pipeline.py:213
+#, python-format
+msgid "Topic %d"
+msgstr "主题 %d"
+
+#: post.py:38
+msgid "[Image]"
+msgstr "【图】"
+
+#: user.py:38
+msgid "Please sign in to access this page."
+msgstr "请先登录"
+
+#: user.py:71
+#, python-format
+msgid "Activation Mail - %s"
+msgstr "激活邮件 - %s"
+
+#: user.py:74
+#, python-format
+msgid "Activation link for %s: "
+msgstr "%s 的激活链接："
+
+#: user.py:88
+#, python-format
+msgid "Reset Password for %s - %s"
+msgstr "重置 %s 的密码 - %s"
+
+#: user.py:93
+#, python-format
+msgid "Your token is: %s"
+msgstr "您的 Token 是：%s"
+
+#: user.py:117
+msgid ""
+"Signed up successfully. Activation mail has been sent to you. Please "
+"login after activation."
+msgstr "注册成功。激活邮件已发送，请激活后登录。"
+
+#: user.py:121
+msgid "Email address already in use."
+msgstr "该邮箱已被注册"
+
+#: user.py:123
+msgid "Name already in use."
+msgstr "该昵称已被占用"
+
+#: user.py:125
+msgid "Wrong captcha."
+msgstr "验证码错误"
+
+#: user.py:136
+#, python-format
+msgid "User %s activated successfully."
+msgstr "%s 已成功激活"
+
+#: user.py:139
+msgid "Wrong activation token."
+msgstr "激活 Token 错误"
+
+#: user.py:141 user.py:198 user.py:218
+msgid "No such user."
+msgstr "没有这个用户"
+
+#: user.py:143
+msgid "Wrong token format."
+msgstr "Token 格式不正确"
+
+#: user.py:150
+msgid "You have already signed in."
+msgstr "您已登录"
+
+#: user.py:163
+msgid "Signed in successfully."
+msgstr "登录成功"
+
+#: user.py:166
+msgid "This user is inactive."
+msgstr "该用户尚未激活"
+
+#: user.py:171
+msgid "Invalid login name or password."
+msgstr "登录名或密码错误"
+
+#: user.py:196
+msgid "A valid token has already been sent to you."
+msgstr "一个 Token 已经发送"
+
+#: user.py:213
+msgid "Password reset successfully."
+msgstr "密码重置成功"
+
+#: user.py:216
+msgid "Invalid token."
+msgstr "Token 无效"
+
+#: user.py:262
+msgid "Profile updated successfully."
+msgstr "个人资料更新成功"
+
+#: user.py:277
+#, python-format
+msgid "Ban on user %s entered into force."
+msgstr "对 %s 的封禁已生效"
+
+#: user.py:283
+msgid "You have been banned by moderator %(operator)s for %(num)d day."
+msgid_plural "You have been banned by moderator %(operator)s for %(num)d days."
+msgstr[0] "您已被管理员 %(operator)s 封禁 %(num)d 天。"
+msgstr[1] "您已被管理员 %(operator)s 封禁 %(num)d 天。"
+
+#: user.py:293
+msgid "A ban with longer duration already exists."
+msgstr "已存在更长时间的封禁"
+
+#: user.py:307
+msgid "Invalid operation."
+msgstr "操作无效"
+
+#: user.py:311
+msgid "User privilege changed successfully."
+msgstr "权限变更成功"
+
+#: user.py:322
+msgid "Signed out successfully."
+msgstr "注销成功"
+
+#: user.py:419
+msgid "Private message sent successfully."
+msgstr "私信发送成功"
+
+#: utils.py:96
+msgid "just now"
+msgstr "刚刚"
+
+#: utils.py:100
+msgid "a minute ago"
+msgstr "1 分"
+
+#: utils.py:102
+#, python-format
+msgid "%d minutes ago"
+msgstr "%d 分"
+
+#: utils.py:106
+msgid "an hour ago"
+msgstr "1 小时"
+
+#: utils.py:108
+#, python-format
+msgid "%d hours ago"
+msgstr "%d 小时"
+
+#: utils.py:113
+msgid "a day ago"
+msgstr "1 天"
+
+#: utils.py:115
+#, python-format
+msgid "%d days ago"
+msgstr "%d 天"
+
+#: utils.py:120
+msgid "a week ago"
+msgstr "1 周"
+
+#: utils.py:122
+#, python-format
+msgid "%d weeks ago"
+msgstr "%d 周"
+
+#: utils.py:127
+msgid "a month ago"
+msgstr "1 个月"
+
+#: utils.py:129
+#, python-format
+msgid "%d months ago"
+msgstr "%d 个月"
+
+#: utils.py:133
+msgid "a year ago"
+msgstr "1 年"
+
+#: utils.py:135
+#, python-format
+msgid "%d years ago"
+msgstr "%d 年"
+
+#: validation.py:25
+#, python-format
+msgid "%s should be at least %d bytes."
+msgstr "%s 不能少于 %d 字节"
+
+#: validation.py:29
+#, python-format
+msgid "%s should be at most %d bytes."
+msgstr "%s 不能超过 %d 字节"
+
+#: templates/confirm.html:5
+#, python-format
+msgid "Confirm Operation - %(site)s"
+msgstr "确认操作 - %(site)s"
+
+#: templates/confirm.html:33
+msgid "Yes"
+msgstr "是"
+
+#: templates/confirm.html:37
+msgid "No"
+msgstr "否"
+
+#: templates/macros.html:45
+msgid "Empty"
+msgstr "空无一物"
+
+#: templates/macros.html:54
+msgid "You are currently being banned."
+msgstr "您的帐号正处于封禁中"
+
+#: templates/macros.html:57
+msgid "Expire date: "
+msgstr "解封时间："
+
+#: templates/forum/topic_content.html:254
+#: templates/forum/topic_content.html:274 templates/macros.html:110
+#: templates/user/notification.html:14
+msgid "Reply"
+msgstr "回复"
+
+#: templates/macros.html:111
+#, python-format
+msgid "Reply(%(n)d)"
+msgstr "回复(%(n)d)"
+
+#: templates/macros.html:114 templates/user/notification.html:15
+msgid "At"
+msgstr "呼叫"
+
+#: templates/macros.html:115
+#, python-format
+msgid "At(%(n)d)"
+msgstr "呼叫(%(n)d)"
+
+#: templates/macros.html:118
+msgid "Sys"
+msgstr "系统"
+
+#: templates/macros.html:119
+#, python-format
+msgid "Sys(%(n)d)"
+msgstr "系统(%(n)d)"
+
+#: templates/macros.html:122 templates/user/profile.html:88
+msgid "PM"
+msgstr "私信"
+
+#: templates/macros.html:123
+#, python-format
+msgid "PM(%(n)d)"
+msgstr "私信(%(n)d)"
+
+#: templates/macros.html:133 templates/macros.html:158
+msgid "Logout"
+msgstr "注销"
+
+#: templates/macros.html:140
+msgid "Login"
+msgstr "登录"
+
+#: templates/macros.html:144 templates/user/profile.html:55
+msgid "Register"
+msgstr "注册"
+
+#: templates/macros.html:155
+#, python-format
+msgid "User: %(user)s"
+msgstr "用户：%(user)s"
+
+#: templates/macros.html:170
+msgid "change tags"
+msgstr "变更此主题帖的标签"
+
+#: templates/macros.html:175
+msgid "delete this topic"
+msgstr "删除该主题帖"
+
+#: templates/image/info.html:52 templates/image/upload.html:42
+#: templates/macros.html:177 templates/moderate/delete_record.html:54
+msgid "Delete"
+msgstr "删除"
+
+#: templates/macros.html:182
+msgid "add this topic to distillate"
+msgstr "添加到精品区"
+
+#: templates/forum/topic_list.html:214 templates/macros.html:184
+msgid "Dist"
+msgstr "精品"
+
+#: templates/macros.html:188
+msgid "unset distillate for this topic"
+msgstr "从精品区中移除"
+
+#: templates/macros.html:190
+msgid "Unset"
+msgstr "取消精品"
+
+#: templates/macros.html:195
+msgid "pin this topic"
+msgstr "置顶此主题帖"
+
+#: templates/macros.html:197
+msgid "Pin"
+msgstr "置顶"
+
+#: templates/macros.html:201
+msgid "unpin this topic"
+msgstr "不再置顶此帖"
+
+#: templates/macros.html:203
+msgid "Unpin"
+msgstr "取消置顶"
+
+#: templates/macros.html:220
+msgid "Config"
+msgstr "配置"
+
+#: templates/macros.html:225 templates/moderate/moderator_list.html:19
+msgid "Moderator List"
+msgstr "管理员列表"
+
+#: templates/macros.html:231 templates/moderate/delete_record.html:31
+msgid "Delete Record"
+msgstr "删除记录"
+
+#: templates/macros.html:236 templates/moderate/ban_list.html:30
+msgid "Ban List"
+msgstr "封禁列表"
+
+#: templates/macros.html:241 templates/moderate/tag_list.html:6
+msgid "Tag Management"
+msgstr "标签管理"
+
+#: templates/macros.html:246 templates/moderate/face_list.html:6
+msgid "Face Management"
+msgstr "表情管理"
+
+#: templates/macros.html:280
+msgid "Insert Code"
+msgstr "插入代码"
+
+#: templates/macros.html:376
+msgid "OK"
+msgstr "确定"
+
+#: templates/macros.html:377
+msgid "Cancel"
+msgstr "取消"
+
+#: templates/image/upload.html:7 templates/macros.html:386
+msgid "Upload Image"
+msgstr "上传图片"
+
+#: templates/macros.html:392
+msgid "Only PNG/JPG/GIF are allowed."
+msgstr "可用格式：PNG/JPG/GIF"
+
+#: templates/macros.html:396
+msgid "Click here to manage your images"
+msgstr "点击这里管理图片"
+
+#: templates/message.html:10
+msgid "Message"
+msgstr "消息"
+
+#: templates/richtext_info.html:7
+#, python-format
+msgid "Richtext Usage - %(site)s"
+msgstr "富文本使用方法 - %(site)s"
+
+#: templates/richtext_info.html:15
+msgid "Richtext Usage"
+msgstr "富文本使用方法"
+
+#: templates/forum/post_content.html:49 templates/forum/topic_content.html:187
+msgid "Go back to the homepage"
+msgstr "返回首页"
+
+#: templates/forum/post_content.html:51 templates/forum/topic_content.html:189
+msgid "Home"
+msgstr "首页"
+
+#: templates/forum/post_content.html:55
+msgid "Go back to the topic"
+msgstr "返回主题帖"
+
+#: templates/forum/post_content.html:57
+msgid "Topic"
+msgstr "主题帖"
+
+#: templates/forum/post_content.html:61
+msgid "Go back to the post of the upper layer"
+msgstr "返回上一层"
+
+#: templates/forum/post_content.html:63
+msgid "Upper"
+msgstr "上一层"
+
+#: templates/forum/post_content.html:75
+msgid "Reply this post"
+msgstr "回复此帖"
+
+#: templates/forum/post_edit.html:4
+#, python-format
+msgid "Edit Post - %(site)s"
+msgstr "编辑帖子 - %(site)s"
+
+#: templates/forum/post_edit.html:6
+msgid "Edit Post"
+msgstr "编辑帖子"
+
+#: templates/forum/post_edit.html:48 templates/forum/topic_tag_manage.html:19
+#: templates/moderate/tag_edit.html:16 templates/user/ban.html:38
+#: templates/user/change_level.html:32 templates/user/password_reset.html:16
+msgid "Confirm"
+msgstr "确认"
+
+#: templates/forum/subpost_list.html:24 templates/forum/topic_content.html:225
+msgid "delete this post"
+msgstr "删除此帖"
+
+#: templates/forum/subpost_list.html:27 templates/forum/topic_content.html:229
+msgid "ban this user"
+msgstr "封禁该用户"
+
+#: templates/forum/subpost_list.html:32 templates/forum/topic_content.html:234
+#: templates/user/pm.html:94
+msgid "edit this post"
+msgstr "编辑此帖"
+
+#: templates/forum/subpost_list.html:37
+msgid "reply this post"
+msgstr "回复此帖"
+
+#: templates/forum/subpost_list.html:43 templates/forum/topic_content.html:238
+#: templates/user/notification.html:139 templates/user/pm.html:99
+msgid "[Edited]"
+msgstr "【已编辑】"
+
+#: templates/forum/topic_content.html:197
+msgid "Manage"
+msgstr "管理"
+
+#: templates/forum/topic_list.html:11
+#, python-format
+msgid "Dist Topics - %(site)s"
+msgstr "精品帖 - %(site)s"
+
+#: templates/forum/topic_list.html:15
+#, python-format
+msgid "%(tag)s - %(site)s"
+msgstr "%(tag)s - %(site)s"
+
+#: templates/forum/topic_list.html:17
+#, python-format
+msgid "Dist Topics - %(tag)s - %(site)s"
+msgstr "精品帖 - %(tag)s - %(site)s"
+
+#: templates/forum/topic_list.html:54
+msgid "[Pinned]"
+msgstr "【置顶】"
+
+#: templates/forum/topic_list.html:59
+msgid "[Dist]"
+msgstr "【精】"
+
+#: templates/forum/topic_list.html:191
+msgid "All"
+msgstr "全部"
+
+#: templates/forum/topic_list.html:207
+msgid "Show all topics"
+msgstr "显示全部帖子"
+
+#: templates/forum/topic_list.html:209
+msgid "Show All"
+msgstr "显示全部"
+
+#: templates/forum/topic_list.html:212
+msgid "Show distillate topics only"
+msgstr "只显示精品帖"
+
+#: templates/forum/topic_list.html:224
+msgid "Moderate"
+msgstr "管理"
+
+#: templates/forum/topic_list.html:236
+msgid "Dist Topics"
+msgstr "精品帖"
+
+#: templates/forum/topic_list.html:242
+#, python-format
+msgid "Dist Topics: %(tag)s"
+msgstr "精品帖：%(tag)s"
+
+#: templates/forum/topic_list.html:296
+msgid "Publish a new topic"
+msgstr "发表新帖"
+
+#: templates/forum/topic_list.html:308
+msgid "Publish"
+msgstr "发表"
+
+#: templates/forum/topic_tag_manage.html:4
+#, python-format
+msgid "Change Tags - %(site)s"
+msgstr "变更标签 - %(site)s"
+
+#: templates/forum/topic_tag_manage.html:6
+msgid "Change Tags"
+msgstr "变更标签"
+
+#: templates/image/info.html:6
+#, python-format
+msgid "Image Info: %(hash)s"
+msgstr "图片信息：%(hash)s"
+
+#: templates/image/info.html:20 templates/image/upload.html:22
+msgid "HASH"
+msgstr "哈希值"
+
+#: templates/image/info.html:28
+msgid "Format"
+msgstr "格式"
+
+#: templates/image/info.html:32
+msgid "Uploader"
+msgstr "上传者"
+
+#: templates/image/info.html:40 templates/image/upload.html:23
+msgid "Upload Date"
+msgstr "上传时间"
+
+#: templates/image/info.html:44
+msgid "Full SHA256"
+msgstr "完整 SHA256"
+
+#: templates/image/upload.html:4
+#, python-format
+msgid "Upload Image - %(site)s"
+msgstr "上传图片 - %(site)s"
+
+#: templates/image/upload.html:21
+msgid "File Name"
+msgstr "文件名"
+
+#: templates/image/upload.html:24 templates/moderate/ban_list.html:40
+#: templates/moderate/delete_record.html:43 templates/moderate/tag_list.html:20
+msgid "Operations"
+msgstr "操作"
+
+#: templates/image/upload.html:55
+msgid "Upload"
+msgstr "上传"
+
+#: templates/moderate/ban_list.html:7
+#, python-format
+msgid "Ban List - %(site)s"
+msgstr "封禁列表"
+
+#: templates/moderate/ban_list.html:36 templates/user/ban.html:23
+#: templates/user/change_level.html:19
+msgid "User"
+msgstr "用户"
+
+#: templates/moderate/ban_list.html:37 templates/user/ban.html:27
+msgid "Days"
+msgstr "天数"
+
+#: templates/moderate/ban_list.html:38 templates/moderate/delete_record.html:41
+msgid "Date"
+msgstr "时间"
+
+#: templates/moderate/ban_list.html:39 templates/moderate/delete_record.html:42
+msgid "Operator"
+msgstr "操作人"
+
+#: templates/moderate/ban_list.html:53 templates/moderate/delete_record.html:52
+#: templates/moderate/delete_record.html:85
+#: templates/moderate/delete_record.html:91
+msgid "Revert"
+msgstr "恢复"
+
+#: templates/moderate/ban_list.html:55
+msgid "(Expired)"
+msgstr "（已失效）"
+
+#: templates/moderate/config.html:4
+#, python-format
+msgid "Configurations - %(site)s"
+msgstr "配置 - %(site)s"
+
+#: templates/moderate/config.html:6
+msgid "Configurations"
+msgstr "配置"
+
+#: templates/moderate/config.html:19 templates/user/config.html:29
+#: templates/user/profile_edit.html:18
+msgid "Update"
+msgstr "更新"
+
+#: templates/moderate/delete_record.html:7
+#, python-format
+msgid "Delete Record - %(site)s"
+msgstr "删除记录 - %(site)s"
+
+#: templates/moderate/delete_record.html:37
+msgid "Type"
+msgstr "类型"
+
+#: templates/moderate/delete_record.html:38
+msgid "ID"
+msgstr "ID"
+
+#: templates/moderate/delete_record.html:39
+msgid "Summary"
+msgstr "摘要"
+
+#: templates/moderate/delete_record.html:40
+msgid "Author"
+msgstr "作者"
+
+#: templates/moderate/delete_record.html:87
+#: templates/moderate/delete_record.html:93
+msgid "(Reverted)"
+msgstr "（已恢复）"
+
+#: templates/moderate/face_list.html:4
+#, python-format
+msgid "Face Management - %(site)s"
+msgstr "表情管理 - %(site)s"
+
+#: templates/moderate/face_list.html:37
+msgid "Click the face if you want to remove it."
+msgstr "点击表情以删除"
+
+#: templates/moderate/face_list.html:45 templates/moderate/tag_list.html:44
+msgid "Add"
+msgstr "添加"
+
+#: templates/moderate/moderator_list.html:7
+#, python-format
+msgid "Moderator List - %(site)s"
+msgstr "管理员列表 - %(site)s"
+
+#: templates/moderate/moderator_list.html:25
+msgid "UID"
+msgstr "UID"
+
+#: templates/moderate/moderator_list.html:27
+msgid "Role"
+msgstr "职责"
+
+#: templates/moderate/moderator_list.html:44
+msgid "Ordinary Moderator"
+msgstr "一般管理员"
+
+#: templates/moderate/tag_edit.html:4
+#, python-format
+msgid "Edit Tag - %(site)s"
+msgstr "编辑标签 - %(site)s"
+
+#: templates/moderate/tag_edit.html:6
+msgid "Edit Tag"
+msgstr "编辑标签"
+
+#: templates/moderate/tag_list.html:4
+#, python-format
+msgid "Tag Management - %(site)s"
+msgstr "标签管理 - %(site)s"
+
+#: templates/user/ban.html:4
+#, python-format
+msgid "Ban %(user)s - %(site)s"
+msgstr "封禁 %(user)s - %(site)s"
+
+#: templates/user/ban.html:6
+msgid "Ban"
+msgstr "封禁"
+
+#: templates/user/change_level.html:4
+#, python-format
+msgid "Change Privilege of user %(user)s - %(site)s"
+msgstr "变更 %(user)s 的权限 %(site)s"
+
+#: templates/user/change_level.html:6 templates/user/profile.html:94
+msgid "Change Privilege"
+msgstr "变更权限"
+
+#: templates/user/config.html:4
+#, python-format
+msgid "Preferences - %(site)s"
+msgstr "首选项 - %(site)s"
+
+#: templates/user/config.html:6
+msgid "Preferences"
+msgstr "首选项"
+
+#: templates/user/get_token.html:4 templates/user/password_reset.html:4
+#, python-format
+msgid "Reset Password - %(site)s"
+msgstr "重置密码 - %(site)s"
+
+#: templates/user/get_token.html:6
+msgid "Verify your identity"
+msgstr "验证身份"
+
+#: templates/user/get_token.html:14
+msgid "Send email"
+msgstr "发送邮件"
+
+#: templates/user/login.html:4
+#, python-format
+msgid "Sign in - %(site)s"
+msgstr "登录 - %(site)s"
+
+#: templates/user/login.html:6 templates/user/login.html:26
+msgid "Sign in"
+msgstr "登录"
+
+#: templates/user/login.html:19
+msgid "Forgot your password? Click here to reset it."
+msgstr "忘记密码？"
+
+#: templates/user/notification.html:8
+msgid "Reply me"
+msgstr "回复我的"
+
+#: templates/user/notification.html:9
+msgid "At me"
+msgstr "@我的"
+
+#: templates/user/notification.html:10
+msgid "System Messages"
+msgstr "系统消息"
+
+#: templates/user/notification.html:11 templates/user/pm.html:61
+msgid "Private Messages"
+msgstr "私信"
+
+#: templates/user/notification.html:16
+msgid "System"
+msgstr "系统"
+
+#: templates/user/notification.html:17
+msgid "Private"
+msgstr "私信"
+
+#: templates/user/notification.html:19
+#, python-format
+msgid "%(title)s - %(site)s"
+msgstr "%(title)s - %(site)s"
+
+#: templates/user/notification.html:104
+#, python-format
+msgid "%(name)s (%(unread)d)"
+msgstr "%(name)s (%(unread)d)"
+
+#: templates/user/notification.html:122
+msgid "[System]"
+msgstr "【系统】"
+
+#: templates/user/password_reset.html:6
+msgid "Reset Your Password"
+msgstr "重置密码"
+
+#: templates/user/pm.html:16
+#, python-format
+msgid "Private messages with %(target)s - %(site)s"
+msgstr "私信给 %(target)s - %(site)s"
+
+#: templates/user/pm.html:66
+#, python-format
+msgid "To: %(name)s"
+msgstr "To: %(name)s"
+
+#: templates/user/pm.html:72
+msgid "Send"
+msgstr "发送"
+
+#: templates/user/profile.html:7
+#, python-format
+msgid "User: %(name)s"
+msgstr "用户：%(name)s"
+
+#: templates/user/profile.html:59
+msgid "Posts"
+msgstr "帖子数"
+
+#: templates/user/profile.html:64 templates/user/profile.html:68
+#: templates/user/profile.html:72 templates/user/profile.html:76
+msgid "Unknown"
+msgstr "未知"
+
+#: templates/user/profile.html:84
+msgid "Edit"
+msgstr "编辑"
+
+#: templates/user/profile.html:87
+msgid "Send a private message to this user."
+msgstr "向该用户发送私信"
+
+#: templates/user/profile_edit.html:4
+#, python-format
+msgid "Edit Profile - %(site)s"
+msgstr "编缉个人资料 - %(site)s"
+
+#: templates/user/profile_edit.html:6
+msgid "Edit Profile"
+msgstr "编缉个人资料"
+
+#: templates/user/register.html:4
+#, python-format
+msgid "Sign up - %(site)s"
+msgstr "注册 - %(site)s"
+
+#: templates/user/register.html:6 templates/user/register.html:21
+msgid "Sign up"
+msgstr "注册"
+
