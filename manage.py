@@ -17,8 +17,15 @@ def create_administrator():
         print('Passwords are inconsistent.')
         return
     else:
+        conflict = User.select().where(
+            (User.mail == mail.lower())
+            | (User.name == name)
+        )
+        if conflict:
+            print('Conflict detected. Failed to create account.')
+            return
         user = User(
-            mail = mail,
+            mail = mail.lower(),
             name = name,
             level = 2,
             date_register = now(),

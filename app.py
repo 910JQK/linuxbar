@@ -6,9 +6,9 @@ import io
 import hashlib
 import datetime
 from flask import Flask, Response, session, render_template
-from flask_babel import Babel
 from flask_login import current_user
 from flask_wtf.csrf import CsrfProtect
+from flask_babel import Babel
 
 
 import captcha
@@ -42,6 +42,7 @@ assert_config()
 app.secret_key = SECRET_KEY
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_SIZE
+app.config['BABEL_DEFAULT_LOCALE'] = LOCALE
 if PREFIX_ENABLED:
     app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=PREFIX)
 
@@ -61,18 +62,6 @@ app.add_template_filter(path_get_level, 'get_level')
 app.add_template_filter(path_get_padding, 'get_padding')
 app.add_template_filter(get_content_html, 'get_html')
 app.add_template_filter(filter_deleted_post, 'filter_deleted_post')
-
-gettext.install(
-    'linuxbar',
-    os.path.join(
-        os.path.dirname(
-            os.path.realpath(
-                __file__
-            )
-        ),
-        'locale'
-    )
-)
 
 
 @app.context_processor

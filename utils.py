@@ -1,12 +1,14 @@
+import os
 import re
 import random
-import gettext
 import hashlib
 import datetime
 import threading
+import gettext
 from math import log
 from html import escape
 from urllib.parse import quote
+from config import LOCALE
 
 
 import smtplib
@@ -20,11 +22,22 @@ TOKEN_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 now = datetime.datetime.now
 
 
+locale_path = os.path.join(
+    os.path.dirname(
+        os.path.realpath(
+            __file__
+        )
+    ),
+    'translations'
+)
+translation = gettext.translation('messages', locale_path, languages=[LOCALE])
+
+
 def _(string, string_pl=None, n=None):
     if not string_pl:
-        return gettext.gettext(string)
+        return translation.gettext(string)
     else:
-        return gettext.ngettext(string, string_pl, n)
+        return translation.ngettext(string, string_pl, n)
 
 
 def sha256(string):
