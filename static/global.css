@@ -378,6 +378,16 @@ code {
     to { visibility: hidden; opacity: 0; }
 }
 
+@-webkit-keyframes show_message {
+    from {top: 0em;}
+    to {top: -3em;}
+}
+
+@-webkit-keyframes show_message_mobile {
+    from { visibility: visible; opacity: 1; }
+    to { visibility: hidden; opacity: 0; }
+}
+
 #messager {
     box-sizing: border-box;    
     position: fixed;
@@ -397,10 +407,16 @@ code {
     animation-duration: 0.8s;
     animation-fill-mode: forwards;
     animation-timing-function: linear;
+    -webkit-animation-name: show_message;
+    -webkit-animation-delay: 2s;
+    -webkit-animation-duration: 0.8s;
+    -webkit-animation-fill-mode: forwards;
+    -webkit-animation-timing-function: linear;
 }
 
 #messager.empty {
     animation-play-state: paused;
+    -webkit-animation-play-state: paused;
 }
 
 #messager > .message_list {
@@ -556,5 +572,6 @@ code {
 	width: unset;
 	max-width: 80%;
 	animation-name: show_message_mobile;
+	-webkit-animation-name: show_message_mobile;
     }
 }
