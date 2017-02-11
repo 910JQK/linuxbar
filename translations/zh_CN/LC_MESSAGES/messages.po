@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-11 16:24+0800\n"
+"POT-Creation-Date: 2017-02-11 18:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_Hans_CN\n"
@@ -275,7 +275,7 @@ msgstr "标题"
 msgid "Content"
 msgstr "内容"
 
-#: forms.py:249 forms.py:259 templates/forum/topic_list.html:185
+#: forms.py:249 forms.py:259 templates/forum/topic_list.html:184
 #: templates/macros.html:172
 msgid "Tags"
 msgstr "标签"
@@ -742,8 +742,8 @@ msgstr "您的帐号正处于封禁中"
 msgid "Expire date: "
 msgstr "解封时间："
 
-#: templates/forum/topic_content.html:254
-#: templates/forum/topic_content.html:274 templates/macros.html:110
+#: templates/forum/topic_content.html:253
+#: templates/forum/topic_content.html:273 templates/macros.html:110
 #: templates/user/notification.html:14
 msgid "Reply"
 msgstr "回复"
@@ -814,7 +814,7 @@ msgstr "删除"
 msgid "add this topic to distillate"
 msgstr "添加到精品区"
 
-#: templates/forum/topic_list.html:214 templates/macros.html:184
+#: templates/forum/topic_list.html:213 templates/macros.html:184
 msgid "Dist"
 msgstr "精品"
 
@@ -874,7 +874,7 @@ msgstr "插入代码"
 msgid "OK"
 msgstr "确定"
 
-#: templates/macros.html:377
+#: templates/macros.html:377 templates/macros.html:401
 msgid "Cancel"
 msgstr "取消"
 
@@ -890,6 +890,10 @@ msgstr "可用格式：PNG/JPG/GIF"
 msgid "Click here to manage your images"
 msgstr "点击这里管理图片"
 
+#: templates/macros.html:400
+msgid "Insert"
+msgstr "插入"
+
 #: templates/message.html:10
 msgid "Message"
 msgstr "消息"
@@ -903,31 +907,31 @@ msgstr "富文本使用方法 - %(site)s"
 msgid "Richtext Usage"
 msgstr "富文本使用方法"
 
-#: templates/forum/post_content.html:49 templates/forum/topic_content.html:187
+#: templates/forum/post_content.html:48 templates/forum/topic_content.html:186
 msgid "Go back to the homepage"
 msgstr "返回首页"
 
-#: templates/forum/post_content.html:51 templates/forum/topic_content.html:189
+#: templates/forum/post_content.html:50 templates/forum/topic_content.html:188
 msgid "Home"
 msgstr "首页"
 
-#: templates/forum/post_content.html:55
+#: templates/forum/post_content.html:54
 msgid "Go back to the topic"
 msgstr "返回主题帖"
 
-#: templates/forum/post_content.html:57
+#: templates/forum/post_content.html:56
 msgid "Topic"
 msgstr "主题帖"
 
-#: templates/forum/post_content.html:61
+#: templates/forum/post_content.html:60
 msgid "Go back to the post of the upper layer"
 msgstr "返回上一层"
 
-#: templates/forum/post_content.html:63
+#: templates/forum/post_content.html:62
 msgid "Upper"
 msgstr "上一层"
 
-#: templates/forum/post_content.html:75
+#: templates/forum/post_content.html:74
 msgid "Reply this post"
 msgstr "回复此帖"
 
@@ -940,22 +944,22 @@ msgstr "编辑帖子 - %(site)s"
 msgid "Edit Post"
 msgstr "编辑帖子"
 
-#: templates/forum/post_edit.html:48 templates/forum/topic_tag_manage.html:19
+#: templates/forum/post_edit.html:46 templates/forum/topic_tag_manage.html:19
 #: templates/moderate/tag_edit.html:16 templates/user/ban.html:38
 #: templates/user/change_level.html:32 templates/user/password_reset.html:16
 msgid "Confirm"
 msgstr "确认"
 
-#: templates/forum/subpost_list.html:24 templates/forum/topic_content.html:225
+#: templates/forum/subpost_list.html:24 templates/forum/topic_content.html:224
 msgid "delete this post"
 msgstr "删除此帖"
 
-#: templates/forum/subpost_list.html:27 templates/forum/topic_content.html:229
+#: templates/forum/subpost_list.html:27 templates/forum/topic_content.html:228
 msgid "ban this user"
 msgstr "封禁该用户"
 
-#: templates/forum/subpost_list.html:32 templates/forum/topic_content.html:234
-#: templates/user/pm.html:94
+#: templates/forum/subpost_list.html:32 templates/forum/topic_content.html:233
+#: templates/user/pm.html:93
 msgid "edit this post"
 msgstr "编辑此帖"
 
@@ -963,12 +967,12 @@ msgstr "编辑此帖"
 msgid "reply this post"
 msgstr "回复此帖"
 
-#: templates/forum/subpost_list.html:43 templates/forum/topic_content.html:238
-#: templates/user/notification.html:139 templates/user/pm.html:99
+#: templates/forum/subpost_list.html:43 templates/forum/topic_content.html:237
+#: templates/user/notification.html:139 templates/user/pm.html:98
 msgid "[Edited]"
 msgstr "【已编辑】"
 
-#: templates/forum/topic_content.html:197
+#: templates/forum/topic_content.html:196
 msgid "Manage"
 msgstr "管理"
 
@@ -987,48 +991,48 @@ msgstr "%(tag)s - %(site)s"
 msgid "Dist Topics - %(tag)s - %(site)s"
 msgstr "精品帖 - %(tag)s - %(site)s"
 
-#: templates/forum/topic_list.html:54
+#: templates/forum/topic_list.html:53
 msgid "[Pinned]"
 msgstr "【置顶】"
 
-#: templates/forum/topic_list.html:59
+#: templates/forum/topic_list.html:58
 msgid "[Dist]"
 msgstr "【精】"
 
-#: templates/forum/topic_list.html:191
+#: templates/forum/topic_list.html:190
 msgid "All"
 msgstr "全部"
 
-#: templates/forum/topic_list.html:207
+#: templates/forum/topic_list.html:206
 msgid "Show all topics"
 msgstr "显示全部帖子"
 
-#: templates/forum/topic_list.html:209
+#: templates/forum/topic_list.html:208
 msgid "Show All"
 msgstr "显示全部"
 
-#: templates/forum/topic_list.html:212
+#: templates/forum/topic_list.html:211
 msgid "Show distillate topics only"
 msgstr "只显示精品帖"
 
-#: templates/forum/topic_list.html:224
+#: templates/forum/topic_list.html:223
 msgid "Moderate"
 msgstr "管理"
 
-#: templates/forum/topic_list.html:236
+#: templates/forum/topic_list.html:235
 msgid "Dist Topics"
 msgstr "精品帖"
 
-#: templates/forum/topic_list.html:242
+#: templates/forum/topic_list.html:241
 #, python-format
 msgid "Dist Topics: %(tag)s"
 msgstr "精品帖：%(tag)s"
 
-#: templates/forum/topic_list.html:296
+#: templates/forum/topic_list.html:295
 msgid "Publish a new topic"
 msgstr "发表新帖"
 
-#: templates/forum/topic_list.html:308
+#: templates/forum/topic_list.html:307
 msgid "Publish"
 msgstr "发表"
 
@@ -1265,7 +1269,7 @@ msgstr "@我的"
 msgid "System Messages"
 msgstr "系统消息"
 
-#: templates/user/notification.html:11 templates/user/pm.html:61
+#: templates/user/notification.html:11 templates/user/pm.html:60
 msgid "Private Messages"
 msgstr "私信"
 
@@ -1295,17 +1299,17 @@ msgstr "【系统】"
 msgid "Reset Your Password"
 msgstr "重置密码"
 
-#: templates/user/pm.html:16
+#: templates/user/pm.html:15
 #, python-format
 msgid "Private messages with %(target)s - %(site)s"
 msgstr "私信给 %(target)s - %(site)s"
 
-#: templates/user/pm.html:66
+#: templates/user/pm.html:65
 #, python-format
 msgid "To: %(name)s"
 msgstr "To: %(name)s"
 
-#: templates/user/pm.html:72
+#: templates/user/pm.html:71
 msgid "Send"
 msgstr "发送"
 
@@ -1345,7 +1349,7 @@ msgstr "编缉个人资料"
 msgid "Sign up - %(site)s"
 msgstr "注册 - %(site)s"
 
-#: templates/user/register.html:6 templates/user/register.html:21
+#: templates/user/register.html:6 templates/user/register.html:35
 msgid "Sign up"
 msgstr "注册"
 
