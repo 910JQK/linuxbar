@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-11 14:19+0800\n"
+"POT-Creation-Date: 2017-02-11 16:24+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_Hans_CN\n"
@@ -22,273 +22,277 @@ msgstr ""
 msgid "This field is required."
 msgstr "此处必填"
 
-#: forms.py:26
+#: forms.py:28
 msgid "Invalid username format."
 msgstr "用户名格式不正确"
 
-#: forms.py:30
+#: forms.py:33
 msgid "Passwords are inconsistent."
 msgstr "密码不匹配"
 
-#: forms.py:34
+#: forms.py:37
 msgid "Positive integer required"
 msgstr "必须是正整数"
 
-#: forms.py:39 forms.py:97 forms.py:190
+#: forms.py:42 forms.py:100 forms.py:193
 msgid "Email Address"
 msgstr "邮箱"
 
-#: forms.py:41 forms.py:99
+#: forms.py:44 forms.py:102
 msgid "Invalid Email Address."
 msgstr "邮箱地址无效"
 
-#: forms.py:43
+#: forms.py:46
 msgid "Used to enable your account and reset your password."
 msgstr "用以启用帐号和重置密码"
 
-#: forms.py:46
+#: forms.py:49
 msgid "Nickname"
 msgstr "昵称"
 
-#: forms.py:50
+#: forms.py:53
 msgid "Nickname as well as identifier."
 msgstr "昵称，同时也是不可重复的用户名"
 
-#: forms.py:53 forms.py:84
+#: forms.py:56 forms.py:87
 msgid "Password"
 msgstr "密码"
 
-#: forms.py:57 forms.py:88
+#: forms.py:60 forms.py:91
 msgid "Your password. Won't be encrypted if not using HTTPS."
 msgstr "密码，非 HTTPS 则不加密传输"
 
-#: forms.py:60 forms.py:114
+#: forms.py:63 forms.py:117
 msgid "Password Confirmation"
 msgstr "确认密码"
 
-#: forms.py:64 forms.py:118
+#: forms.py:67 forms.py:121
 msgid "Repeat your password to confirm."
 msgstr "重复输入一遍密码以确认"
 
-#: forms.py:67
+#: forms.py:70
 msgid "Captcha"
 msgstr "验证码"
 
-#: forms.py:69
+#: forms.py:72
 msgid "Invalid captcha"
 msgstr "验证码无效"
 
-#: forms.py:77
+#: forms.py:74
+msgid "Input the text on the image."
+msgstr "输入图片上的文字"
+
+#: forms.py:80
 msgid "Login name"
 msgstr "登录名"
 
-#: forms.py:81
+#: forms.py:84
 msgid "Login Name can be either nickname or email address."
 msgstr "登录名可以是用户名也可以是邮箱"
 
-#: forms.py:91
+#: forms.py:94
 msgid "Remember me"
 msgstr "记住我"
 
-#: forms.py:101
+#: forms.py:104
 msgid "Email address of your account."
 msgstr "注册时填写的邮箱地址"
 
-#: forms.py:107
+#: forms.py:110
 msgid "New Password"
 msgstr "新的密码"
 
-#: forms.py:111
+#: forms.py:114
 msgid "New password. Won't be encrypted if not using HTTPS."
 msgstr "新的密码，非 HTTPS 则不加密传输"
 
-#: forms.py:121
+#: forms.py:124
 msgid "Token"
 msgstr "Token"
 
-#: forms.py:123
+#: forms.py:126
 msgid "Invalid token format"
 msgstr "Token 格式错误"
 
-#: forms.py:126
+#: forms.py:129
 #, python-format
 msgid "The token sent to you by email. Valid in %d minutes."
 msgstr "Token 已发送到你的邮箱。%d 分钟内有效。"
 
-#: forms.py:133
+#: forms.py:136
 msgid "Bio"
 msgstr "Bio"
 
-#: forms.py:133
+#: forms.py:136
 msgid "A brief description of you."
 msgstr "个人简介"
 
-#: forms.py:135 templates/user/profile.html:63
+#: forms.py:138 templates/user/profile.html:63
 msgid "Location"
 msgstr "位置"
 
-#: forms.py:137
+#: forms.py:140
 msgid "Your geolocation."
 msgstr "地理位置"
 
-#: forms.py:140 templates/user/profile.html:67
+#: forms.py:143 templates/user/profile.html:67
 msgid "Birth Year"
 msgstr "出生年份"
 
-#: forms.py:142
+#: forms.py:145
 msgid "Your birth year, at least four digits."
 msgstr "出生年份，四位数字"
 
-#: forms.py:145 templates/user/profile.html:71
+#: forms.py:148 templates/user/profile.html:71
 msgid "Occupation"
 msgstr "职业"
 
-#: forms.py:147
+#: forms.py:150
 msgid "Your work."
 msgstr "工作"
 
-#: forms.py:150 templates/user/profile.html:75
+#: forms.py:153 templates/user/profile.html:75
 msgid "IM Accounts"
 msgstr "IM 帐号"
 
-#: forms.py:152
+#: forms.py:155
 msgid "Your instant-messaging accounts."
 msgstr "即时通迅帐号"
 
-#: forms.py:158
+#: forms.py:161
 msgid "Duration"
 msgstr "时长"
 
-#: forms.py:162
+#: forms.py:165
+#, python-format
 msgid "%d Day"
-msgid_plural  "%d Days"
-msgstr[0] "%d 天"
-msgstr[1] "%d 天"
+msgid_plural "%d Days"
+msgstr "%d 天"
 
-#: forms.py:172 templates/user/change_level.html:23
+#: forms.py:175 templates/user/change_level.html:23
 msgid "Privilege"
 msgstr "权限"
 
-#: forms.py:174
+#: forms.py:177
 msgid "None"
 msgstr "无"
 
-#: forms.py:174 templates/user/profile.html:41
+#: forms.py:177 templates/user/profile.html:41
 msgid "Moderator"
 msgstr "管理员"
 
-#: forms.py:174 templates/moderate/moderator_list.html:42
+#: forms.py:177 templates/moderate/moderator_list.html:42
 #: templates/user/profile.html:43
 msgid "Administrator"
 msgstr "站点管理员"
 
-#: forms.py:182
+#: forms.py:185
 msgid "Site Name"
 msgstr "站点名称"
 
-#: forms.py:183
+#: forms.py:186
 msgid "Name of this site."
 msgstr "这个站的标题"
 
-#: forms.py:186
+#: forms.py:189
 msgid "Site URL"
 msgstr "站点 URL"
 
-#: forms.py:187
+#: forms.py:190
 msgid "URL of this site. Example: https://foobar.invalid"
 msgstr "站点 URL. 例：https://foobar.invalid"
 
-#: forms.py:191
+#: forms.py:194
 msgid "Email address showed in mails sent by this site."
 msgstr "发件邮件地址"
 
-#: forms.py:194
+#: forms.py:197
 msgid "Topics per page"
 msgstr "每页主题帖数"
 
-#: forms.py:195
+#: forms.py:198
 msgid "The number of topics shown in one page in a topic list."
 msgstr "每页主题列表中主题帖的数量"
 
-#: forms.py:199
+#: forms.py:202
 msgid "Posts per page"
 msgstr "每页帖子数"
 
-#: forms.py:200
+#: forms.py:203
 msgid "The number of posts shown in one page in a post list."
 msgstr "每页主题帖中楼层的数量"
 
-#: forms.py:204
+#: forms.py:207
 msgid "Items per page"
 msgstr "每页条目数"
 
-#: forms.py:205
+#: forms.py:208
 msgid "The number of items shown in one page in a list"
 msgstr "每页列表中条目的数量"
 
-#: forms.py:212 templates/moderate/tag_list.html:18
+#: forms.py:215 templates/moderate/tag_list.html:18
 msgid "Slug"
 msgstr "代称"
 
-#: forms.py:216
+#: forms.py:219
 msgid "Invalid format."
 msgstr "格式不正确"
 
-#: forms.py:218
+#: forms.py:221
 msgid "Name in URL. Only Latin, number and \"-\" are allowed."
 msgstr "URL 中的名称。只能包含拉丁字母，数字和短线。"
 
-#: forms.py:221 forms.py:261 templates/moderate/moderator_list.html:26
+#: forms.py:224 forms.py:264 templates/moderate/moderator_list.html:26
 #: templates/moderate/tag_list.html:19
 msgid "Name"
 msgstr "昵称"
 
-#: forms.py:223
+#: forms.py:226
 msgid "Name that is displayed."
 msgstr "显示的名称"
 
-#: forms.py:226
+#: forms.py:229
 msgid "Description"
 msgstr "描述"
 
-#: forms.py:228
+#: forms.py:231
 msgid "Detailed description."
 msgstr "详细的说明"
 
-#: forms.py:234
+#: forms.py:237
 msgid "Image"
 msgstr "图片"
 
-#: forms.py:236
+#: forms.py:239
 msgid "Image file to upload (PNG/JPG/GIF)."
 msgstr "要上传的图片 (PNG/JPG/GIF)"
 
-#: forms.py:242
+#: forms.py:245
 msgid "Title"
 msgstr "标题"
 
-#: forms.py:244 forms.py:251
+#: forms.py:247 forms.py:254
 msgid "Content"
 msgstr "内容"
 
-#: forms.py:246 forms.py:256 templates/forum/topic_list.html:185
+#: forms.py:249 forms.py:259 templates/forum/topic_list.html:185
 #: templates/macros.html:172
 msgid "Tags"
 msgstr "标签"
 
-#: forms.py:266
+#: forms.py:269
 msgid "Name of the face."
 msgstr "表情的名称"
 
-#: forms.py:269
+#: forms.py:272
 msgid "Hash"
 msgstr "哈希值"
 
-#: forms.py:272
+#: forms.py:275
 msgid "Invalid format"
 msgstr "格式不正确"
 
-#: forms.py:274
+#: forms.py:277
 msgid "Image hash value."
 msgstr "图片的哈希值"
 
@@ -532,6 +536,11 @@ msgstr "激活邮件 - %s"
 msgid "Activation link for %s: "
 msgstr "%s 的激活链接："
 
+#: user.py:79
+#, python-format
+msgid "<a target=\"_blank\" href=\"%s\">%s</a>"
+msgstr ""
+
 #: user.py:88
 #, python-format
 msgid "Reset Password for %s - %s"
@@ -614,29 +623,29 @@ msgstr "个人资料更新成功"
 msgid "Ban on user %s entered into force."
 msgstr "对 %s 的封禁已生效"
 
-#: user.py:283
+#: user.py:286
+#, python-format
 msgid "You have been banned by moderator %(operator)s for %(num)d day."
 msgid_plural "You have been banned by moderator %(operator)s for %(num)d days."
-msgstr[0] "您已被管理员 %(operator)s 封禁 %(num)d 天。"
-msgstr[1] "您已被管理员 %(operator)s 封禁 %(num)d 天。"
+msgstr "您已被管理员 %(operator)s 封禁 %(num)d 天。"
 
-#: user.py:293
+#: user.py:295
 msgid "A ban with longer duration already exists."
 msgstr "已存在更长时间的封禁"
 
-#: user.py:307
+#: user.py:309
 msgid "Invalid operation."
 msgstr "操作无效"
 
-#: user.py:311
+#: user.py:313
 msgid "User privilege changed successfully."
 msgstr "权限变更成功"
 
-#: user.py:322
+#: user.py:324
 msgid "Signed out successfully."
 msgstr "注销成功"
 
-#: user.py:419
+#: user.py:421
 msgid "Private message sent successfully."
 msgstr "私信发送成功"
 
@@ -713,11 +722,11 @@ msgstr "%s 不能超过 %d 字节"
 msgid "Confirm Operation - %(site)s"
 msgstr "确认操作 - %(site)s"
 
-#: templates/confirm.html:33
+#: templates/confirm.html:35
 msgid "Yes"
 msgstr "是"
 
-#: templates/confirm.html:37
+#: templates/confirm.html:39
 msgid "No"
 msgstr "否"
 
