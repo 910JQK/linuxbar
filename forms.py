@@ -48,7 +48,7 @@ class RegisterForm(FlaskForm):
     name = StringField(
         _('Nickname'),
         validators = [
-            Required(), Username()
+            Required(), SizeRange(3, 32), Username()
         ],
         description = _('Nickname as well as identifier.')
     )
