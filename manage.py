@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 
+import re
+import os
+import json
 from getpass import getpass
 from app import run
 from models import User, Profile, init_db
@@ -37,11 +40,30 @@ def create_administrator():
         print('New administrator created successfully.')
 
 
+def gen_js_trans_file():
+    messages = {}
+    TRANS_STR = re.compile('_\(\'([^\']+)')
+    for filename in os.listdir('static'):
+        if filename.endswith('.js'):
+            path = os.path.join('static', filename)
+            f = open(path)
+            for line in f.readlines():
+                for match in TRANS_STR.finditer(line):
+                    msgid = match.expand('\\1')
+                    messages[msgid] = ''
+    msg_str = json.dumps(messages)
+    msg_str = msg_str.replace('{', '{\n')
+    msg_str = msg_str.replace(',', ',\n')
+    msg_str = msg_str.replace('}', '\n}')
+    print(msg_str)
+
+
 def main():
     commands = {
         'run': run,
         'init-db': init_db,
-        'create-admin': create_administrator
+        'create-admin': create_administrator,
+        'gen-js-trans': gen_js_trans_file
     }
     parser = ArgumentParser()
     parser.add_argument(

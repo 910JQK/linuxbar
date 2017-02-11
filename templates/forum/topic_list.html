@@ -20,9 +20,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}" />
     <script type="text/javascript" src="{{ url_for('static', filename='toolkit.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='editor.js') }}"></script>
-    <template id="richtext_info" style="display: none">
-      {{ RT_INFO }}
-    </template>
+    <template id="richtext_info">{{ RT_INFO }}</template>
+    <template id="translation_data">{{ FRONTEND_TRANS }}</template>
     <style>
      li { list-style-type: none; }
      #topic_list { padding: 0em; margin: 0em 0em 2em 0em; }

@@ -3,12 +3,23 @@ var TITLE_MAX_SIZE = 64;
 var CONTENT_MAX_SIZE = 15000;
 
 
+var messages = {};
 var query = selector => document.querySelector(selector);
 var query_all = selector => document.querySelectorAll(selector);
-var _ = str => str; // reserved for l10n
 var timer = new Worker(
     URL.createObjectURL(new Blob([WORKER_CODE], {type: 'text/javascript'}))
 );
+
+
+/**
+ * Translate message strings
+ *
+ * @param String str
+ * @return String
+ */
+function _(str) {
+    return messages[str]? messages[str]: str;
+}
 
 
 /**
@@ -405,7 +416,23 @@ function init_topic_links() {
 }
 
 
+/**
+ * Initialize translations of front-end
+ *
+ * @return void
+ */
+function init_translation() {
+    if(query('#translation_data')) {
+	var messages_dict = JSON.parse(translation_data.innerHTML);
+	if(messages_dict) {
+	    messages = messages_dict;
+	}
+    }
+}
+
+
 window.addEventListener('load', init_datetime_timer);
 window.addEventListener('load', init_forms);
 window.addEventListener('load', init_tag_selector);
 window.addEventListener('load', init_topic_links);
+window.addEventListener('load', init_translation);

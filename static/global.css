@@ -9,6 +9,10 @@ a {
     color: hsl(233, 80%, 48%);
 }
 
+template {
+    display: none;
+}
+
 fieldset { border: none; padding: 0; margin: 0; }
 
 textarea {

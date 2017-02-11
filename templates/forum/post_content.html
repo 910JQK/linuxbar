@@ -10,9 +10,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='highlight.css') }}" />
     <script type="text/javascript" src="{{ url_for('static', filename='toolkit.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='editor.js') }}"></script>
-    <template id="richtext_info" style="display: none">
-      {{ RT_INFO }}
-    </template>
+    <template id="richtext_info">{{ RT_INFO }}</template>
+    <template id="translation_data">{{ FRONTEND_TRANS }}</template>
     <title>{{ (post.content|truncate(50)) ~ ' - ' ~ get_config('site_name') }}</title>
     <style>
      #container {

@@ -3,6 +3,7 @@
 
 import os
 import io
+import json
 import hashlib
 import datetime
 from flask import Flask, Response, session, render_template
@@ -68,10 +69,26 @@ app.add_template_filter(filter_deleted_post, 'filter_deleted_post')
 def inject_data():
     def get_faces():
         return Face.select().order_by(Face.name)
+    if LOCALE:
+        with open(
+            os.path.join(
+                'translations', LOCALE, 'LC_MESSAGES', 'messages.json'
+            )
+        ) as f:
+            frontend_trans = f.read()
+            try:
+                json.loads(frontend_trans)
+            except json.decoder.JSONDecodeError:
+                raise AssertionError(
+                    'Front-end translation file has a wrong format.'
+                )
+    else:
+        frontend_trans = '{}'
     return {
         'get_config': Config.Get,
         'get_faces': get_faces,
-        'RT_INFO': RICHTEXT_INFO_JSON
+        'RT_INFO': RICHTEXT_INFO_JSON,
+        'FRONTEND_TRANS': frontend_trans 
     }
 
 
