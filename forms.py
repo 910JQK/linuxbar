@@ -23,7 +23,10 @@ def Required():
 
 
 def Username():
-    return Regexp(REGEX_USERNAME, message=_('Invalid username format.'))
+    def validator(form, field):
+        if not REGEX_USERNAME.fullmatch(field.data):
+            raise ValidationError(_('Invalid username format.'))
+    return validator
 
 
 def PasswordConfirm():

@@ -99,11 +99,12 @@ def register():
     form = RegisterForm()
     signed_up = False
     if form.validate_on_submit():
+        mail_lower = form.mail.data.lower()
         if session.get('captcha') == form.captcha.data:
-            conflict = User.check_conflict(form.mail.data, form.name.data)
+            conflict = User.check_conflict(mail_lower, form.name.data)
             if not conflict:
                 user = User(
-                    mail = form.mail.data,
+                    mail = mail_lower,
                     name = form.name.data,
                     date_register = now()
                 )
@@ -116,7 +117,7 @@ def register():
                 flash(_('Signed up successfully. Activation mail has been sent to you. Please login after activation.'), 'ok')
                 signed_up = True
             else:
-                if conflict.mail == form.mail.data:
+                if conflict.mail == mail_lower:
                     flash(_('Email address already in use.'), 'err')
                 else:
                     flash(_('Name already in use.'), 'err')
@@ -151,7 +152,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         query = User.select().where(
-            (User.mail == form.login_name.data)
+            (User.mail == form.login_name.data.lower())
             | (User.name == form.login_name.data)
         )
         user = bool(query) and query.get()
@@ -280,11 +281,13 @@ def ban(uid):
                 create_system_message(
                     (
                         _(
-                            'You have been banned by moderator {0} for {1} day.',
-                            'You have been banned by moderator {0} for {1} days.',
-                            form.days.data
-                        )
-                        .format(current_user.name, form.days.data)
+                            'You have been banned by moderator %(operator)s for %(num)d day.',
+                            'You have been banned by moderator %(operator)s for %(num)d days.',
+                            int(form.days.data)
+                       ) % {
+                           'num': int(form.days.data),
+                           'operator': current_user.name
+                       }
                     ),
                     user
                 )
