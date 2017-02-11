@@ -5,6 +5,20 @@
 {% block body_class %}box_horizontal_center{% endblock %}
 {% block form_title %}{{ _('Sign up') }}{% endblock %}
 
+{% block head %}
+  <script type="text/javascript">
+    function refresh_captcha() {
+	var img = document.querySelector('.captcha_image');
+	var url = img.src.replace(/\?.*/, '');
+	img.src = url + '?t=' + (new Date()).getTime();
+    }
+    window.addEventListener('load', function () {
+	var img = document.querySelector('.captcha_image');
+	img.addEventListener('click', refresh_captcha);
+    });
+  </script>
+{% endblock %}
+
 {% block form %}
   <fieldset{% if signed_up %} disabled="disabled"{% endif %}>
     {{ field(form.mail) }}
