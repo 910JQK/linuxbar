@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-11 18:00+0800\n"
+"POT-Creation-Date: 2017-02-11 18:32+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh_Hans_CN\n"
@@ -276,7 +276,7 @@ msgid "Content"
 msgstr "内容"
 
 #: forms.py:249 forms.py:259 templates/forum/topic_list.html:184
-#: templates/macros.html:172
+#: templates/macros.html:181
 msgid "Tags"
 msgstr "标签"
 
@@ -730,169 +730,169 @@ msgstr "是"
 msgid "No"
 msgstr "否"
 
-#: templates/macros.html:45
+#: templates/macros.html:46 templates/user/notification.html:139
+msgid "[Edited]"
+msgstr "【已编辑】"
+
+#: templates/macros.html:54
 msgid "Empty"
 msgstr "空无一物"
 
-#: templates/macros.html:54
+#: templates/macros.html:63
 msgid "You are currently being banned."
 msgstr "您的帐号正处于封禁中"
 
-#: templates/macros.html:57
+#: templates/macros.html:66
 msgid "Expire date: "
 msgstr "解封时间："
 
-#: templates/forum/topic_content.html:253
-#: templates/forum/topic_content.html:273 templates/macros.html:110
+#: templates/forum/post_content.html:83 templates/forum/topic_content.html:251
+#: templates/forum/topic_content.html:271 templates/macros.html:119
 #: templates/user/notification.html:14
 msgid "Reply"
 msgstr "回复"
 
-#: templates/macros.html:111
+#: templates/macros.html:120
 #, python-format
 msgid "Reply(%(n)d)"
 msgstr "回复(%(n)d)"
 
-#: templates/macros.html:114 templates/user/notification.html:15
+#: templates/macros.html:123 templates/user/notification.html:15
 msgid "At"
 msgstr "呼叫"
 
-#: templates/macros.html:115
+#: templates/macros.html:124
 #, python-format
 msgid "At(%(n)d)"
 msgstr "呼叫(%(n)d)"
 
-#: templates/macros.html:118
+#: templates/macros.html:127
 msgid "Sys"
 msgstr "系统"
 
-#: templates/macros.html:119
+#: templates/macros.html:128
 #, python-format
 msgid "Sys(%(n)d)"
 msgstr "系统(%(n)d)"
 
-#: templates/macros.html:122 templates/user/profile.html:88
+#: templates/macros.html:131 templates/user/profile.html:88
 msgid "PM"
 msgstr "私信"
 
-#: templates/macros.html:123
+#: templates/macros.html:132
 #, python-format
 msgid "PM(%(n)d)"
 msgstr "私信(%(n)d)"
 
-#: templates/macros.html:133 templates/macros.html:158
+#: templates/macros.html:142 templates/macros.html:167
 msgid "Logout"
 msgstr "注销"
 
-#: templates/macros.html:140
+#: templates/macros.html:149
 msgid "Login"
 msgstr "登录"
 
-#: templates/macros.html:144 templates/user/profile.html:55
+#: templates/macros.html:153 templates/user/profile.html:55
 msgid "Register"
 msgstr "注册"
 
-#: templates/macros.html:155
+#: templates/macros.html:164
 #, python-format
 msgid "User: %(user)s"
 msgstr "用户：%(user)s"
 
-#: templates/macros.html:170
+#: templates/macros.html:179
 msgid "change tags"
 msgstr "变更此主题帖的标签"
 
-#: templates/macros.html:175
+#: templates/macros.html:184
 msgid "delete this topic"
 msgstr "删除该主题帖"
 
 #: templates/image/info.html:52 templates/image/upload.html:42
-#: templates/macros.html:177 templates/moderate/delete_record.html:54
+#: templates/macros.html:186 templates/moderate/delete_record.html:54
 msgid "Delete"
 msgstr "删除"
 
-#: templates/macros.html:182
+#: templates/macros.html:191
 msgid "add this topic to distillate"
 msgstr "添加到精品区"
 
-#: templates/forum/topic_list.html:213 templates/macros.html:184
+#: templates/forum/topic_list.html:213 templates/macros.html:193
 msgid "Dist"
 msgstr "精品"
 
-#: templates/macros.html:188
+#: templates/macros.html:197
 msgid "unset distillate for this topic"
 msgstr "从精品区中移除"
 
-#: templates/macros.html:190
+#: templates/macros.html:199
 msgid "Unset"
 msgstr "取消精品"
 
-#: templates/macros.html:195
+#: templates/macros.html:204
 msgid "pin this topic"
 msgstr "置顶此主题帖"
 
-#: templates/macros.html:197
+#: templates/macros.html:206
 msgid "Pin"
 msgstr "置顶"
 
-#: templates/macros.html:201
+#: templates/macros.html:210
 msgid "unpin this topic"
 msgstr "不再置顶此帖"
 
-#: templates/macros.html:203
+#: templates/macros.html:212
 msgid "Unpin"
 msgstr "取消置顶"
 
-#: templates/macros.html:220
+#: templates/macros.html:229
 msgid "Config"
 msgstr "配置"
 
-#: templates/macros.html:225 templates/moderate/moderator_list.html:19
+#: templates/macros.html:234 templates/moderate/moderator_list.html:19
 msgid "Moderator List"
 msgstr "管理员列表"
 
-#: templates/macros.html:231 templates/moderate/delete_record.html:31
+#: templates/macros.html:240 templates/moderate/delete_record.html:31
 msgid "Delete Record"
 msgstr "删除记录"
 
-#: templates/macros.html:236 templates/moderate/ban_list.html:30
+#: templates/macros.html:245 templates/moderate/ban_list.html:30
 msgid "Ban List"
 msgstr "封禁列表"
 
-#: templates/macros.html:241 templates/moderate/tag_list.html:6
+#: templates/macros.html:250 templates/moderate/tag_list.html:6
 msgid "Tag Management"
 msgstr "标签管理"
 
-#: templates/macros.html:246 templates/moderate/face_list.html:6
+#: templates/macros.html:255 templates/moderate/face_list.html:6
 msgid "Face Management"
 msgstr "表情管理"
 
-#: templates/macros.html:280
+#: templates/macros.html:289
 msgid "Insert Code"
 msgstr "插入代码"
 
-#: templates/macros.html:376
-msgid "OK"
-msgstr "确定"
+#: templates/macros.html:385 templates/macros.html:409
+msgid "Insert"
+msgstr "插入"
 
-#: templates/macros.html:377 templates/macros.html:401
+#: templates/macros.html:386 templates/macros.html:410
 msgid "Cancel"
 msgstr "取消"
 
-#: templates/image/upload.html:7 templates/macros.html:386
+#: templates/image/upload.html:7 templates/macros.html:395
 msgid "Upload Image"
 msgstr "上传图片"
 
-#: templates/macros.html:392
+#: templates/macros.html:401
 msgid "Only PNG/JPG/GIF are allowed."
 msgstr "可用格式：PNG/JPG/GIF"
 
-#: templates/macros.html:396
+#: templates/macros.html:405
 msgid "Click here to manage your images"
 msgstr "点击这里管理图片"
-
-#: templates/macros.html:400
-msgid "Insert"
-msgstr "插入"
 
 #: templates/message.html:10
 msgid "Message"
@@ -944,7 +944,7 @@ msgstr "编辑帖子 - %(site)s"
 msgid "Edit Post"
 msgstr "编辑帖子"
 
-#: templates/forum/post_edit.html:46 templates/forum/topic_tag_manage.html:19
+#: templates/forum/post_edit.html:47 templates/forum/topic_tag_manage.html:19
 #: templates/moderate/tag_edit.html:16 templates/user/ban.html:38
 #: templates/user/change_level.html:32 templates/user/password_reset.html:16
 msgid "Confirm"
@@ -967,14 +967,13 @@ msgstr "编辑此帖"
 msgid "reply this post"
 msgstr "回复此帖"
 
-#: templates/forum/subpost_list.html:43 templates/forum/topic_content.html:237
-#: templates/user/notification.html:139 templates/user/pm.html:98
-msgid "[Edited]"
-msgstr "【已编辑】"
-
 #: templates/forum/topic_content.html:196
 msgid "Manage"
 msgstr "管理"
+
+#: templates/forum/topic_content.html:262
+msgid "Reply this topic"
+msgstr "回复楼主"
 
 #: templates/forum/topic_list.html:11
 #, python-format
@@ -1352,4 +1351,7 @@ msgstr "注册 - %(site)s"
 #: templates/user/register.html:6 templates/user/register.html:35
 msgid "Sign up"
 msgstr "注册"
+
+#~ msgid "OK"
+#~ msgstr "确定"
 
