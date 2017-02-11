@@ -33,6 +33,7 @@ As it is still under development, currently, we use Sqlite instead of MySQL for 
 Run it:
     
     $ pip install -r requirements.txt # install dependencies
+    $ pybabel compile -d translations # generate mo files
     $ ./manage.py init-db # create database data.db (sqlite3)
     $ ./manage.py create-admin # create an administrator account
     $ ./manage.py run # run app, then goto http://localhost:5000
