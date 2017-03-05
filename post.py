@@ -91,11 +91,10 @@ def filter_at_messages(lines, callees):
             yield str(line)
 
 
-def create_post(topic, parent, content, add_reply_count=True, is_sys_msg=False, is_pm=False):
+def create_post(topic, parent, content, add_reply_count=True, is_sys_msg=False, is_pm=False, author=None):
     if not is_sys_msg:
-        author = find_record(User, id=current_user.id)
-    else:
-        author = None
+        if not author:
+            author = find_record(User, id=current_user.id)
     callees = []
     def process_at(lines):
         return filter_at_messages(lines, callees)

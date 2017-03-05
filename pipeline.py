@@ -1,3 +1,4 @@
+import re
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.util import ClassNotFound
@@ -22,11 +23,14 @@ from config import (
     FORMAT_DEFAULT,
     FORMATS,
     IMAGE_LIMIT,
-    FACE_LIMIT
+    FACE_LIMIT,
+    TIEBA_COMP,
+    TIEBA_TIMG_URL,
+    TIEBA_EMOTICON_URL
 )
 
 
-class Code():    
+class Code():   
     text = ''
     lang = ''
     highlight = True
@@ -133,11 +137,13 @@ def process_format(lines):
                 escape(content),
                 tag
             )
-    def gen_image_html(sha256part):
-        url = url_for('image.get', sha256part=sha256part)
+    def gen_image_html(url):
         return (
             '<a class="content_image_link" href="%s" target="_blank"><img class="content_image" src="%s" /></a>' % (url, url)
         )
+    def gen_image_html_sha256(sha256):
+        url = url_for('image.get', sha256part=sha256part)
+        return gen_image_html(url)
     def gen_face_html(face_name):
         url = url_for('image.face', name=face_name)
         return '<img class="content_image face" src="%s"></img>' % url
@@ -161,6 +167,15 @@ def process_format(lines):
         def process_segment(segment):
             nonlocal count_image
             nonlocal count_face
+            # Tieba Compatibility
+            if TIEBA_COMP:
+                if segment.startswith(TIEBA_TIMG_URL):
+                    return gen_image_html(segment)
+                if re.match('\[[a-z_]+/[0-9a-z_\.\?=]+\]', segment):
+                    return gen_image_html(
+                        TIEBA_EMOTICON_URL + segment[1:-1]
+                    )
+            # ---------------------
             for protocol in LINK_PROTOCOLS:
                 head = protocol + '://'
                 if (
@@ -185,7 +200,7 @@ def process_format(lines):
                 sha256part = segment[len(IMAGE_SIGN):]
                 if REGEX_SHA256_PART.fullmatch(sha256part):
                     count_image += 1
-                    return gen_image_html(sha256part)
+                    return gen_image_html_sha256(sha256part)
             if segment.startswith(FACE_SIGN) and count_face < FACE_LIMIT:
                 face_name = segment[len(FACE_SIGN):]
                 if not face_name.startswith(FACE_SIGN):
