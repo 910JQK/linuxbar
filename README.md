@@ -40,5 +40,7 @@ Run it:
 
 Transport topics from Tieba:
 
+Firstly, put `fetch.py` of [tieba-fetch](https://github.com/910JQK/tieba-fetch) in this directory.
+
     $ ./manage.py create-move # create an account as the author of moved posts
     $ ./move-post.py 4834742871 4809205799 # for example
