@@ -44,7 +44,7 @@ def move(kz):
                 author = user
             )
             total_reply += 1
-    new_topic.reply_count = total_reply
+    new_topic.reply_count = total_reply-1
     new_topic.save()
     info('Done.')
 
