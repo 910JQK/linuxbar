@@ -38,3 +38,7 @@ Run it:
     $ ./manage.py create-admin # create an administrator account
     $ ./manage.py run # run app, then goto http://localhost:5000
 
+Transport topics from Tieba:
+
+    $ ./manage.py create-move # create an account as the author of moved posts
+    $ ./move-post.py 4834742871 4809205799 # for example

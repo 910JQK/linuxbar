@@ -9,7 +9,7 @@ from fetch import fetch_kz, info
 
 
 def move(kz):
-    user = find_record(User, name='搬運')
+    user = find_record(User, mail='move_post@foobar')
     date_now = now()
     topic = fetch_kz(kz)
     info('Writing data into database ...')
@@ -50,4 +50,5 @@ def move(kz):
 
 
 if __name__ == '__main__':
-    move(int(sys.argv[1]))
+    for kz_str in sys.argv[1:]:
+        move(int(kz_str))

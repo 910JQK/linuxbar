@@ -40,6 +40,25 @@ def create_administrator():
         print('New administrator created successfully.')
 
 
+def create_post_move_account():
+    name = input('Nickname: ')
+    password = getpass('Password: ')
+    confirm = getpass('Confirm password: ')
+    if password != confirm:
+        print('Passwords are inconsistent.')
+        return
+    else:
+        user = User(
+            mail = 'move_post@foobar',
+            name = name,
+            date_register = now(),
+            is_active = True
+        )
+        user.set_password(password)
+        user.save(force_insert=True)
+        Profile.create(user=user)
+
+
 def gen_js_trans_file():
     messages = {}
     TRANS_STR = re.compile('_\(\'([^\']+)')
@@ -63,6 +82,7 @@ def main():
         'run': run,
         'init-db': init_db,
         'create-admin': create_administrator,
+        'create-move': create_post_move_account,
         'gen-js-trans': gen_js_trans_file
     }
     parser = ArgumentParser()
