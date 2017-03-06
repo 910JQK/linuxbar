@@ -100,7 +100,7 @@ def register():
     signed_up = False
     if form.validate_on_submit():
         mail_lower = form.mail.data.lower()
-        if session.get('captcha') == form.captcha.data:
+        if session.get('captcha', None) == form.captcha.data.lower():
             conflict = User.check_conflict(mail_lower, form.name.data)
             if not conflict:
                 user = User(
