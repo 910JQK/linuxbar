@@ -260,7 +260,7 @@ class Message(BaseModel):
 
 class Image(BaseModel):
     sha256 = FixedCharField(max_length=64, primary_key=True, index=True)
-    uploader = ForeignKeyField(User, related_name='images', index=True)
+    uploader = ForeignKeyField(User, related_name='images')
     file_name = CharField(max_length=256, null=True)
     img_type = CharField(max_length=8)
     date = DateTimeField(index=True)
@@ -271,10 +271,22 @@ class Face(BaseModel):
     hash_value = CharField(max_length=64)
 
 
+class TiebaTopic(BaseModel):
+    topic = ForeignKeyField(Topic, related_name='tieba_topic')
+    kz = IntegerField(unique=True)
+
+
+class TiebaPost(BaseModel):
+    post = ForeignKeyField(Post, related_name='tieba_post')
+    pid = IntegerField(unique=True, default=0)
+    hash_value = CharField(max_length=64, default='')
+
+
 tables = [
     Config, User, Profile, PasswordResetToken, Ban,
     Tag, Topic, TagRelation, Post,
-    DeleteRecord, Message, Image, Face
+    DeleteRecord, Message, Image, Face,
+    TiebaTopic, TiebaPost
 ]
 
 
