@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import random
 import hashlib
 import datetime
@@ -43,6 +44,10 @@ def _(string, string_pl=None, n=None):
         return translation.gettext(string)
     else:
         return translation.ngettext(string, string_pl, n)
+
+
+def info(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 
 def sha256(string):

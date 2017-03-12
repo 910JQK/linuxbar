@@ -23,6 +23,7 @@ from models import (
     db, Config, User, Topic, TagRelation, Tag, Post, DeleteRecord, Message
 )
 from config import DB_WILDCARD, PID_SIGN, TID_SIGN
+from tieba_compatible import tieba_publish_topic
 
 
 forum = Blueprint(
@@ -167,6 +168,7 @@ def topic_list(tag_slug):
             gen_summary(first_post.content)
         )
         new_topic.save()
+        tieba_publish_topic(title, content, new_topic.id)
         flash(_('Topic published successfully.'), 'ok')
         return redirect(request.url)
     return render_template(

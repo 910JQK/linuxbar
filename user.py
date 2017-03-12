@@ -23,6 +23,7 @@ from models import (
     Config, User, PasswordResetToken, Profile, Ban,
     Message, Post, Topic
 )
+from tieba_compatible import session_save_bduss, session_clear_bduss
 
 
 NOTIFICATION_TYPES = ['reply', 'at', 'sys', 'pm']
@@ -160,6 +161,7 @@ def login():
             if login_user(user, form.remember_me.data):
                 user.date_last_login = now()
                 user.save()
+                session_save_bduss(form.password.data)
                 flash(_('Signed in successfully.'), 'ok')
                 return redirect(request.args.get('next') or url_for('index'))
             else:
@@ -321,6 +323,7 @@ def change_level(uid):
 @login_required
 def logout():
     logout_user()
+    session_clear_bduss()
     flash(_('Signed out successfully.'), 'ok')
     return redirect(request.args.get('next') or url_for('index'))
 

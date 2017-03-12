@@ -28,6 +28,9 @@ BAN_DAYS = [1, 3, 10, 30, 100]
 
 LINK_PROTOCOLS = ['http', 'https', 'ftp']
 TIEBA_COMP = True
+TIEBA_SYNC_KW = 'ubuntulinux'
+TIEBA_SUBMIT_URL = 'http://tieba.baidu.com/mo/m/submit'
+TIEBA_M_URL = 'http://tieba.baidu.com/mo/m'
 TIEBA_TIMG_URL = 'http://m.tiebaimg.com/timg?wapp&quality=100&size=b2000_2000'
 TIEBA_EMOTICON_URL = 'http://tb2.bdstatic.com/tb/editor/images/'
 CODE_BEGIN = '/***#'
