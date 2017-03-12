@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 
+import re
 import sys
 from utils import *
 from models import *
@@ -14,31 +15,53 @@ def move(kz):
 
     topic = fetch_kz(kz)
     info('Writing data into database ...')
+    match = re.match('^([0-9]+)| ', topic['title'])
+    if match:
+        tid = int(match.group(1))
+        local_topic = find_record(Topic, id=tid)
+    else:
+        local_topic = None
 
     topic_rec = find_record(TiebaTopic, kz=kz)
     if not topic_rec:
         info('Create new topic: %d' % kz)
-        new_topic = Topic.create(
-            author = user,
-            title = topic['title'],
-            summary = gen_summary(topic['posts'][0]['text'])[0],
-            post_date = date_now,
-            last_reply_date = date_now,
-            last_reply_author = user
-        )
+        if not local_topic:
+            new_topic = Topic.create(
+                author = user,
+                title = topic['title'],
+                summary = gen_summary(topic['posts'][0]['text'])[0],
+                post_date = date_now,
+                last_reply_date = date_now,
+                last_reply_author = user
+            )
+        else:
+            new_topic = local_topic
         TiebaTopic.create(topic=new_topic, kz=kz)
     else:
         info('Ignore existing topic: %d' % kz)
         new_topic = topic_rec.topic
     total_reply = 0
     for post in topic['posts']:
-        if total_reply > 0:
+        if total_reply > 0 or post.get('pid'):
             post_rec = find_record(TiebaPost, pid=post['pid'])
         else:
             # The first floor, no pid info
-            post_rec = find_record(
-                TiebaPost, pid=0, hash_value=sha256(str(kz))
-            )
+            if not local_topic:
+                post_rec = find_record(
+                    TiebaPost, pid=0, hash_value=sha256(str(kz))
+                )
+            else:
+                local_first_post = find_record(
+                    Post,
+                    topic = local_topic,
+                    parent = None,
+                    ordinal = 1
+                )
+                post_rec = TiebaPost.create(
+                    post = local_first_post,
+                    hash_value = sha256(str(kz)),
+                    pid = 0
+                )
         if not post_rec:
             info('Create new post: floor %d' % post['floor'])
             post['text'] = post['text'].replace('#', '##')
