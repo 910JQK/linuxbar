@@ -1,0 +1,24 @@
+{% extends 'form.html' %}
+{% from 'macros.html' import field, submit %}
+
+{% block title %}{{ _('Tieba Sync Settings - %(site)s', site=get_config('site_name')) }}{% endblock %}
+{% block body_class %}box_horizontal_center{% endblock %}
+{% block form_title %}{{ _('Tieba Sync') }}{% endblock %}
+
+{% block form %}
+  {{ field(form.password) }}
+  {{ field(form.name) }}
+  {{ field(form.bduss) }}
+{% endblock %}
+
+
+{% block buttons %}
+  {% if exist %}
+    {{ submit(_('Update Data')) }}
+    <a href="{{ url_for('.sync_stop') }}">
+      <button type="button">{{ _('Stop Sync') }}</button>
+    </a>
+  {% else %}
+    {{ submit(_('Start Sync')) }}
+  {% endif %}
+{% endblock %}

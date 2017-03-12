@@ -272,21 +272,40 @@ class Face(BaseModel):
 
 
 class TiebaTopic(BaseModel):
-    topic = ForeignKeyField(Topic, related_name='tieba_topic')
+    topic = ForeignKeyField(Topic, related_name='tieba_topic', unique=True)
     kz = IntegerField(unique=True)
 
 
 class TiebaPost(BaseModel):
-    post = ForeignKeyField(Post, related_name='tieba_post')
+    post = ForeignKeyField(Post, related_name='tieba_post', unique=True)
     pid = IntegerField(unique=True, default=0)
     hash_value = CharField(max_length=64, default='')
+
+
+class TiebaUser(BaseModel):
+    user = ForeignKeyField(User, related_name='tieba_user', unique=True)
+    name = CharField(max_length=64, unique=True)
+    bduss = CharField(max_length=640, unique=True)
+    def set_bduss(self, bduss, password):
+        if self.user.check_password(password):
+            e = AESCipher(password)
+            self.bduss = e.encrypt(bduss).decode()
+            return True
+        else:
+            return False
+    def get_bduss(self, password):
+        if self.user.check_password(password):
+            e = AESCipher(password)
+            return e.decrypt(self.bduss.encode())
+        else:
+            return ''
 
 
 tables = [
     Config, User, Profile, PasswordResetToken, Ban,
     Tag, Topic, TagRelation, Post,
     DeleteRecord, Message, Image, Face,
-    TiebaTopic, TiebaPost
+    TiebaTopic, TiebaPost, TiebaUser
 ]
 
 

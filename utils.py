@@ -7,13 +7,18 @@ import threading
 import gettext
 from math import log
 from html import escape
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 from config import LOCALE
 
 
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+
+import base64
+from Crypto import Random
+from Crypto.Cipher import AES
 
 
 TOKEN_CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -164,3 +169,31 @@ class EmailThread(threading.Thread):
 
 def send_mail(subject, addr_from, addr_to, content, html=''):
     EmailThread(subject, addr_from, addr_to, content, html).start()
+
+
+class AESCipher(object):
+
+    # http://stackoverflow.com/questions/12524994
+    
+    def __init__(self, key):
+        self.bs = 32
+        self.key = hashlib.sha256(key.encode(encoding='utf8')).digest()
+
+    def encrypt(self, raw):
+        raw = self._pad(quote(raw))
+        iv = Random.new().read(AES.block_size)
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        return base64.b64encode(iv + cipher.encrypt(raw))
+
+    def decrypt(self, enc):
+        enc = base64.b64decode(enc)
+        iv = enc[:AES.block_size]
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        return unquote(self._unpad(cipher.decrypt(enc[AES.block_size:])).decode('utf-8'))
+
+    def _pad(self, s):
+        return s + (self.bs - len(s) % self.bs) * chr(self.bs - len(s) % self.bs)
+
+    @staticmethod
+    def _unpad(s):
+        return s[:-ord(s[len(s)-1:])]

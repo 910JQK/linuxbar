@@ -21,9 +21,10 @@ from user import user, login_manager
 from moderate import moderate
 from image import image
 from forum import forum, topic_list, filter_deleted_post
+from tieba_compatible import tieba
 from config import (
     PREFIX_ENABLED, PREFIX, DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE, 
-    RICHTEXT_INFO, RICHTEXT_INFO_JSON, assert_config
+    RICHTEXT_INFO, RICHTEXT_INFO_JSON, TIEBA_COMP, assert_config
 )
 
 
@@ -55,6 +56,8 @@ app.register_blueprint(user, url_prefix='/user')
 app.register_blueprint(moderate, url_prefix='/moderate')
 app.register_blueprint(image, url_prefix='/image')
 app.register_blueprint(forum, url_prefix='/forum')
+if TIEBA_COMP:
+    app.register_blueprint(tieba, url_prefix='/tieba')
 
 app.add_template_filter(md5, 'md5')
 app.add_template_filter(format_date, 'date')

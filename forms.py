@@ -276,3 +276,28 @@ class FaceAddForm(FlaskForm):
         ],
         description = _('Image hash value.')
     )
+
+
+class TiebaSyncForm(FlaskForm):
+    password = PasswordField(
+        _('Password'),
+        validators = [
+            Required()
+        ],
+        description = _("Your password. Used to encrypt BDUSS.")
+    )
+    name = StringField(
+        _('Tieba ID'),
+        validators = [
+            Required(), SizeRange(1, 64)
+        ],
+        description = _('Username of Tieba.')
+    )
+    bduss = StringField(
+        _('BDUSS'),
+        validators = [
+            Required(), SizeRange(1, 400)
+        ],
+        description = _('BDUSS in cookie of Tieba.')
+    )
+
