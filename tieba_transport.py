@@ -114,7 +114,7 @@ def move(kz):
             if not subpost_rec:
                 if not local_subpost:
                     info('Create new subpost')
-                    match = re.match('^回复 (.*)', subpost['text'])
+                    match = re.match('^回复.(.*).:', subpost['text'])
                     reply_target = None
                     if match:
                         reply_to = match.group(1)

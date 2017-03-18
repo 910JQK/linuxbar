@@ -11,6 +11,7 @@ from config import (
 )
 
 
+import re
 import threading
 import urllib.request
 from urllib.parse import urlencode
@@ -86,6 +87,10 @@ def session_clear_bduss():
         session['bduss'] = ''
 
 
+def process_link(url):
+    return re.sub('^https?://', '', url)
+
+
 def gen_url(url, **kwargs):
     return url + '?' + urlencode(kwargs)
 
@@ -110,7 +115,7 @@ def tieba_publish_topic(topic):
     first_post = find_record(Post, topic=topic, parent=None, ordinal=1)
     pid = first_post.id
     content = first_post.content
-    topic_url = (
+    topic_url = process_link(
         Config.Get('site_url') + url_for('forum.topic_content', tid=tid)
     )
     def send_req():
@@ -142,7 +147,9 @@ def tieba_publish_post(post):
         return
     kz = tieba_topic.kz
     bduss = session['bduss']
-    post_url = Config.Get('site_url') + url_for('forum.post', pid=post.id)
+    post_url = process_link(
+        Config.Get('site_url') + url_for('forum.post', pid=post.id)
+    )
     def send_req():
         m_doc = fetch(TIEBA_M_URL, bduss, kz=kz)
         data = {'co': '%d | %s\n%s' % (post.id, post_url, post.content)}
@@ -157,13 +164,14 @@ def tieba_publish_post(post):
 
 
 def tieba_publish_subpost(post):
-    assert post.parent
     if not TIEBA_COMP:
         return
     if not session.get('bduss'):
         return
     tieba_topic = find_record(TiebaTopic, topic=post.topic)
     if not tieba_topic:
+        return
+    if not post.parent and post.ordinal == 1:
         return
     p = post
     while p.parent != None:
