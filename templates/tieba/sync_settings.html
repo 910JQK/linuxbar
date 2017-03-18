@@ -5,10 +5,28 @@
 {% block body_class %}box_horizontal_center{% endblock %}
 {% block form_title %}{{ _('Tieba Sync') }}{% endblock %}
 
+{% block head %}
+  <template id="data_template">
+    <span class="ip">{{ ip }}</span>
+  </template>
+  <script type="text/javascript">
+    window.addEventListener('load', function() {
+      var ua_field = document.querySelector('input[name="ua"]');
+      var ip_field = document.querySelector('input[name="fakeip"]');
+      if(!ua_field.value)
+        ua_field.value = navigator.userAgent;
+      if(!ip_field.value)
+        ip_field.value = document.importNode(data_template.content, true).querySelector('.ip').textContent
+    });
+  </script>
+{% endblock %}
+
 {% block form %}
   {{ field(form.password) }}
   {{ field(form.name) }}
   {{ field(form.bduss) }}
+  {{ field(form.fakeip) }}
+  {{ field(form.ua) }}
 {% endblock %}
 
 

@@ -287,6 +287,8 @@ class TiebaUser(BaseModel):
     user = ForeignKeyField(User, related_name='tieba_user', unique=True)
     name = CharField(max_length=64, unique=True)
     bduss = CharField(max_length=640, unique=True)
+    fakeip = CharField(max_length=64, default='')
+    ua = CharField(max_length=512, default='')
     def set_bduss(self, bduss, password):
         if self.user.check_password(password):
             e = AESCipher(password)

@@ -28,6 +28,7 @@ tieba = Blueprint(
 def sync_settings():
     user = find_record(User, id=current_user.id)
     tieba_user = find_record(TiebaUser, user=user)
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     if tieba_user:
         exist = True
         tieba_user.bduss = ''
@@ -49,7 +50,12 @@ def sync_settings():
             return redirect(url_for('.sync_settings'))
         else:
             flash(_('Wrong Password!'), 'err')
-    return render_template('tieba/sync_settings.html', form=form, exist=exist)
+    return render_template(
+        'tieba/sync_settings.html',
+        form = form,
+        exist = exist,
+        ip = ip
+    )
 
 
 @tieba.route('/sync/stop', methods=['GET', 'POST'])
@@ -95,10 +101,22 @@ def gen_url(url, **kwargs):
     return url + '?' + urlencode(kwargs)
 
 
-def fetch(url, bduss, data=None, **kwargs):
+def get_additional_args():
+    user = find_record(User, id=current_user.id)
+    tieba_user = find_record(TiebaUser, user=user)
+    assert tieba_user
+    return {'fakeip': tieba_user.fakeip, 'ua': tieba_user.ua}
+
+
+def fetch(url, bduss, data=None, fakeip='', ua='', **kwargs):
     url = gen_url(url, **kwargs)
     info('Request %s' % url)
     req_headers = {'cookie': 'BDUSS=%s' % bduss}
+    if fakeip:
+        req_headers['X-Forwarded-For'] = fakeip
+        req_headers['Client-IP'] = fakeip
+    if ua:
+        req_headers['User-Agent'] = ua
     req = urllib.request.Request(url=url, data=data, headers=req_headers)
     response = urllib.request.urlopen(req, timeout=50)
     return BeautifulSoup(response.read(), 'lxml')
@@ -110,6 +128,7 @@ def tieba_publish_topic(topic):
     if not session.get('bduss'):
         return
     bduss = session['bduss']
+    args = get_additional_args()
     tid = topic.id
     title = topic.title
     first_post = find_record(Post, topic=topic, parent=None, ordinal=1)
@@ -120,7 +139,7 @@ def tieba_publish_topic(topic):
     )
     def send_req():
         kw = TIEBA_SYNC_KW
-        m_doc = fetch(TIEBA_M_URL, bduss, kw=kw)
+        m_doc = fetch(TIEBA_M_URL, bduss, kw=kw, **args)
         data = {
             'ti': '[%d] %s' % (tid, title),
             'co': '%d | %s\n%s' % (pid, topic_url, content),
@@ -130,7 +149,7 @@ def tieba_publish_topic(topic):
             if item['name'] != 'kw':
                 data[item['name']] = item['value']
         submit_doc = fetch(
-            TIEBA_SUBMIT_URL, bduss, data=urlencode(data).encode()
+            TIEBA_SUBMIT_URL, bduss, data=urlencode(data).encode(), **args
         )
         # debug
         info(submit_doc.prettify())
@@ -147,16 +166,17 @@ def tieba_publish_post(post):
         return
     kz = tieba_topic.kz
     bduss = session['bduss']
+    args = get_additional_args()
     post_url = process_link(
         Config.Get('site_url') + url_for('forum.post', pid=post.id)
     )
     def send_req():
-        m_doc = fetch(TIEBA_M_URL, bduss, kz=kz)
+        m_doc = fetch(TIEBA_M_URL, bduss, kz=kz, **args)
         data = {'co': '%d | %s\n%s' % (post.id, post_url, post.content)}
         for item in m_doc.find_all('input', type='hidden'):
             data[item['name']] = item['value']
         submit_doc = fetch(
-            TIEBA_SUBMIT_URL, bduss, data=urlencode(data).encode()
+            TIEBA_SUBMIT_URL, bduss, data=urlencode(data).encode(), **args
         )
         # debug
         info(submit_doc.prettify())
@@ -188,13 +208,14 @@ def tieba_publish_subpost(post):
         if reply_tieba_post and reply_tieba_post.author:
             reply_str = '回复 %s: ' % reply_tieba_post.author
     bduss = session['bduss']
+    args = get_additional_args()
     def send_req():
-        m_doc = fetch(TIEBA_FLR_URL, bduss, kz=kz, pid=pid)
+        m_doc = fetch(TIEBA_FLR_URL, bduss, kz=kz, pid=pid, **args)
         data = {'co': '%s[%d] %s' % (reply_str, post.id, post.content)}
         for item in m_doc.find_all('input', type='hidden'):
             data[item['name']] = item['value']
         submit_doc = fetch(
-            TIEBA_SUBMIT_URL, bduss, data=urlencode(data).encode()
+            TIEBA_SUBMIT_URL, bduss, data=urlencode(data).encode(), **args
         )
         # debug
         info(submit_doc.prettify())

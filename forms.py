@@ -300,4 +300,18 @@ class TiebaSyncForm(FlaskForm):
         ],
         description = _('BDUSS in cookie of Tieba.')
     )
+    fakeip = StringField(
+        _('FakeIP'),
+        validators = [
+            Optional()
+        ],
+        description = _('Fake IP used when creating posts in Tieba.')
+    )
+    ua = StringField(
+        _('UA'),
+        validators = [
+            Optional()
+        ],
+        description = _('User Agent used when creating posts in Tieba.')
+    )
 
