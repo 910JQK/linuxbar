@@ -7,8 +7,8 @@ from fetch import fetch_kw
 from tieba_transport import move
 
 
-DELAY = 30
-OFFSET = 10
+DELAY = 10
+OFFSET = 7
 
 
 def sync(kw):
