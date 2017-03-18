@@ -28,7 +28,7 @@ BAN_DAYS = [1, 3, 10, 30, 100]
 
 LINK_PROTOCOLS = ['http', 'https', 'ftp']
 TIEBA_COMP = True
-TIEBA_SYNC_KW = 'ubuntulinux'
+TIEBA_SYNC_KW = 'linuxinside'
 TIEBA_SUBMIT_URL = 'http://tieba.baidu.com/mo/m/submit'
 TIEBA_M_URL = 'http://tieba.baidu.com/mo/m'
 TIEBA_FLR_URL = 'http://tieba.baidu.com/mo/m/flr'

@@ -5,7 +5,7 @@ from flask_login import current_user, login_required
 from utils import _
 from utils import *
 from forms import TiebaSyncForm
-from models import Config, User, TiebaUser, TiebaTopic, Post
+from models import Config, User, TiebaUser, TiebaTopic, TiebaPost, Post
 from config import (
     TIEBA_COMP, TIEBA_SUBMIT_URL, TIEBA_M_URL, TIEBA_FLR_URL, TIEBA_SYNC_KW
 )
