@@ -23,7 +23,7 @@ from models import (
     db, Config, User, Topic, TagRelation, Tag, Post, DeleteRecord, Message
 )
 from config import DB_WILDCARD, PID_SIGN, TID_SIGN
-from tieba_compatible import tieba_publish_topic
+from tieba_compatible import tieba_publish_topic, tieba_publish_post
 
 
 forum = Blueprint(
@@ -168,7 +168,7 @@ def topic_list(tag_slug):
             gen_summary(first_post.content)
         )
         new_topic.save()
-        tieba_publish_topic(title, content, new_topic.id)
+        tieba_publish_topic(new_topic)
         flash(_('Topic published successfully.'), 'ok')
         return redirect(request.url)
     return render_template(
@@ -232,7 +232,8 @@ def topic_content(tid):
             if current_user.is_banned:
                 flash(_('You are being banned.'), 'err')
                 return redirect(request.url)
-            create_post(topic, None, form.content.data)
+            new_post = create_post(topic, None, form.content.data)
+            tieba_publish_post(new_post)
             flash(_('Post published successfully.'), 'ok')
             return redirect(url_for('.topic_content', tid=tid))
         posts = (

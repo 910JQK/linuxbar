@@ -5,8 +5,10 @@ from flask_login import current_user, login_required
 from utils import _
 from utils import *
 from forms import TiebaSyncForm
-from models import User, TiebaUser
-from config import TIEBA_COMP, TIEBA_SUBMIT_URL, TIEBA_M_URL, TIEBA_SYNC_KW
+from models import Config, User, TiebaUser, TiebaTopic, Post
+from config import (
+    TIEBA_COMP, TIEBA_SUBMIT_URL, TIEBA_M_URL, TIEBA_FLR_URL, TIEBA_SYNC_KW
+)
 
 
 import threading
@@ -97,19 +99,92 @@ def fetch(url, bduss, data=None, **kwargs):
     return BeautifulSoup(response.read(), 'lxml')
 
 
-def tieba_publish_topic(title, content, tid):
+def tieba_publish_topic(topic):
     if not TIEBA_COMP:
         return
-    if not session['bduss']:
+    if not session.get('bduss'):
         return
     bduss = session['bduss']
+    tid = topic.id
+    title = topic.title
+    first_post = find_record(Post, topic=topic, parent=None, ordinal=1)
+    pid = first_post.id
+    content = first_post.content
+    topic_url = (
+        Config.Get('site_url') + url_for('forum.topic_content', tid=tid)
+    )
     def send_req():
         kw = TIEBA_SYNC_KW
         m_doc = fetch(TIEBA_M_URL, bduss, kw=kw)
-        data = {'ti': '%d| %s' % (tid, title), 'co': content, 'word': kw}
+        data = {
+            'ti': '[%d] %s' % (tid, title),
+            'co': '%d | %s\n%s' % (pid, topic_url, content),
+            'word': kw
+        }
         for item in m_doc.find_all('input', type='hidden'):
             if item['name'] != 'kw':
                 data[item['name']] = item['value']
+        submit_doc = fetch(
+            TIEBA_SUBMIT_URL, bduss, data=urlencode(data).encode()
+        )
+        # debug
+        info(submit_doc.prettify())
+    threading.Thread(target=send_req, args=()).start()
+
+
+def tieba_publish_post(post):
+    if not TIEBA_COMP:
+        return
+    if not session.get('bduss'):
+        return
+    tieba_topic = find_record(TiebaTopic, topic=post.topic)
+    if not tieba_topic:
+        return
+    kz = tieba_topic.kz
+    bduss = session['bduss']
+    post_url = Config.Get('site_url') + url_for('forum.post', pid=post.id)
+    def send_req():
+        m_doc = fetch(TIEBA_M_URL, bduss, kz=kz)
+        data = {'co': '%d | %s\n%s' % (post.id, post_url, post.content)}
+        for item in m_doc.find_all('input', type='hidden'):
+            data[item['name']] = item['value']
+        submit_doc = fetch(
+            TIEBA_SUBMIT_URL, bduss, data=urlencode(data).encode()
+        )
+        # debug
+        info(submit_doc.prettify())
+    threading.Thread(target=send_req, args=()).start()
+
+
+def tieba_publish_subpost(post):
+    assert post.parent
+    if not TIEBA_COMP:
+        return
+    if not session.get('bduss'):
+        return
+    tieba_topic = find_record(TiebaTopic, topic=post.topic)
+    if not tieba_topic:
+        return
+    p = post
+    while p.parent != None:
+        p = p.parent
+    l1_post = p
+    tieba_post = find_record(TiebaPost, post=l1_post)
+    if not tieba_post or tieba_post.pid == 0:
+        return
+    kz = tieba_topic.kz
+    pid = tieba_post.pid
+    reply_str = ''
+    if l1_post.id != post.parent.id:
+        reply_tieba_post = find_record(TiebaPost, post=post.parent)
+        if reply_tieba_post and reply_tieba_post.author:
+            reply_str = '回复 %s: ' % reply_tieba_post.author
+    bduss = session['bduss']
+    def send_req():
+        m_doc = fetch(TIEBA_FLR_URL, bduss, kz=kz, pid=pid)
+        data = {'co': '%s[%d] %s' % (reply_str, post.id, post.content)}
+        for item in m_doc.find_all('input', type='hidden'):
+            data[item['name']] = item['value']
         submit_doc = fetch(
             TIEBA_SUBMIT_URL, bduss, data=urlencode(data).encode()
         )

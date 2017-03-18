@@ -280,6 +280,7 @@ class TiebaPost(BaseModel):
     post = ForeignKeyField(Post, related_name='tieba_post', unique=True)
     pid = IntegerField(unique=True, default=0)
     hash_value = CharField(max_length=64, default='')
+    author = CharField(max_length=64, default='')
 
 
 class TiebaUser(BaseModel):
