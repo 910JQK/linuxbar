@@ -159,14 +159,21 @@ def topic_list(tag_slug):
             last_reply_author_id = current_user.id
         )
         TagRelation.create(topic=new_topic, tag=None)
-        with db.atomic():
-            for tag in tags:
-                found = find_record(Tag, slug=tag)
-                # deleted/renamed tag?
-                if found:
-                    TagRelation.create(
-                        topic=new_topic, tag=found
-                    )
+
+        (
+            TagRelation
+            .insert_many(
+                [
+                    {
+                        TagRelation.tag: find_record(Tag, slug=tag),
+                        TagRelation.topic: new_topic
+                    }
+                    for tag in tags
+                ]
+            )
+            .execute()
+        )
+
         first_post = create_post(
             new_topic, None, content, add_reply_count=False
         )
@@ -294,13 +301,27 @@ def topic_tag_manage(tid):
             )
         }
         if form.validate_on_submit():
-            with db.atomic():
-                for rel in find_record_all(TagRelation, topic=topic):
-                    rel.delete_instance()
-                for tag in form.tags.data:
-                    TagRelation.create(
-                        topic=topic, tag=find_record(Tag, slug=tag)
-                    )
+
+            (
+                TagRelation
+                .delete()
+                .where(TagRelation.topic == topic)
+                .execute()
+            )
+            (
+                TagRelation
+                .insert_many(
+                    [
+                        {
+                            TagRelation.tag: find_record(Tag, slug=tag),
+                            TagRelation.topic: topic
+                        }
+                        for tag in form.tags.data
+                    ]
+                )
+                .execute()
+            )
+
             flash(_('Tags changed successfully.'))
             return redirect(url_for('.topic_content', tid=tid))
         return render_template(

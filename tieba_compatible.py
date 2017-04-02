@@ -6,6 +6,7 @@ from utils import _
 from utils import *
 from forms import TiebaSyncForm
 from post import create_system_message
+from validation import REGEX_SHA256_PART
 from models import Config, User, TiebaUser, TiebaTopic, TiebaPost, Post
 from pipeline import (
     pipeline, split_lines, process_code_block, join_lines
@@ -93,20 +94,10 @@ def tieba_filter(lines):
             and REGEX_SHA256_PART.fullmatch(segment[len(IMAGE_SIGN):])
         ):
             hash_part = segment[len(IMAGE_SIGN):]
-            image_query = (
-                Image
-                .select()
-                .where(
-                    Image.sha256.startswith(
-                        hash_part
-                    )
-                )
+            return process_link(
+                Config.Get('site_url')
+                + url_for('image.get', sha256part=hash_part)
             )
-            if image_query:
-                return process_link(
-                    Config.Get('site_url')
-                    + url_for('image.get', sha256part=hash_part)
-                )
         return segment
     for line in lines:
         if isinstance(line, str):
@@ -171,9 +162,10 @@ def fetch(url, bduss, data=None, fakeip='', ua='', **kwargs):
 
 def send_failed_message(user, submit_doc):
     create_system_message(
-        _('Failed to submit your post to tieba.')
+        _('**Failed to submit your post to tieba.**')
         + '\n'
         + _('The returned document is as follows:')
+        + '\n'
         + '\n'
         + submit_doc.prettify(),
         user

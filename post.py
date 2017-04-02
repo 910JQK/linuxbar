@@ -8,7 +8,7 @@ from pipeline import (
     join_lines
 )
 from models import (
-    db, User, Topic, Post, DeleteRecord, Message, Image
+    db, fn, User, Topic, Post, DeleteRecord, Message, Image
 )
 from config import NOTIFICATION_SIGN, IMAGE_SIGN, SUMMARY_LENGTH
 from validation import REGEX_SHA256_PART
@@ -109,19 +109,20 @@ def create_post(topic, parent, content, add_reply_count=True, is_sys_msg=False, 
     else:
         parent_path = ''
         parent_sort_path = ''
-    with db.atomic():
-        total = Post.select().where(
-            Post.topic == topic,
-            Post.parent == parent
-        ).count()
-        new_post = Post.create(
-            topic = topic,
-            parent = parent,
-            ordinal = (total + 1),
-            content = content,
-            date = now(),
-            author = author
-        )
+        
+    total = Post.select(fn.COUNT(Post.id)).where(
+        Post.topic == topic,
+        Post.parent == parent
+    )
+    new_post = Post.create(
+        topic = topic,
+        parent = parent,
+        ordinal = total,
+        content = content,
+        date = now(),
+        author = author
+    )
+
     new_post.path = '%s/%d' % (parent_path, new_post.id)
     new_post.sort_path = (
         '%s/%s-%d' % (
