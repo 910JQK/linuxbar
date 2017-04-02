@@ -1,5 +1,7 @@
+import atexit
 import datetime
 from peewee import *
+from playhouse.sqliteq import SqliteQueueDatabase
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -9,7 +11,19 @@ from config import DEFAULT_CONFIG, TOKEN_LIFETIME, INACTIVE_USER_LIFETIME
 
 
 # use sqlite temporarily
-db = SqliteDatabase('data.db')
+#db = SqliteDatabase('data.db')
+db = SqliteQueueDatabase(
+    'data.db',
+    use_gevent = False,
+    autostart = True,
+    queue_max_size = 64,
+    results_timeout = 5.0
+)
+
+
+@atexit.register
+def _stop_worker_threads():
+    db.stop()
 
 
 class BaseModel(Model):
