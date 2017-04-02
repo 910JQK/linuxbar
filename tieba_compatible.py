@@ -5,9 +5,14 @@ from flask_login import current_user, login_required
 from utils import _
 from utils import *
 from forms import TiebaSyncForm
+from post import create_system_message
 from models import Config, User, TiebaUser, TiebaTopic, TiebaPost, Post
+from pipeline import (
+    pipeline, split_lines, process_code_block, join_lines
+)
 from config import (
-    TIEBA_COMP, TIEBA_SUBMIT_URL, TIEBA_M_URL, TIEBA_FLR_URL, TIEBA_SYNC_KW
+    TIEBA_COMP, TIEBA_SUBMIT_URL, TIEBA_M_URL, TIEBA_FLR_URL, TIEBA_SYNC_KW,
+    IMAGE_SIGN
 )
 
 
@@ -77,6 +82,44 @@ def sync_stop():
         )
 
 
+def tieba_filter(lines):
+    def process_segment(segment):
+        if (
+            segment.startswith(IMAGE_SIGN)
+            and REGEX_SHA256_PART.fullmatch(segment[len(IMAGE_SIGN):])
+        ):
+            hash_part = segment[len(IMAGE_SIGN):]
+            image_query = (
+                Image
+                .select()
+                .where(
+                    Image.sha256.startswith(
+                        hash_part
+                    )
+                )
+            )
+            if image_query:
+                return process_link(
+                    Config.Get('site_url')
+                    + url_for('image.get', sha256part=hash_part)
+                )
+        return segment
+    for line in lines:
+        if isinstance(line, str):
+            yield (
+                ' '.join(process_segment(segment) for segment in line.split(' '))
+            )
+        else:
+            yield str(line)
+
+
+def tieba_content_convert(content):
+    processor = pipeline(
+        split_lines, process_code_block, tieba_filter, join_lines
+    )
+    return processor(content)
+
+
 def session_save_bduss(password):
     if not TIEBA_COMP:
         return
@@ -122,18 +165,30 @@ def fetch(url, bduss, data=None, fakeip='', ua='', **kwargs):
     return BeautifulSoup(response.read(), 'lxml')
 
 
+def send_failed_message(user, submit_doc):
+    create_system_message(
+        _('Failed to submit your post to tieba.')
+        + '\n'
+        + _('The returned document is as follows:')
+        + '\n'
+        + submit_doc.prettify(),
+        user
+    )
+
+
 def tieba_publish_topic(topic):
     if not TIEBA_COMP:
         return
     if not session.get('bduss'):
         return
+    user = find_record(User, id=current_user.id)
     bduss = session['bduss']
     args = get_additional_args()
     tid = topic.id
     title = topic.title
     first_post = find_record(Post, topic=topic, parent=None, ordinal=1)
     pid = first_post.id
-    content = first_post.content
+    content = tieba_content_convert(first_post.content)
     topic_url = process_link(
         Config.Get('site_url') + url_for('forum.topic_content', tid=tid)
     )
@@ -151,8 +206,8 @@ def tieba_publish_topic(topic):
         submit_doc = fetch(
             TIEBA_SUBMIT_URL, bduss, data=urlencode(data).encode(), **args
         )
-        # debug
-        info(submit_doc.prettify())
+        if not submit_doc.find('span', text='发贴成功'):
+            send_failed_message(user, submit_doc)
     threading.Thread(target=send_req, args=()).start()
 
 
@@ -164,22 +219,24 @@ def tieba_publish_post(post):
     tieba_topic = find_record(TiebaTopic, topic=post.topic)
     if not tieba_topic:
         return
+    user = find_record(User, id=current_user.id)
     kz = tieba_topic.kz
     bduss = session['bduss']
     args = get_additional_args()
+    content = tieba_content_convert(post.content)
     post_url = process_link(
         Config.Get('site_url') + url_for('forum.post', pid=post.id)
     )
     def send_req():
         m_doc = fetch(TIEBA_M_URL, bduss, kz=kz, **args)
-        data = {'co': '%d | %s\n%s' % (post.id, post_url, post.content)}
+        data = {'co': '%d | %s\n%s' % (post.id, post_url, content)}
         for item in m_doc.find_all('input', type='hidden'):
             data[item['name']] = item['value']
         submit_doc = fetch(
             TIEBA_SUBMIT_URL, bduss, data=urlencode(data).encode(), **args
         )
-        # debug
-        info(submit_doc.prettify())
+        if not submit_doc.find('span', text='回贴成功'):
+            send_failed_message(user, submit_doc)
     threading.Thread(target=send_req, args=()).start()
 
 
@@ -200,6 +257,7 @@ def tieba_publish_subpost(post):
     tieba_post = find_record(TiebaPost, post=l1_post)
     if not tieba_post or tieba_post.pid == 0:
         return
+    user = find_record(User, id=current_user.id)
     kz = tieba_topic.kz
     pid = tieba_post.pid
     reply_str = ''
@@ -209,14 +267,15 @@ def tieba_publish_subpost(post):
             reply_str = '回复 %s: ' % reply_tieba_post.author
     bduss = session['bduss']
     args = get_additional_args()
+    content = tieba_convert_content(post.content)
     def send_req():
         m_doc = fetch(TIEBA_FLR_URL, bduss, kz=kz, pid=pid, **args)
-        data = {'co': '%s[%d] %s' % (reply_str, post.id, post.content)}
+        data = {'co': '%s[%d] %s' % (reply_str, post.id, content)}
         for item in m_doc.find_all('input', type='hidden'):
             data[item['name']] = item['value']
         submit_doc = fetch(
             TIEBA_SUBMIT_URL, bduss, data=urlencode(data).encode(), **args
         )
-        # debug
-        info(submit_doc.prettify())
+        if not submit_doc.find('span', text='回贴成功'):
+            send_failed_message(user, submit_doc)
     threading.Thread(target=send_req, args=()).start()

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import field, submit, user_toolbar, messager, ban_tip, editor_toolbar, insert_code_dialog, insert_image_dialog, user_helper, face_picker %}
+{% from 'macros.html' import field, submit, user_toolbar, messager, ban_tip, editor_toolbar, insert_code_dialog, insert_image_dialog, user_helper, face_picker, tieba_sync_tip %}
 {% from 'forum/subpost_list.html' import subpost_list %}
 <html>
   <head>
@@ -73,6 +73,9 @@
 	<hr/>
       <p class="bold">{{ _('Reply this post') }}</p>
       <form id="add_post_form" method="post">
+	{% if tieba_post and not (not post.parent and post.ordinal == 1) %}
+	  {{ tieba_sync_tip() }}
+	{% endif %}
 	<fieldset{% if is_banned %} disabled="disabled"{% endif %}>
 	  {{ form.csrf_token }}
 	  {% if not is_banned %}

@@ -425,6 +425,15 @@ code {
     list-style-type: none;
 }
 
+.tieba_sync_tip {
+    background-color: hsla(50, 96%, 80%, 0.9);
+    border-radius: 3px;
+    padding: 0.5em 1em;
+    margin: 0.5em 0em;
+    font-weight: bold;
+    text-align: center;
+}
+
 @media only screen and (max-width: 1000px) {
     body.box_center, body.box_horizontal_center {
 	display: unset;

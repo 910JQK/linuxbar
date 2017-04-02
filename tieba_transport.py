@@ -100,7 +100,9 @@ def move(kz):
         for subpost in post.get('subposts', []):
             subpost['text'] = subpost['text'].replace('#', '##')
             subpost_content = '**%(author)s** | %(date)s\n%(text)s' % subpost
-            hash_value = sha256(subpost_content)
+            hash_value = sha256(
+                subpost['text'] + subpost['author'] + str(post['pid'])
+            )
 
             match = re.search(':?.?\[([0-9]+)\]', subpost['text'])
             if match:

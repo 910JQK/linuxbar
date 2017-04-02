@@ -20,7 +20,8 @@ from post import (
 )
 from forms import TopicAddForm, TopicTagManageForm, PostAddForm
 from models import (
-    db, Config, User, Topic, TagRelation, Tag, Post, DeleteRecord, Message
+    db, Config, User, Topic, TagRelation, Tag, Post, DeleteRecord, Message,
+    TiebaTopic, TiebaPost
 )
 from config import DB_WILDCARD, PID_SIGN, TID_SIGN
 from tieba_compatible import (
@@ -251,6 +252,7 @@ def topic_content(tid):
         )
         total = posts.count()
         post_list = posts.paginate(pn, count)
+        tieba_topic = find_record(TiebaTopic, topic=topic)
         return render_template(
             'forum/topic_content.html',
             topic = topic,
@@ -260,7 +262,8 @@ def topic_content(tid):
             count = count,
             total = total,
             get_subpost_count = get_subpost_count,
-            gen_subpost_list = gen_subpost_list
+            gen_subpost_list = gen_subpost_list,
+            tieba_topic = tieba_topic
         )
     else:
         abort(404)
@@ -439,11 +442,13 @@ def post(pid):
         else:
             # system message
             post_list = [post]
+        tieba_post = find_record(TiebaPost, post=post)
         return render_template(
             'forum/post_content.html',
             post = post,
             form = form,
-            post_list = post_list
+            post_list = post_list,
+            tieba_post = tieba_post
         )
     else:
         abort(404)

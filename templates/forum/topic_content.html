@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit, ban_tip, editor_toolbar, date_span, insert_code_dialog, insert_image_dialog, user_helper, face_picker, edited_mark %}
+{% from 'macros.html' import messager, avatar, user_toolbar, topic_manage_menu, pager, field, submit, ban_tip, editor_toolbar, date_span, insert_code_dialog, insert_image_dialog, user_helper, face_picker, edited_mark, tieba_sync_tip %}
 {% from 'forum/subpost_list.html' import subpost_list %}
 <html>
   <head>
@@ -261,6 +261,9 @@
 	{% set is_banned = current_user.is_banned %}
 	<p class="bold">{{ _('Reply this topic') }}</p>
 	<form id="add_post_form" method="post">
+	  {% if tieba_topic %}
+	    {{ tieba_sync_tip() }}
+	  {% endif %}
 	  <fieldset{% if is_banned %} disabled="disabled"{% endif %}>
 	    {{ form.csrf_token }}
 	    {% if not is_banned %}

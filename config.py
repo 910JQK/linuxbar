@@ -97,4 +97,4 @@ def assert_config():
     assert len(NOTIFICATION_SIGN) == 1
     assert len(FORMAT_DEFAULT) == 1
     for sign in FORMATS:
-        assert len(sign) == 1    
+        assert len(sign) == 1
