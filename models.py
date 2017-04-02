@@ -274,6 +274,7 @@ class Face(BaseModel):
 class TiebaTopic(BaseModel):
     topic = ForeignKeyField(Topic, related_name='tieba_topic', unique=True)
     kz = IntegerField(unique=True)
+    last_update_date = DateTimeField()
 
 
 class TiebaPost(BaseModel):

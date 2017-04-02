@@ -11,6 +11,7 @@ from fetch import fetch_kz, info
 
 
 def move(kz):
+    updated = False
     user = find_record(User, mail='move_post@foobar')
     date_now = now()
 
@@ -39,10 +40,15 @@ def move(kz):
         else:
             info('New local topic: %d -> local %d' % (kz, local_topic.id))
             new_topic = local_topic
-        TiebaTopic.create(topic=new_topic, kz=kz)
+        tieba_topic = TiebaTopic.create(
+            topic = new_topic,
+            kz = kz,
+            last_update_date = now()
+        )
     else:
         info('Ignore existing topic: %d' % kz)
         new_topic = topic_rec.topic
+        tieba_topic = topic_rec
     total_reply = 0
     for post in topic['posts']:
         match = re.match('^([0-9]+).\|', post['text'])
@@ -93,6 +99,7 @@ def move(kz):
                     hash_value = sha256(str(kz)),
                     author = post['author']
                 )
+            updated = True
         else:
             info('Ignore existing post: floor %d' % post['floor'])
             new_post = post_rec.post
@@ -142,11 +149,15 @@ def move(kz):
                     hash_value = hash_value,
                     author = subpost['author']
                 )
+                updated = True
             else:
                 info('Ignore existing subpost')
             total_reply += 1
-    new_topic.reply_count = total_reply-1
-    new_topic.save()
+    if updated:
+        new_topic.reply_count = total_reply-1
+        new_topic.save()
+        tieba_topic.last_update_date = now()
+        tieba_topic.save()
     info('Done.')
 
 

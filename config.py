@@ -28,7 +28,17 @@ BAN_DAYS = [1, 3, 10, 30, 100]
 
 LINK_PROTOCOLS = ['http', 'https', 'ftp']
 TIEBA_COMP = True
+TIEBA_SYNC_ON = True
 TIEBA_SYNC_KW = 'linuxinside'
+TIEBA_SYNC_INTERVAL = 300
+TIEBA_SYNC_DELAY = 10
+TIEBA_SYNC_OFFSET = 7
+TIEBA_SYNC_PENDING_MAX = 15
+TIEBA_SYNC_P = [
+    1.0, # probability of sync when the topic list is accessed
+    0.5, # a topic
+    0.2  # a post
+]
 TIEBA_SUBMIT_URL = 'http://tieba.baidu.com/mo/m/submit'
 TIEBA_M_URL = 'http://tieba.baidu.com/mo/m'
 TIEBA_FLR_URL = 'http://tieba.baidu.com/mo/m/flr'

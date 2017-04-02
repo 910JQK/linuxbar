@@ -26,6 +26,8 @@ from config import (
     PREFIX_ENABLED, PREFIX, DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE, 
     RICHTEXT_INFO, RICHTEXT_INFO_JSON, TIEBA_COMP, assert_config
 )
+if TIEBA_COMP:
+    from tieba_sync import start_sync as tieba_start_sync
 
 
 class PrefixMiddleware(object):
@@ -117,7 +119,9 @@ def richtext_info():
     return render_template('richtext_info.html', info=RICHTEXT_INFO)
 
 
-def run():
+def run():    
+    if TIEBA_COMP:
+        tieba_start_sync()
     app.run(debug=DEBUG)
 
 

@@ -23,6 +23,10 @@ from urllib.parse import urlencode
 from bs4 import BeautifulSoup
 
 
+if TIEBA_COMP:
+    from tieba_sync import force_sync
+
+
 tieba = Blueprint(
     'tieba', __name__, template_folder='templates', static_folder='static'
 )
@@ -208,6 +212,8 @@ def tieba_publish_topic(topic):
         )
         if not submit_doc.find('span', text='发贴成功'):
             send_failed_message(user, submit_doc)
+        else:
+            force_sync()
     threading.Thread(target=send_req, args=()).start()
 
 
@@ -237,6 +243,8 @@ def tieba_publish_post(post):
         )
         if not submit_doc.find('span', text='回贴成功'):
             send_failed_message(user, submit_doc)
+        else:
+            force_sync()
     threading.Thread(target=send_req, args=()).start()
 
 
@@ -267,7 +275,7 @@ def tieba_publish_subpost(post):
             reply_str = '回复 %s: ' % reply_tieba_post.author
     bduss = session['bduss']
     args = get_additional_args()
-    content = tieba_convert_content(post.content)
+    content = tieba_content_convert(post.content)
     def send_req():
         m_doc = fetch(TIEBA_FLR_URL, bduss, kz=kz, pid=pid, **args)
         data = {'co': '%s[%d] %s' % (reply_str, post.id, content)}
@@ -278,4 +286,6 @@ def tieba_publish_subpost(post):
         )
         if not submit_doc.find('span', text='回贴成功'):
             send_failed_message(user, submit_doc)
+        else:
+            force_sync()
     threading.Thread(target=send_req, args=()).start()
