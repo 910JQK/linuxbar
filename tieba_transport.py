@@ -3,6 +3,7 @@
 
 import re
 import sys
+from datetime import timedelta
 from utils import *
 from models import *
 from config import DB_WILDCARD
@@ -10,10 +11,33 @@ from post import gen_summary, create_post
 from fetch import fetch_kz, info
 
 
+# 迷之重復發帖。找不出原因，只能先想辦法阻止第二次調用。
+RECENT_KEEP = 3 # minutes
+recent_posts = {}
+recent_subposts = {}
+
+
 def move(kz):
+    global recent_posts
+    global recent_subposts
+
+    db.pause()
+    db.unpause()
+
+    date_now = now()
+    recent_posts = {
+        kz: date
+        for kz, date in recent_posts.items()
+        if date_now - date < timedelta(minutes=RECENT_KEEP)
+    }
+    recent_subposts = {
+        hash_value: date
+        for hash_value, date in recent_subposts.items()
+        if date_now - date < timedelta(minutes=RECENT_KEEP)
+    }
+
     updated = False
     user = find_record(User, mail='move_post@foobar')
-    date_now = now()
 
     topic = fetch_kz(kz)
     info('Writing data into database ...')
@@ -29,6 +53,7 @@ def move(kz):
     if not topic_rec:
         if not local_topic:
             info('Create new topic: %d' % kz)
+            date_now = now()
             new_topic = Topic.create(
                 author = user,
                 title = topic['title'],
@@ -66,7 +91,7 @@ def move(kz):
             post_rec = find_record(
                 TiebaPost, pid=0, hash_value=sha256(str(kz))
             )
-        if not post_rec:
+        if not post_rec and not recent_posts.get(post.get('pid', '')):
             if not local_post:
                 info('Create new post: floor %d' % post['floor'])
                 post['text'] = post['text'].replace('#', '##')
@@ -99,6 +124,8 @@ def move(kz):
                     hash_value = sha256(str(kz)),
                     author = post['author']
                 )
+            if post.get('pid'):
+                recent_posts[post['pid']] = now()
             updated = True
         else:
             info('Ignore existing post: floor %d' % post['floor'])
@@ -120,7 +147,7 @@ def move(kz):
             else:
                 local_subpost = None
             subpost_rec = find_record(TiebaPost, hash_value=hash_value)
-            if not subpost_rec:
+            if not subpost_rec and not recent_subposts.get(hash_value):
                 if not local_subpost:
                     info('Create new subpost')
                     match = re.match('^回复.(.*).:', subpost['text'])
@@ -149,6 +176,7 @@ def move(kz):
                     hash_value = hash_value,
                     author = subpost['author']
                 )
+                recent_subposts[hash_value] = now()
                 updated = True
             else:
                 info('Ignore existing subpost')
@@ -159,6 +187,9 @@ def move(kz):
         tieba_topic.last_update_date = now()
         tieba_topic.save()
     info('Done.')
+
+    db.pause()
+    db.unpause()
 
 
 if __name__ == '__main__':
