@@ -24,11 +24,11 @@ from models import (
     db, Config, User, Topic, TagRelation, Tag, Post, DeleteRecord, Message,
     TiebaTopic, TiebaPost
 )
-from config import DB_WILDCARD, PID_SIGN, TID_SIGN, TIEBA_COMP, TIEBA_SYNC_P
+from config import DB_WILDCARD, PID_SIGN, TID_SIGN, TIEBA_SYNC_ON, TIEBA_SYNC_P
 from tieba_compatible import (
     tieba_publish_topic, tieba_publish_post, tieba_publish_subpost
 )
-if TIEBA_COMP:
+if TIEBA_SYNC_ON:
     from tieba_sync import force_sync as tieba_force_sync
 
 
@@ -184,7 +184,7 @@ def topic_list(tag_slug):
         tieba_publish_topic(new_topic)
         flash(_('Topic published successfully.'), 'ok')
         return redirect(request.url)
-    if TIEBA_COMP and random.random() < TIEBA_SYNC_P[0]:
+    if TIEBA_SYNC_ON and random.random() < TIEBA_SYNC_P[0]:
         tieba_force_sync()
     return render_template(
         'forum/topic_list.html',
@@ -265,7 +265,7 @@ def topic_content(tid):
         total = posts.count()
         post_list = posts.paginate(pn, count)
         tieba_topic = find_record(TiebaTopic, topic=topic)
-        if TIEBA_COMP and tieba_topic and random.random() < TIEBA_SYNC_P[1]:
+        if TIEBA_SYNC_ON and tieba_topic and random.random() < TIEBA_SYNC_P[1]:
             tieba_force_sync()
         return render_template(
             'forum/topic_content.html',
@@ -471,7 +471,7 @@ def post(pid):
             # system message
             post_list = [post]
         tieba_post = find_record(TiebaPost, post=post)
-        if TIEBA_COMP and tieba_post and random.random() < TIEBA_SYNC_P[2]:
+        if TIEBA_SYNC_ON and tieba_post and random.random() < TIEBA_SYNC_P[2]:
             tieba_force_sync()
         return render_template(
             'forum/post_content.html',

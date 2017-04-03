@@ -27,9 +27,9 @@ BAN_DAYS = [1, 3, 10, 30, 100]
 
 
 LINK_PROTOCOLS = ['http', 'https', 'ftp']
-TIEBA_COMP = True
-TIEBA_SYNC_ON = True
-TIEBA_SYNC_KW = 'linuxinside'
+TIEBA_COMP = False
+TIEBA_SYNC_ON = False
+TIEBA_SYNC_KW = 'linux'
 TIEBA_SYNC_INTERVAL = 300
 TIEBA_SYNC_DELAY = 10
 TIEBA_SYNC_OFFSET = 7

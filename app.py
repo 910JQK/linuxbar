@@ -24,9 +24,9 @@ from forum import forum, topic_list, filter_deleted_post
 from tieba_compatible import tieba
 from config import (
     PREFIX_ENABLED, PREFIX, DEBUG, SECRET_KEY, UPLOAD_FOLDER, MAX_UPLOAD_SIZE, 
-    RICHTEXT_INFO, RICHTEXT_INFO_JSON, TIEBA_COMP, assert_config
+    RICHTEXT_INFO, RICHTEXT_INFO_JSON, TIEBA_COMP, TIEBA_SYNC_ON, assert_config
 )
-if TIEBA_COMP:
+if TIEBA_SYNC_ON:
     from tieba_sync import start_sync as tieba_start_sync
 
 
@@ -120,7 +120,7 @@ def richtext_info():
 
 
 def run():    
-    if TIEBA_COMP:
+    if TIEBA_SYNC_ON:
         tieba_start_sync()
     app.run(debug=DEBUG)
 

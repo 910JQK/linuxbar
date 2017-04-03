@@ -12,8 +12,8 @@ from pipeline import (
     pipeline, split_lines, process_code_block, join_lines
 )
 from config import (
-    TIEBA_COMP, TIEBA_SUBMIT_URL, TIEBA_M_URL, TIEBA_FLR_URL, TIEBA_SYNC_KW,
-    IMAGE_SIGN
+    TIEBA_COMP, TIEBA_SUBMIT_URL, TIEBA_M_URL, TIEBA_FLR_URL, TIEBA_SYNC_ON
+    TIEBA_SYNC_KW, IMAGE_SIGN
 )
 
 
@@ -24,7 +24,7 @@ from urllib.parse import urlencode
 from bs4 import BeautifulSoup
 
 
-if TIEBA_COMP:
+if TIEBA_SYNC_ON:
     from tieba_sync import force_sync
 
 
@@ -205,7 +205,8 @@ def tieba_publish_topic(topic):
         if not submit_doc.find('span', text='发贴成功'):
             send_failed_message(user, submit_doc)
         else:
-            force_sync()
+            if TIEBA_SYNC_ON:
+                force_sync()
     threading.Thread(target=send_req, args=()).start()
 
 
@@ -236,7 +237,8 @@ def tieba_publish_post(post):
         if not submit_doc.find('span', text='回贴成功'):
             send_failed_message(user, submit_doc)
         else:
-            force_sync()
+            if TIEBA_SYNC_ON:
+                force_sync()
     threading.Thread(target=send_req, args=()).start()
 
 
@@ -279,5 +281,6 @@ def tieba_publish_subpost(post):
         if not submit_doc.find('span', text='回贴成功'):
             send_failed_message(user, submit_doc)
         else:
-            force_sync()
+            if TIEBA_SYNC_ON:
+                force_sync()
     threading.Thread(target=send_req, args=()).start()
