@@ -3,7 +3,7 @@
 
 import re
 import sys
-from datetime import timedelta
+from datetime import timedelta, datetime
 from utils import *
 from models import *
 from config import DB_WILDCARD
@@ -15,16 +15,29 @@ from fetch import fetch_kz, info
 RECENT_KEEP = 3 # minutes
 recent_posts = {}
 recent_subposts = {}
+CALL_INTERVAL = 10 # seconds
+last_call = {}
 
 
 def move(kz):
     global recent_posts
     global recent_subposts
+    global last_call
 
-    db.pause()
-    db.unpause()
+    info('Start moving: %d' % kz)
 
     date_now = now()
+
+    if last_call.get(kz):
+        if date_now - last_call[kz] < timedelta(seconds=CALL_INTERVAL):
+            info('Duplicate call, exit.')
+            return
+    last_call[kz] = date_now
+    last_call = {
+        kz: date
+        for kz, date in last_call.items()
+        if date_now - date < timedelta(seconds=CALL_INTERVAL)
+    }
     recent_posts = {
         kz: date
         for kz, date in recent_posts.items()
@@ -36,9 +49,18 @@ def move(kz):
         if date_now - date < timedelta(minutes=RECENT_KEEP)
     }
 
+    db.pause()
+    db.unpause()
+
+    info('Recent posts:')
+    info(repr(recent_posts))
+    info('Recent subposts:')
+    info(repr(recent_subposts))
+
     updated = False
     user = find_record(User, mail='move_post@foobar')
 
+    info('Start Fetching')
     topic = fetch_kz(kz)
     info('Writing data into database ...')
     match = re.match('^\[([0-9]+)\]', topic['title'])

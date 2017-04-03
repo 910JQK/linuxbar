@@ -29,8 +29,9 @@ def sync():
     )
     kz_updated = {}
     for recent_topic in recent_tieba_topics:
-        move(recent_topic.kz)
-        kz_updated[recent_topic.kz] = True
+        if not kz_updated.get(recent_topic.kz):
+            move(recent_topic.kz)
+            kz_updated[recent_topic.kz] = True
     # Fetch new topics
     topics = fetch_kw(TIEBA_SYNC_KW, 1, 1)[:TIEBA_SYNC_OFFSET]
     topics.reverse()
