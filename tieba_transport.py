@@ -12,6 +12,7 @@ from fetch import fetch_kz, info
 
 
 # 迷之重復發帖。找不出原因，只能先想辦法阻止第二次調用。
+# 然而並沒有什麽卵用，最後還是用了終極解決方案 try ... except ...
 RECENT_KEEP = 3 # minutes
 recent_posts = {}
 recent_subposts = {}
