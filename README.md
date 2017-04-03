@@ -28,19 +28,36 @@ A lightweight forum with the following features:
 
 ## Testing
 
-As it is still under development, currently, we use Sqlite instead of MySQL for convenience.
+> As it is still under development, currently, we use Sqlite instead of MySQL for convenience.
 
-Run it:
+### Run it
     
     $ pip install -r requirements.txt # install dependencies
     $ pybabel compile -d translations # generate mo files
+    $ cp config.example.py config.py # create configuration file
+    $ "$EDITOR" config.py # edit configurations
     $ ./manage.py init-db # create database data.db (sqlite3)
     $ ./manage.py create-admin # create an administrator account
     $ ./manage.py run # run app, then goto http://localhost:5000
 
-Transport topics from Tieba:
+### Sync with Tieba
 
 Firstly, put `fetch.py` of [tieba-fetch](https://github.com/910JQK/tieba-fetch) in this directory.
 
-    $ ./manage.py create-move # create an account as the author of moved posts
+And create an account as the author of moved posts:
+
+    $ ./manage.py create-move
+    
+Opening the compatible option `TIEBA_COMP` is also necessary:
+
+    $ "$EDITOR" config.py
+
+Then you can transport specified topics from Tieba:
+
     $ ./tieba_transport.py 4834742871 4809205799 # for example
+
+Furthermore, it is possible to open the `TIEBA_SYNC_ON` option to enable the sync with tieba. Don't forget to set the `TIEBA_SYNC_KW` option to the bar you want to sync with.
+
+Any user can go to `http://[site]/tieba/sync/settings` to bind his or her Tieba account with the corresponding account of this site.
+
+Finally, please note that this feature is unstable.
