@@ -293,8 +293,8 @@ class TiebaTopic(BaseModel):
 
 class TiebaPost(BaseModel):
     post = ForeignKeyField(Post, related_name='tieba_post', unique=True)
-    pid = IntegerField(unique=True, default=0)
-    hash_value = CharField(max_length=64, default='')
+    pid = IntegerField(unique=True, null=True, default=None)
+    hash_value = CharField(max_length=64, unique=True, null=True, default=None)
     author = CharField(max_length=64, default='')
 
 

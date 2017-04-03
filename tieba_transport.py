@@ -111,7 +111,7 @@ def move(kz):
         else:
             # The first floor, no pid info
             post_rec = find_record(
-                TiebaPost, pid=0, hash_value=sha256(str(kz))
+                TiebaPost, pid=None, hash_value=sha256(str(kz))
             )
         if not post_rec and not recent_posts.get(post.get('pid', '')):
             if not local_post:
@@ -134,18 +134,27 @@ def move(kz):
                 )
                 new_post = local_post
             if post.get('pid') is not None:
-                TiebaPost.create(
-                    post = new_post,
-                    pid = post['pid'],
-                    author = post['author']
-                )
+                try:
+                    TiebaPost.create(
+                        post = new_post,
+                        pid = post['pid'],
+                        hash_value = None,
+                        author = post['author']
+                    )
+                except IntegrityError:
+                    info('Duplicate post detected. Remove.')
+                    new_post.delete_instance()
             else:
-                TiebaPost.create(
-                    post = new_post,
-                    pid = 0,
-                    hash_value = sha256(str(kz)),
-                    author = post['author']
-                )
+                try:
+                    TiebaPost.create(
+                        post = new_post,
+                        pid = None,
+                        hash_value = sha256(str(kz)),
+                        author = post['author']
+                    )
+                except IntegrityError:
+                    info('Duplicate post detected. Remove.')
+                    new_post.delete_instance()
             if post.get('pid'):
                 recent_posts[post['pid']] = now()
             updated = True
@@ -193,11 +202,15 @@ def move(kz):
                 else:
                     info('New local subpost -> %d' % local_subpost.id)
                     new_subpost = local_subpost
-                TiebaPost.create(
-                    post = new_subpost,
-                    hash_value = hash_value,
-                    author = subpost['author']
-                )
+                try:
+                    TiebaPost.create(
+                        post = new_subpost,
+                        hash_value = hash_value,
+                        author = subpost['author']
+                    )
+                except IntegrityError:
+                    info('Duplicate subpost detected. Remove.')
+                    new_subpost.delete_instance()
                 recent_subposts[hash_value] = now()
                 updated = True
             else:
