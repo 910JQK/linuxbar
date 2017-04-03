@@ -12,7 +12,7 @@ from pipeline import (
     pipeline, split_lines, process_code_block, join_lines
 )
 from config import (
-    TIEBA_COMP, TIEBA_SUBMIT_URL, TIEBA_M_URL, TIEBA_FLR_URL, TIEBA_SYNC_ON
+    TIEBA_COMP, TIEBA_SUBMIT_URL, TIEBA_M_URL, TIEBA_FLR_URL, TIEBA_SYNC_ON,
     TIEBA_SYNC_KW, IMAGE_SIGN
 )
 
