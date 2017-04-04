@@ -2,6 +2,7 @@
 
 
 import sys
+import socket
 import threading
 from time import sleep
 from fetch import fetch_kw
@@ -52,7 +53,10 @@ def start_sync():
         while True:
             if waiting > 0:
                 waiting -= 1
-                sync()
+                try:
+                    sync()
+                except socket.timeout:
+                    pass
                 sleep(TIEBA_SYNC_DELAY)
             else:
                 sleep(1)
