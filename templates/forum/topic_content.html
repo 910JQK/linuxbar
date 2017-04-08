@@ -216,14 +216,19 @@
 	    <div class="container_right">
 	      <div class="post_body content">{{ post.content | get_html | safe }}</div>
 	      <div class="post_footer float_right_box" id="f{{ post.id }}">
-		<div class="info post_info">
-		  {% if current_user.level and current_user.level > 0 %}
-		    {% if post.ordinal != 1 %}
-		      {# avoid to be thought as topic delete button #}
-		      <a href="{{ url_for('.post_remove', pid=post.id, prev=request.url) }}">		      
-			<img class="icon btn post_del_btn" src="{{ url_for('static', filename='icons/x.svg') }}" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" />
-		      </a>
-		    {% endif %}
+		<div class="info post_info">	
+		  {% if post.ordinal != 1 and current_user.is_authenticated and (current_user.level > 0 or current_user.id == post.author.id) %}
+		    {# avoid to be thought as topic delete button #}
+		    <a href="{{ url_for('.post_remove', pid=post.id, prev=request.url) }}">		      
+		      <img class="icon btn post_del_btn" src="{{ url_for('static', filename='icons/x.svg') }}" aria-label="delete" alt="delete" title="{{ _('delete this post') }}" />
+		    </a>
+		  {% endif %}
+		  {% if post.ordinal == 1 and current_user.level == 0 and current_user.id == topic.author.id %}
+		    <a href="{{ url_for('.topic_remove', tid=topic.id, prev=request.url) }}">		      
+		      <img class="icon btn post_del_btn" src="{{ url_for('static', filename='icons/x.svg') }}" aria-label="delete" alt="delete" title="{{ _('delete this topic') }}" />
+		    </a>
+		  {% endif %}
+		  {% if current_user.is_authenticated and current_user.level > 0 %}
 		    <a href="{{ url_for('user.ban', uid=post.author.id) }}" target="_blank">
 		      <img class="icon btn post_ban_icon" src="{{ url_for('static', filename='icons/ban.svg') }}" aria-label="ban" alt="ban" title="{{ _('ban this user') }}" />
 		    </a>

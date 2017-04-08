@@ -373,23 +373,26 @@ def topic_distillate(tid):
 
 
 @forum.route('/topic/remove/<int:tid>', methods=['GET', 'POST'])
-@privilege_required()
+@login_required
 def topic_remove(tid):
     topic = find_record(Topic, id=tid)
     if topic and not topic.is_deleted:
+        if not (current_user.level > 0 or current_user.id == topic.author.id):
+            abort(401)
         if request.form.get('confirmed'):
             topic.is_deleted = True
             topic.save()
             DeleteRecord.create(
                 topic=topic, date=now(), operator_id=current_user.id
             )
-            create_system_message(
-                (
-                    _('Your topic {0} has been deleted by moderator {1}.\nThe title of your topic is {2}.')
-                    .format(tid, current_user.name, topic.title)
-                ),
-                topic.author
-            )
+            if current_user.id != topic.author.id:
+                create_system_message(
+                    (
+                        _('Your topic {0} has been deleted by moderator {1}.\nThe title of your topic is {2}.')
+                        .format(tid, current_user.name, topic.title)
+                    ),
+                    topic.author
+                )
             flash(_('Topic deleted successfully.'), 'ok')            
             return redirect(url_for('index'))
         else:
@@ -515,12 +518,14 @@ def post_edit(pid):
 
 
 @forum.route('/post/remove/<int:pid>', methods=['GET', 'POST'])
-@privilege_required()
+@login_required
 def post_remove(pid):
     post = find_record(Post, id=pid)
     if post and post.is_available:
         if post.is_sys_msg or post.is_pm:
             abort(403)
+        if not (current_user.level > 0 or current_user.id == post.author.id):
+            abort(401)
         cancel_url = request.args.get('prev') or url_for('.post', pid=pid)
         if cancel_url.find(url_for('.post', pid=pid)) != -1: 
             if post.parent:
@@ -535,13 +540,14 @@ def post_remove(pid):
             DeleteRecord.create(
                 post=post, date=now(), operator_id=current_user.id
             )
-            create_system_message(
-                (
-                    _('Your post {0} has been deleted by moderator {1}.\nThe content of your post is shown below:\n\n{2}')
-                    .format(pid, current_user.name, post.content)
-                ),
-                post.author
-            )
+            if current_user.id != post.author.id:
+                create_system_message(
+                    (
+                        _('Your post {0} has been deleted by moderator {1}.\nThe content of your post is shown below:\n\n{2}')
+                        .format(pid, current_user.name, post.content)
+                    ),
+                    post.author
+                )
             flash(_('Post deleted successfully.'), 'ok')
             return redirect(ok_url)
         else:
