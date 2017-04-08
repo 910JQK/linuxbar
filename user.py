@@ -178,7 +178,7 @@ def login():
 def get_token():
     form = GetTokenForm()
     if form.validate_on_submit():
-        mail = form.mail.data
+        mail = form.mail.data.lower()
         user = find_record(User, mail=mail)
         if user:
             old_token_record = find_record(PasswordResetToken, user=user)
@@ -209,7 +209,14 @@ def password_reset(uid):
         user = find_record(User, id=uid)
         if user:
             token_record = find_record(PasswordResetToken, user=user)
+            new_mail = form.new_mail.data.lower()
+            if new_mail:
+                if find_record(User, mail=new_mail):
+                    flash(_('New email address already is use.'), 'err')
+                    return redirect(url_for('.password_reset', uid=uid))
             if token_record and token_record.check_token(token):
+                if new_mail:
+                    user.mail = new_mail
                 user.set_password(form.password.data)
                 user.save()
                 flash(_('Password reset successfully.'), 'ok')

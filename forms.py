@@ -106,6 +106,13 @@ class GetTokenForm(FlaskForm):
 
 
 class PasswordResetForm(FlaskForm):    
+    new_mail = StringField(
+        _('[Optional] New Email'),
+        validators = [
+            Optional(), Email(_('Invalid Email Address.'))
+        ],
+        description = _('New email address (optional).')
+    )
     password = PasswordField(
         _('New Password'),
         validators = [
