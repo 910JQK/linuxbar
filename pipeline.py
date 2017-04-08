@@ -222,7 +222,7 @@ def process_format(lines):
             if segment.startswith(TID_SIGN):
                 tid = segment[len(TID_SIGN):]
                 if REGEX_PINT.fullmatch(tid):
-                    pid = int(pid)
+                    tid = int(tid)
                     return gen_html_tag(
                         'a',
                         _('Topic %d') % tid,
