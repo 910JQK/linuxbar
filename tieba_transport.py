@@ -63,6 +63,8 @@ def move(kz):
 
     info('Start Fetching')
     topic = fetch_kz(kz)
+    if len(topic['posts']) == 0:
+        return
     info('Writing data into database ...')
     match = re.match('^\[([0-9]+)\]', topic['title'])
     if match:
