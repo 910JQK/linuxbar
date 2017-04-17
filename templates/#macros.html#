@@ -1,4 +1,5 @@
-{% set FONT_SIZE = 16 %}
+
+41;320;0c{% set FONT_SIZE = 16 %}
 
 
 {% macro description(desc, errors) %}
@@ -433,7 +434,7 @@
   {% else %}
     {% set lower_limit = pn - 4 %}
     {% if pn + 5 <= pages %}
-      {% set upper_limit = pn + 5 %}
+      {% set uppper_limit = pn + 5 %}
     {% else %}
       {% set upper_limit = pages %}
     {% endif %}
