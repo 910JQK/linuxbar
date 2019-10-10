@@ -1,5 +1,7 @@
 # Tieba Substitute (Still Under Development)
 
+> **NOTE**: 此项目的开发已经终止。但由于*度贴吧隐藏了 2017 年以前的所有帖子，此项目的遗留程序已被用于将 Linux 吧所有旧精品帖备份在 [linuxbar.pythonanywhere.com](http://linuxbar.pythonanywhere.com/)
+
 ## Plan
 
 A lightweight forum with the following features:
@@ -16,7 +18,7 @@ A lightweight forum with the following features:
 - image uploading
 - simple richtext support (e.g. bold, link, image...)
 - code hightlighting
-- full and robust API
+- full and robust API  // not implemented
 
 ## Principle
 
